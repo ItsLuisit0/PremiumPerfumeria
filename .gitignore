@@ -1,0 +1,21 @@
+# Dependencies
+/node_modules
+/backend/node_modules
+
+# Environment Variables
+.env
+backend/.env
+
+# Logs
+npm-debug.log*
+*.log
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln

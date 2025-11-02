@@ -15,9 +15,19 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// ===== CONFIGURACIÓN CORS COMPLETA =====
+// ===== CONFIGURACIÓN CORS PARA PRODUCCIÓN Y DESARROLLO =====
+const allowedOrigins = process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : ['http://127.0.0.1:5500', 'http://localhost:3000', 'http://localhost:8080'];
+
 app.use(cors({
-    origin: ['http://127.0.0.1:5500', 'http://localhost:3000', 'http://localhost:8080'],
+    origin: function (origin, callback) {
+        // Permitir solicitudes sin origen (como Postman o apps móviles)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'La política de CORS para este sitio no permite acceso desde el origen especificado.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization']

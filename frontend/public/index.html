@@ -4,13 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfumería Elegancia - Réplicas Premium</title>
-    
-    <!-- Meta tags para SEO -->
     <meta name="description" content="Perfumería Elegancia - Réplicas premium de las mejores fragancias del mundo. Calidad garantizada, envío rápido y precios accesibles.">
     <meta name="keywords" content="perfumes, réplicas, fragancias, elegancia, aromas, colonia, perfume hombre, perfume mujer">
     <meta name="author" content="Perfumería Elegancia">
     
-    <!-- Open Graph -->
     <meta property="og:title" content="Perfumería Elegancia - Réplicas Premium">
     <meta property="og:description" content="Descubre nuestras réplicas de alta calidad de las mejores fragancias del mundo.">
     <meta property="og:image" content="./ImagenesPerfumes/logo.png">
@@ -26,9 +23,7 @@
 </head>
 <body>
     <div id="app" v-cloak>
-        <!-- Header Premium -->
         <header class="premium-header">
-            <!-- Header Top Bar -->
             <div class="header-top">
                 <div class="container">
                     <div class="header-top-content">
@@ -54,16 +49,13 @@
                 </div>
             </div>
 
-            <!-- Header Main -->
             <div class="header-main">
                 <div class="container">
                     <div class="header-main-content">
-                        <!-- Logo -->
                         <a href="./index.html" class="logo-container">
                             <img src="./ImagenesPerfumes/logo.png" alt="Perfumería Elegancia - Réplicas de lujo" class="logo-img">
                         </a>
 
-                        <!-- Search Bar -->
                         <div class="search-container">
                             <div class="search-wrapper">
                                 <input 
@@ -80,7 +72,6 @@
                             </div>
                         </div>
 
-                        <!-- Navigation -->
                         <nav class="nav-actions">
                             <button class="mobile-menu-toggle" @click="toggleMobileMenu" aria-label="Menú principal">
                                 <i class="bi bi-list"></i>
@@ -106,7 +97,6 @@
             </div>
         </header>
 
-        <!-- Hero Section -->
         <section class="hero-section" aria-labelledby="hero-title" 
                  style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
                         url('http://localhost:3000/imagenesPerfumes/fondo.png') center/cover;">
@@ -126,16 +116,13 @@
             </div>
         </section>
 
-        <!-- Main Content -->
         <main id="main-content">
             <div class="container py-5">
-                <!-- Loading State -->
                 <div v-if="isLoading" class="loading-container">
                     <div class="loading-spinner"></div>
                     <p class="loading-text">Cargando catálogo...</p>
                 </div>
 
-                <!-- Error State -->
                 <div v-else-if="errorApi" class="error-container">
                     <i class="bi bi-exclamation-triangle error-icon"></i>
                     <h3 class="error-title">Error al cargar productos</h3>
@@ -143,12 +130,10 @@
                     <button class="btn btn-warning" @click="fetchPerfumes">Reintentar</button>
                 </div>
 
-                <!-- Products Section -->
                 <div v-else-if="!showFavoritesView">
                     <section class="products-section" aria-labelledby="products-title">
                         <h2 id="products-title" class="section-title">Nuestra Colección Exclusiva</h2>
                         
-                        <!-- Filtros -->
                         <div class="filters-section" role="group" aria-label="Filtrar productos por público">
                             <button class="filter-btn" 
                                     :class="{'active': selectedPublico === null}"
@@ -176,7 +161,6 @@
                             </button>
                         </div>
 
-                        <!-- Productos -->
                         <div v-if="filteredPerfumes.length > 0" class="products-grid">
                             <article class="product-card"
                                      v-for="(perfume, index) in filteredPerfumes"
@@ -232,7 +216,6 @@
                             </article>
                         </div>
 
-                        <!-- Empty State -->
                         <div v-else class="empty-state">
                             <i class="bi bi-search empty-icon"></i>
                             <h3 class="empty-title">No se encontraron productos</h3>
@@ -241,7 +224,6 @@
                         </div>
                     </section>
                 </div>
-                <!-- Favorites Section -->
                 <div v-else-if="showFavoritesView">
                     <section class="favorites-section" aria-labelledby="favorites-title">
                         <h2 id="favorites-title" class="section-title">Mis Perfumes Favoritos</h2>
@@ -301,7 +283,6 @@
                             </article>
                         </div>
 
-                        <!-- Empty Favorites State -->
                         <div v-else class="empty-state">
                             <i class="bi bi-heartbreak empty-icon"></i>
                             <h3 class="empty-title">No tienes favoritos</h3>
@@ -313,7 +294,6 @@
             </div>
         </main>
 
-        <!-- Offcanvas de Carrito -->
         <div class="offcanvas offcanvas-end cart-offcanvas" tabindex="-1" id="cartOffcanvas" aria-labelledby="cartOffcanvasLabel">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="cartOffcanvasLabel">Tu Carrito de Compras</h5>
@@ -394,7 +374,6 @@
             </div>
         </div>
 
-        <!-- Footer -->
         <footer class="premium-footer">
             <div class="container">
                 <div class="footer-content">
@@ -423,7 +402,6 @@
             </div>
         </footer>
 
-        <!-- Modal de Detalles de Perfume -->
         <div class="modal fade" 
              id="perfumeDetailModal" 
              tabindex="-1" 
@@ -437,7 +415,6 @@
                     </div>
                     <div class="modal-body">
                         <div class="row g-4">
-                            <!-- Imagen y Acciones -->
                             <div class="col-md-5">
                                 <div class="product-modal-image">
                                     <img :src="selectedPerfume.imagen_url" 
@@ -476,7 +453,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Información del Producto -->
                             <div class="col-md-7">
                                 <div class="product-info">
                                     <h3 class="product-info-title">{{ selectedPerfume.nombre }}</h3>
@@ -506,7 +482,6 @@
                                         <p class="product-description-text">{{ selectedPerfume.notas }}</p>
                                     </div>
 
-                                    <!-- Reseñas -->
                                     <div class="reviews-section">
                                         <h4 class="section-subtitle">Reseñas</h4>
                                         <div v-if="reviews.length > 0" class="reviews-list">
@@ -530,7 +505,6 @@
                                             <p>No hay reseñas para este perfume aún.</p>
                                         </div>
 
-                                        <!-- Formulario de Reseña -->
                                         <div class="review-form-section">
                                             <h5 class="form-title">Deja tu Reseña</h5>
                                             <form @submit.prevent="submitReview" class="review-form">
@@ -591,7 +565,6 @@
             </div>
         </div>
 
-        <!-- Sistema de Notificaciones -->
         <div class="toast-container">
             <div id="cartToast" 
                  :class="['toast', toast.type]"

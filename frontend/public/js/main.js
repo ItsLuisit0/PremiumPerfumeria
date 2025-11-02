@@ -1,4 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Detecta si estamos en desarrollo local o en producción
+    const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_BASE_URL = isDevelopment 
+        ? 'http://localhost:3000' 
+        : 'REPLACE_WITH_YOUR_BACKEND_URL'; // <-- IMPORTANTE: Reemplaza esto al desplegar
+
+    // Advertencia en consola si la URL de producción no ha sido cambiada
+    if (!isDevelopment && API_BASE_URL === 'REPLACE_WITH_YOUR_BACKEND_URL') {
+        console.warn('ATENCIÓN: La URL del backend (API_BASE_URL) no ha sido configurada para producción.');
+    }
+
     new Vue({
         el: '#app',
         data: {
@@ -86,14 +97,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.isLoading = true;
                 this.errorApi = null;
                 try {
-                    const response = await fetch('http://localhost:3000/api/perfumes');
+                    const response = await fetch(`${API_BASE_URL}/api/perfumes`);
                     if (!response.ok) {
                         throw new Error(`Error ${response.status}: No se pudieron cargar los perfumes`);
                     }
                     const perfumesData = await response.json();
                     this.perfumes = perfumesData.map(p => ({
                         ...p,
-                        imagen_url: `http://localhost:3000/${p.imagen_url}`
+                        imagen_url: `${API_BASE_URL}/${p.imagen_url}`
                     }));
                     this.showToast('success', 'Catálogo cargado correctamente');
                 } catch (error) {
@@ -106,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             async fetchReviews(perfumeId) {
                 try {
-                    const response = await fetch(`http://localhost:3000/api/perfumes/${perfumeId}/reviews`);
+                    const response = await fetch(`${API_BASE_URL}/api/perfumes/${perfumeId}/reviews`);
                     if (!response.ok) {
                         throw new Error(`Error ${response.status} al cargar reseñas`);
                     }
@@ -274,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
 
                 try {
-                    const response = await fetch(`http://localhost:3000/api/perfumes/${this.selectedPerfume.id_perfume}/reviews`, {
+                    const response = await fetch(`${API_BASE_URL}/api/perfumes/${this.selectedPerfume.id_perfume}/reviews`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'

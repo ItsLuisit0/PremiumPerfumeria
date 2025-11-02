@@ -1,0 +1,10 @@
+{
+  "name": "perfumeria-frontend",
+  "version": "1.0.0",
+  "description": "Frontend para la tienda de perfumes.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": ""
+}

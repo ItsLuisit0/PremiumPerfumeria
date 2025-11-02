@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfumería Elegancia - Réplicas Premium</title>
+    
+    <!-- Meta tags para SEO -->
+    <meta name="description" content="Perfumería Elegancia - Réplicas premium de las mejores fragancias del mundo. Calidad garantizada, envío rápido y precios accesibles.">
+    <meta name="keywords" content="perfumes, réplicas, fragancias, elegancia, aromas, colonia, perfume hombre, perfume mujer">
+    <meta name="author" content="Perfumería Elegancia">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Perfumería Elegancia - Réplicas Premium">
+    <meta property="og:description" content="Descubre nuestras réplicas de alta calidad de las mejores fragancias del mundo.">
+    <meta property="og:image" content="./ImagenesPerfumes/logo.png">
+    <meta property="og:url" content="https://tu-dominio.com">
+    <meta property="og:type" content="website">
+    
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app" v-cloak>
+        <!-- Header Premium -->
+        <header class="premium-header">
+            <!-- Header Top Bar -->
+            <div class="header-top">
+                <div class="container">
+                    <div class="header-top-content">
+                        <div class="header-benefits">
+                            <div class="benefit-item">
+                                <i class="bi bi-truck"></i>
+                                <span>Envío Rápido y Seguro</span>
+                            </div>
+                            <div class="benefit-item">
+                                <i class="bi bi-shield-check"></i>
+                                <span>Calidad Premium Garantizada</span>
+                            </div>
+                            <div class="benefit-item">
+                                <i class="bi bi-currency-dollar"></i>
+                                <span>Pago 100% Seguro</span>
+                            </div>
+                        </div>
+                        <div class="header-contact">
+                            <i class="bi bi-whatsapp"></i>
+                            <span>WhatsApp: 231-187-7967</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Main -->
+            <div class="header-main">
+                <div class="container">
+                    <div class="header-main-content">
+                        <!-- Logo -->
+                        <a href="./index.html" class="logo-container">
+                            <img src="./ImagenesPerfumes/logo.png" alt="Perfumería Elegancia - Réplicas de lujo" class="logo-img">
+                        </a>
+
+                        <!-- Search Bar -->
+                        <div class="search-container">
+                            <div class="search-wrapper">
+                                <input 
+                                    type="text" 
+                                    class="search-input"
+                                    placeholder="Buscar perfume por nombre, marca o tipo..."
+                                    v-model="searchTerm"
+                                    @input="onSearchInput"
+                                    aria-label="Buscar perfumes">
+                                <button class="search-clear" @click="clearSearch" v-if="searchTerm" aria-label="Limpiar búsqueda">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                                <i class="bi bi-search search-icon"></i>
+                            </div>
+                        </div>
+
+                        <!-- Navigation -->
+                        <nav class="nav-actions">
+                            <button class="mobile-menu-toggle" @click="toggleMobileMenu" aria-label="Menú principal">
+                                <i class="bi bi-list"></i>
+                            </button>
+                            <div class="nav-links" :class="{ 'active': mobileMenuOpen }">
+                                <a href="#" class="nav-link-custom">Catálogo</a>
+                                <button class="cart-button position-relative" 
+                                        data-bs-toggle="offcanvas" 
+                                        data-bs-target="#cartOffcanvas" 
+                                        aria-controls="cartOffcanvas"
+                                        aria-label="Ver carrito de compras">
+                                    <i class="bi bi-bag-fill"></i>
+                                    <span class="cart-text">Carrito</span>
+                                    <span class="cart-badge" v-if="cartItemCount > 0">{{ cartItemCount }}</span>
+                                </button>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero-section" aria-labelledby="hero-title" 
+                 style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                        url('http://localhost:3000/imagenesPerfumes/fondo.png') center/cover;">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 id="hero-title" class="hero-title animate-fade-in-up">
+                        Perfumería Elegancia
+                    </h1>
+                    <p class="hero-subtitle animate-fade-in-up delay-200">
+                        Réplicas de alta calidad. Experimenta el lujo de las mejores fragancias del mundo a precios accesibles.
+                    </p>
+                    <button class="hero-cta animate-fade-in-up delay-400" @click="scrollToProducts">
+                        Descubrir Colección
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <main id="main-content">
+            <div class="container py-5">
+                <!-- Loading State -->
+                <div v-if="isLoading" class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">Cargando catálogo...</p>
+                </div>
+
+                <!-- Error State -->
+                <div v-else-if="errorApi" class="error-container">
+                    <i class="bi bi-exclamation-triangle error-icon"></i>
+                    <h3 class="error-title">Error al cargar productos</h3>
+                    <p class="error-message">{{ errorApi }}</p>
+                    <button class="btn btn-warning" @click="fetchPerfumes">Reintentar</button>
+                </div>
+
+                <!-- Products Section -->
+                <div v-else>
+                    <section class="products-section" aria-labelledby="products-title">
+                        <h2 id="products-title" class="section-title">Nuestra Colección Exclusiva</h2>
+                        
+                        <!-- Filtros -->
+                        <div class="filters-section" role="group" aria-label="Filtrar productos por público">
+                            <button class="filter-btn" 
+                                    :class="{'active': selectedPublico === null}"
+                                    @click="filterPerfumes(null)"
+                                    aria-pressed="selectedPublico === null">
+                                Todos
+                            </button>
+                            <button class="filter-btn" 
+                                    :class="{'active': selectedPublico === 'Hombre'}"
+                                    @click="filterPerfumes('Hombre')"
+                                    aria-pressed="selectedPublico === 'Hombre'">
+                                Hombre
+                            </button>
+                            <button class="filter-btn" 
+                                    :class="{'active': selectedPublico === 'Mujer'}"
+                                    @click="filterPerfumes('Mujer')"
+                                    aria-pressed="selectedPublico === 'Mujer'">
+                                Mujer
+                            </button>
+                            <button class="filter-btn" 
+                                    :class="{'active': selectedPublico === 'Unisex'}"
+                                    @click="filterPerfumes('Unisex')"
+                                    aria-pressed="selectedPublico === 'Unisex'">
+                                Unisex
+                            </button>
+                        </div>
+
+                        <!-- Productos -->
+                        <div v-if="filteredPerfumes.length > 0" class="products-grid">
+                            <article class="product-card" 
+                                     v-for="perfume in filteredPerfumes" 
+                                     :key="perfume.id_perfume"
+                                     role="article"
+                                     aria-labelledby="product-title-{{perfume.id_perfume}}">
+                                <div class="product-image-container">
+                                    <img :src="perfume.imagen_url" 
+                                         :alt="`Botella de perfume ${perfume.nombre} de ${perfume.marca} - ${perfume.mililitros}ml`" 
+                                         class="card-img-top img-fluid p-3 product-image"
+                                         loading="lazy"
+                                         @error="handleImageError">
+                                    <span class="product-badge">{{ perfume.publico }}</span>
+                                    <button class="product-favorite" 
+                                            @click.stop="toggleFavorite(perfume)"
+                                            :aria-label="isFavorite(perfume) ? 'Quitar de favoritos' : 'Añadir a favoritos'">
+                                        <i :class="[isFavorite(perfume) ? 'bi-heart-fill' : 'bi-heart']"></i>
+                                    </button>
+                                </div>
+                                <div class="product-body">
+                                    <h3 :id="`product-title-${perfume.id_perfume}`" class="product-title">{{ perfume.nombre }}</h3>
+                                    <div class="product-meta">
+                                        <span class="product-meta-item">
+                                            <i class="bi bi-tag-fill"></i>
+                                            <span>{{ perfume.marca }}</span>
+                                        </span>
+                                        <span class="product-meta-item">
+                                            <i class="bi bi-droplet-fill"></i>
+                                            <span>{{ perfume.tipo }}</span>
+                                        </span>
+                                        <span class="product-meta-item">
+                                            <i class="bi bi-boxes"></i>
+                                            <span>{{ perfume.mililitros }}ml</span>
+                                        </span>
+                                    </div>
+                                    <p class="product-description">{{ perfume.descripcion }}</p>
+                                    <div class="product-price">{{ formatPrice(perfume.precio_minimo) }}</div>
+                                    <div class="product-actions">
+                                        <button class="btn-detail" 
+                                                @click="showPerfumeDetail(perfume)"
+                                                aria-controls="perfumeDetailModal"
+                                                :aria-describedby="`product-title-${perfume.id_perfume}`">
+                                            Ver Detalles
+                                        </button>
+                                        <button class="btn-cart" 
+                                                @click="addToCart(perfume, 1)"
+                                                :aria-label="`Añadir ${perfume.nombre} al carrito`">
+                                            <i class="bi bi-cart-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div v-else class="empty-state">
+                            <i class="bi bi-search empty-icon"></i>
+                            <h3 class="empty-title">No se encontraron productos</h3>
+                            <p class="empty-message">Intenta con otros filtros o términos de búsqueda</p>
+                            <button class="btn btn-outline-warning" @click="clearSearch">Limpiar búsqueda</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <!-- Offcanvas de Carrito -->
+        <div class="offcanvas offcanvas-end cart-offcanvas" tabindex="-1" id="cartOffcanvas" aria-labelledby="cartOffcanvasLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="cartOffcanvasLabel">Tu Carrito de Compras</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar carrito"></button>
+            </div>
+            <div class="offcanvas-body">
+                <div v-if="cart.length > 0" class="cart-content">
+                    <div class="cart-items">
+                        <div v-for="item in cart" 
+                             :key="item.id_perfume" 
+                             class="cart-item"
+                             role="listitem">
+                            <div class="cart-item-image">
+                                <img :src="item.imagen_url" 
+                                     :alt="`Botella de perfume ${item.nombre}`"
+                                     loading="lazy"
+                                     @error="handleImageError">
+                            </div>
+                            <div class="cart-item-details">
+                                <h6 class="cart-item-title">{{ item.nombre }}</h6>
+                                <p class="cart-item-meta">{{ item.marca }} - {{ item.mililitros }}ml</p>
+                                <div class="cart-item-quantity">
+                                    <button class="quantity-btn" 
+                                            @click="updateCartQuantity(item.id_perfume, item.quantity - 1)"
+                                            :disabled="item.quantity <= 1"
+                                            aria-label="Reducir cantidad">
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+                                    <span class="quantity-display">{{ item.quantity }}</span>
+                                    <button class="quantity-btn" 
+                                            @click="updateCartQuantity(item.id_perfume, item.quantity + 1)"
+                                            :disabled="item.quantity >= 10"
+                                            aria-label="Aumentar cantidad">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="cart-item-actions">
+                                <div class="cart-item-price">{{ formatPrice(item.precio_minimo * item.quantity) }}</div>
+                                <button class="btn-remove" 
+                                        @click="removeFromCart(item.id_perfume)"
+                                        aria-label="Eliminar producto">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="cart-summary">
+                        <div class="cart-total">
+                            <span class="total-label">Total:</span>
+                            <span class="total-amount">{{ formatPrice(cartTotalPrice) }}</span>
+                        </div>
+                        <div class="cart-actions">
+                            <button class="btn btn-success btn-checkout" @click="checkoutWhatsapp">
+                                <i class="bi bi-whatsapp"></i>
+                                Comprar por WhatsApp
+                            </button>
+                            <button class="btn btn-outline-secondary" @click="clearCart">
+                                <i class="bi bi-trash"></i>
+                                Vaciar Carrito
+                            </button>
+                            <button class="btn btn-secondary" data-bs-dismiss="offcanvas">
+                                Seguir Comprando
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div v-else class="cart-empty">
+                    <i class="bi bi-cart-x cart-empty-icon"></i>
+                    <h6 class="cart-empty-title">Tu carrito está vacío</h6>
+                    <p class="cart-empty-message">Agrega algunos productos para comenzar</p>
+                    <button class="btn btn-warning" data-bs-dismiss="offcanvas">
+                        Explorar Productos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="premium-footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-social">
+                        <a href="https://www.facebook.com/" 
+                           target="_blank" 
+                           class="social-icon"
+                           aria-label="Síguenos en Facebook">
+                            <img src="./ImagenesPerfumes/facebook-logo.png" alt="Facebook - Perfumería Elegancia">
+                        </a>
+                        <a href="https://wa.me/5212311877967" 
+                           target="_blank" 
+                           class="social-icon"
+                           aria-label="Contáctanos por WhatsApp">
+                            <img src="./ImagenesPerfumes/Whatsapp.png" alt="WhatsApp - Perfumería Elegancia">
+                        </a>
+                    </div>
+                    <div class="footer-info">
+                        <p class="footer-text">&copy; 2025 Elegancia Perfumería. Todos los derechos reservados.</p>
+                        <p class="footer-contact">
+                            <i class="bi bi-whatsapp"></i>
+                            WhatsApp: 231-187-7967
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Modal de Detalles de Perfume -->
+        <div class="modal fade" 
+             id="perfumeDetailModal" 
+             tabindex="-1" 
+             aria-labelledby="perfumeDetailModalLabel" 
+             aria-hidden="true"
+             v-if="selectedPerfume">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="perfumeDetailModalLabel">{{ selectedPerfume.nombre }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-4">
+                            <!-- Imagen y Acciones -->
+                            <div class="col-md-5">
+                                <div class="product-modal-image">
+                                    <img :src="selectedPerfume.imagen_url" 
+                                         :alt="`Botella de perfume ${selectedPerfume.nombre} de ${selectedPerfume.marca}`"
+                                         class="img-fluid"
+                                         @error="handleImageError">
+                                </div>
+                                <div class="product-modal-actions">
+                                    <div class="quantity-selector">
+                                        <button class="quantity-btn" 
+                                                @click="decreaseQuantity"
+                                                :disabled="modalQuantity <= 1"
+                                                aria-label="Reducir cantidad">
+                                            <i class="bi bi-dash"></i>
+                                        </button>
+                                        <span class="quantity-display">{{ modalQuantity }}</span>
+                                        <button class="quantity-btn" 
+                                                @click="increaseQuantity"
+                                                :disabled="modalQuantity >= 10"
+                                                aria-label="Aumentar cantidad">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                    <button class="btn btn-dark btn-add-cart" 
+                                            @click="addToCart(selectedPerfume, modalQuantity); closeModal();"
+                                            :disabled="isSubmittingReview">
+                                        <i class="bi bi-cart-plus"></i>
+                                        Añadir al Carrito
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-favorite" 
+                                            @click="toggleFavorite(selectedPerfume)"
+                                            :aria-label="isFavorite(selectedPerfume) ? 'Quitar de favoritos' : 'Añadir a favoritos'">
+                                        <i :class="[isFavorite(selectedPerfume) ? 'bi-heart-fill' : 'bi-heart']"></i>
+                                        {{ isFavorite(selectedPerfume) ? 'En Favoritos' : 'Añadir a Favoritos' }}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Información del Producto -->
+                            <div class="col-md-7">
+                                <div class="product-info">
+                                    <h3 class="product-info-title">{{ selectedPerfume.nombre }}</h3>
+                                    <p class="product-info-brand">Marca: <strong>{{ selectedPerfume.marca }}</strong></p>
+                                    
+                                    <div class="product-details">
+                                        <div class="detail-item">
+                                            <i class="bi bi-tag-fill"></i>
+                                            <span>Tipo: {{ selectedPerfume.tipo }}</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="bi bi-gender-ambiguous"></i>
+                                            <span>Público: {{ selectedPerfume.publico }}</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="bi bi-boxes"></i>
+                                            <span>Mililitros: {{ selectedPerfume.mililitros }}ml</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="bi bi-cash-stack"></i>
+                                            <span>Precio: {{ formatPrice(selectedPerfume.precio_minimo) }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="product-description-section">
+                                        <h4 class="section-subtitle">Descripción</h4>
+                                        <p class="product-description-text">{{ selectedPerfume.notas }}</p>
+                                    </div>
+
+                                    <!-- Reseñas -->
+                                    <div class="reviews-section">
+                                        <h4 class="section-subtitle">Reseñas</h4>
+                                        <div v-if="reviews.length > 0" class="reviews-list">
+                                            <div v-for="review in reviews" 
+                                                 :key="review.id_reseña" 
+                                                 class="review-item">
+                                                <div class="review-header">
+                                                    <strong class="review-author">{{ review.usuario }}</strong>
+                                                    <span class="review-date">{{ new Date(review.fecha).toLocaleDateString() }}</span>
+                                                </div>
+                                                <div class="review-rating">
+                                                    <i v-for="n in 5" 
+                                                       :key="n" 
+                                                       :class="[n <= review.calificacion ? 'bi-star-fill text-warning' : 'bi-star text-muted']"
+                                                       class="bi"></i>
+                                                </div>
+                                                <p class="review-comment">{{ review.comentario }}</p>
+                                            </div>
+                                        </div>
+                                        <div v-else class="no-reviews">
+                                            <p>No hay reseñas para este perfume aún.</p>
+                                        </div>
+
+                                        <!-- Formulario de Reseña -->
+                                        <div class="review-form-section">
+                                            <h5 class="form-title">Deja tu Reseña</h5>
+                                            <form @submit.prevent="submitReview" class="review-form">
+                                                <div class="form-group">
+                                                    <label for="reviewUser" class="form-label">Tu Nombre</label>
+                                                    <input type="text" 
+                                                           id="reviewUser"
+                                                           class="form-control" 
+                                                           v-model="newReview.usuario" 
+                                                           required
+                                                           maxlength="50"
+                                                           placeholder="Ingresa tu nombre">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="reviewComment" class="form-label">Comentario</label>
+                                                    <textarea id="reviewComment"
+                                                              class="form-control" 
+                                                              v-model="newReview.comentario" 
+                                                              rows="4" 
+                                                              required
+                                                              maxlength="500"
+                                                              placeholder="Comparte tu experiencia con este perfume..."></textarea>
+                                                    <div class="char-counter">
+                                                        {{ newReview.comentario.length }}/500
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form-label">Calificación</label>
+                                                    <div class="rating-selector">
+                                                        <template v-for="n in 5">
+                                                            <i 
+                                                                :key="n" 
+                                                                class="bi rating-star"
+                                                                :class="[n <= (currentRating || newReview.calificacion) ? 'bi-star-fill text-warning' : 'bi-star text-muted']"
+                                                                @mouseover="currentRating = n" 
+                                                                @mouseleave="currentRating = 0" 
+                                                                @click="setRating(n)"
+                                                                :aria-label="`Calificar con ${n} estrellas`">
+                                                            </i>
+                                                        </template>
+                                                        <span class="rating-text">({{ newReview.calificacion || 0 }} estrellas)</span>
+                                                    </div>
+                                                </div>
+                                                <button type="submit" 
+                                                        class="btn btn-dark btn-submit-review"
+                                                        :disabled="isSubmittingReview">
+                                                    <span v-if="isSubmittingReview" class="spinner-border spinner-border-sm" role="status"></span>
+                                                    {{ isSubmittingReview ? 'Enviando...' : 'Enviar Reseña' }}
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sistema de Notificaciones -->
+        <div class="toast-container">
+            <div id="cartToast" 
+                 :class="['toast', toast.type]"
+                 role="alert" 
+                 aria-live="assertive" 
+                 aria-atomic="true" 
+                 v-if="toast.show">
+                <div class="toast-body">
+                    <i :class="getToastIcon(toast.type)" class="toast-icon"></i>
+                    <span class="toast-message">{{ toast.message }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

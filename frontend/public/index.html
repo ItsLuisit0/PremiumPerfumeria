@@ -86,7 +86,10 @@
                                 <i class="bi bi-list"></i>
                             </button>
                             <div class="nav-links" :class="{ 'active': mobileMenuOpen }">
-                                <a href="#" class="nav-link-custom">Catálogo</a>
+                                <a href="#" @click.prevent="showFavoritesView = false" class="nav-link-custom">Catálogo</a>
+                                <a href="#" @click.prevent="showFavoritesView = true" class="nav-link-custom">
+                                    <i class="bi bi-heart-fill"></i> Favoritos
+                                </a>
                                 <button class="cart-button position-relative" 
                                         data-bs-toggle="offcanvas" 
                                         data-bs-target="#cartOffcanvas" 
@@ -110,13 +113,13 @@
             <div class="hero-overlay"></div>
             <div class="hero-content">
                 <div class="hero-text">
-                    <h1 id="hero-title" class="hero-title animate-fade-in-up">
+                    <h1 id="hero-title" class="hero-title animate__animated animate__fadeInUp">
                         Perfumería Elegancia
                     </h1>
-                    <p class="hero-subtitle animate-fade-in-up delay-200">
+                    <p class="hero-subtitle animate__animated animate__fadeInUp animate__delay-1s">
                         Réplicas de alta calidad. Experimenta el lujo de las mejores fragancias del mundo a precios accesibles.
                     </p>
-                    <button class="hero-cta animate-fade-in-up delay-400" @click="scrollToProducts">
+                    <button class="hero-cta animate__animated animate__fadeInUp animate__delay-2s" @click="scrollToProducts">
                         Descubrir Colección
                     </button>
                 </div>
@@ -141,7 +144,7 @@
                 </div>
 
                 <!-- Products Section -->
-                <div v-else>
+                <div v-else-if="!showFavoritesView">
                     <section class="products-section" aria-labelledby="products-title">
                         <h2 id="products-title" class="section-title">Nuestra Colección Exclusiva</h2>
                         
@@ -175,9 +178,79 @@
 
                         <!-- Productos -->
                         <div v-if="filteredPerfumes.length > 0" class="products-grid">
-                            <article class="product-card" 
-                                     v-for="perfume in filteredPerfumes" 
+                            <article class="product-card"
+                                     v-for="(perfume, index) in filteredPerfumes"
                                      :key="perfume.id_perfume"
+                                     :style="{ 'transition-delay': (index * 100) + 'ms' }"
+                                     role="article"
+                                     aria-labelledby="product-title-{{perfume.id_perfume}}">
+                                <div class="product-image-container">
+                                    <img :src="perfume.imagen_url" 
+                                         :alt="`Botella de perfume ${perfume.nombre} de ${perfume.marca} - ${perfume.mililitros}ml`" 
+                                         class="card-img-top img-fluid p-3 product-image"
+                                         loading="lazy"
+                                         @error="handleImageError">
+                                    <span class="product-badge">{{ perfume.publico }}</span>
+                                    <button class="product-favorite" 
+                                            @click.stop="toggleFavorite(perfume)"
+                                            :aria-label="isFavorite(perfume) ? 'Quitar de favoritos' : 'Añadir a favoritos'">
+                                        <i :class="[isFavorite(perfume) ? 'bi-heart-fill' : 'bi-heart']"></i>
+                                    </button>
+                                </div>
+                                <div class="product-body">
+                                    <h3 :id="`product-title-${perfume.id_perfume}`" class="product-title">{{ perfume.nombre }}</h3>
+                                    <div class="product-meta">
+                                        <span class="product-meta-item">
+                                            <i class="bi bi-tag-fill"></i>
+                                            <span>{{ perfume.marca }}</span>
+                                        </span>
+                                        <span class="product-meta-item">
+                                            <i class="bi bi-droplet-fill"></i>
+                                            <span>{{ perfume.tipo }}</span>
+                                        </span>
+                                        <span class="product-meta-item">
+                                            <i class="bi bi-boxes"></i>
+                                            <span>{{ perfume.mililitros }}ml</span>
+                                        </span>
+                                    </div>
+                                    <p class="product-description">{{ perfume.descripcion }}</p>
+                                    <div class="product-price">{{ formatPrice(perfume.precio_minimo) }}</div>
+                                    <div class="product-actions">
+                                        <button class="btn-detail" 
+                                                @click="showPerfumeDetail(perfume)"
+                                                aria-controls="perfumeDetailModal"
+                                                :aria-describedby="`product-title-${perfume.id_perfume}`">
+                                            Ver Detalles
+                                        </button>
+                                        <button class="btn-cart" 
+                                                @click="addToCart(perfume, 1, $event)"
+                                                :aria-label="`Añadir ${perfume.nombre} al carrito`">
+                                            <i class="bi bi-cart-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div v-else class="empty-state">
+                            <i class="bi bi-search empty-icon"></i>
+                            <h3 class="empty-title">No se encontraron productos</h3>
+                            <p class="empty-message">Intenta con otros filtros o términos de búsqueda</p>
+                            <button class="btn btn-outline-warning" @click="clearSearch">Limpiar búsqueda</button>
+                        </div>
+                    </section>
+                </div>
+                <!-- Favorites Section -->
+                <div v-else-if="showFavoritesView">
+                    <section class="favorites-section" aria-labelledby="favorites-title">
+                        <h2 id="favorites-title" class="section-title">Mis Perfumes Favoritos</h2>
+                        
+                        <div v-if="favoriteItems.length > 0" class="products-grid">
+                            <article class="product-card"
+                                     v-for="(perfume, index) in favoriteItems"
+                                     :key="perfume.id_perfume"
+                                     :style="{ 'transition-delay': (index * 100) + 'ms' }"
                                      role="article"
                                      aria-labelledby="product-title-{{perfume.id_perfume}}">
                                 <div class="product-image-container">
@@ -228,12 +301,12 @@
                             </article>
                         </div>
 
-                        <!-- Empty State -->
+                        <!-- Empty Favorites State -->
                         <div v-else class="empty-state">
-                            <i class="bi bi-search empty-icon"></i>
-                            <h3 class="empty-title">No se encontraron productos</h3>
-                            <p class="empty-message">Intenta con otros filtros o términos de búsqueda</p>
-                            <button class="btn btn-outline-warning" @click="clearSearch">Limpiar búsqueda</button>
+                            <i class="bi bi-heartbreak empty-icon"></i>
+                            <h3 class="empty-title">No tienes favoritos</h3>
+                            <p class="empty-message">Haz clic en el corazón de un producto para guardarlo aquí.</p>
+                            <button class="btn btn-warning" @click="showFavoritesView = false">Explorar Colección</button>
                         </div>
                     </section>
                 </div>
@@ -355,9 +428,8 @@
              id="perfumeDetailModal" 
              tabindex="-1" 
              aria-labelledby="perfumeDetailModalLabel" 
-             aria-hidden="true"
-             v-if="selectedPerfume">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered" v-if="selectedPerfume">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="perfumeDetailModalLabel">{{ selectedPerfume.nombre }}</h5>
@@ -390,7 +462,7 @@
                                         </button>
                                     </div>
                                     <button class="btn btn-dark btn-add-cart" 
-                                            @click="addToCart(selectedPerfume, modalQuantity); closeModal();"
+                                            @click="addToCart(selectedPerfume, modalQuantity, $event); closeModal();"
                                             :disabled="isSubmittingReview">
                                         <i class="bi bi-cart-plus"></i>
                                         Añadir al Carrito

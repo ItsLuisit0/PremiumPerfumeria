@@ -20,23 +20,22 @@ document.addEventListener('DOMContentLoaded', () => {
             searchTimeout: null,
             currentRating: 0,
             mobileMenuOpen: false,
-            lastFocusedElement: null, // Para accesibilidad del modal
+            lastFocusedElement: null,
             toast: {
                 show: false,
                 message: '',
                 type: 'info'
-            }
+            },
+            showFavoritesView: false,
+            observer: null,
+            favoriteIds: [] // Reactive list of favorite perfume IDs
         },
         computed: {
             filteredPerfumes() {
                 let filtered = this.perfumes;
-
-                // Filtrar por público
                 if (this.selectedPublico) {
                     filtered = filtered.filter(perfume => perfume.publico === this.selectedPublico);
                 }
-
-                // Filtrar por término de búsqueda
                 if (this.searchTerm) {
                     const searchLower = this.searchTerm.toLowerCase();
                     filtered = filtered.filter(perfume =>
@@ -55,16 +54,34 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             hasProducts() {
                 return this.perfumes.length > 0;
+            },
+            favoriteItems() {
+                return this.perfumes.filter(p => this.favoriteIds.includes(p.id_perfume));
             }
         },
         methods: {
-            // ===== MANEJO DE IMÁGENES =====
+            initObserver() {
+                if (this.observer) {
+                    this.observer.disconnect();
+                }
+                this.observer = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                this.$nextTick(() => {
+                    const cards = document.querySelectorAll('.product-card:not(.is-visible)');
+                    cards.forEach(card => this.observer.observe(card));
+                });
+            },
             handleImageError(event) {
                 console.warn('Error cargando imagen, ocultando elemento:', event.target.src);
                 event.target.style.display = 'none';
             },
-
-            // ===== GESTIÓN DE DATOS =====
             async fetchPerfumes() {
                 this.isLoading = true;
                 this.errorApi = null;
@@ -74,208 +91,156 @@ document.addEventListener('DOMContentLoaded', () => {
                         throw new Error(`Error ${response.status}: No se pudieron cargar los perfumes`);
                     }
                     const perfumesData = await response.json();
-
-                    // El backend ahora debería enviar la URL completa y correcta.
-                    // Simplemente agregamos el prefijo del servidor a la ruta relativa.
                     this.perfumes = perfumesData.map(p => ({
                         ...p,
                         imagen_url: `http://localhost:3000/${p.imagen_url}`
                     }));
-
                     this.showToast('success', 'Catálogo cargado correctamente');
                 } catch (error) {
                     console.error("Error al obtener perfumes:", error);
-                    if (error.message.includes('429')) {
-                        this.errorApi = "Demasiadas solicitudes. Por favor, espera un momento y recarga la página.";
-                    } else {
-                        this.errorApi = "No se pudieron cargar los perfumes. Intente nuevamente más tarde.";
-                    }
+                    this.errorApi = "No se pudieron cargar los perfumes. Intente nuevamente más tarde.";
                     this.showToast('danger', 'Error al cargar el catálogo');
                 } finally {
                     this.isLoading = false;
                 }
             },
-
             async fetchReviews(perfumeId) {
                 try {
                     const response = await fetch(`http://localhost:3000/api/perfumes/${perfumeId}/reviews`);
-                    
                     if (!response.ok) {
                         throw new Error(`Error ${response.status} al cargar reseñas`);
                     }
-                    
                     this.reviews = await response.json();
                 } catch (error) {
                     console.error("Error al obtener reseñas:", error);
                     this.reviews = [];
                 }
             },
-
-            // ===== PERSISTENCIA DEL CARRITO =====
             saveCartToStorage() {
-                try {
-                    localStorage.setItem('perfumeriaCart', JSON.stringify(this.cart));
-                } catch (error) {
-                    console.warn('No se pudo guardar el carrito en localStorage:', error);
-                }
+                localStorage.setItem('perfumeriaCart', JSON.stringify(this.cart));
             },
-
             loadCartFromStorage() {
-                try {
-                    const savedCart = localStorage.getItem('perfumeriaCart');
-                    if (savedCart) {
-                        this.cart = JSON.parse(savedCart);
-                    }
-                } catch (error) {
-                    console.warn('No se pudo cargar el carrito desde localStorage:', error);
-                    this.cart = [];
+                const savedCart = localStorage.getItem('perfumeriaCart');
+                if (savedCart) {
+                    this.cart = JSON.parse(savedCart);
                 }
             },
-
-            // ===== INTERFAZ DE USUARIO =====
             toggleMobileMenu() {
                 this.mobileMenuOpen = !this.mobileMenuOpen;
             },
-
             scrollToProducts() {
-                const productsSection = document.getElementById('main-content');
-                if (productsSection) {
-                    productsSection.scrollIntoView({ 
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
+                document.getElementById('main-content').scrollIntoView({ behavior: 'smooth', block: 'start' });
             },
-
             showPerfumeDetail(perfume) {
-                this.lastFocusedElement = document.activeElement; // Guardar foco para accesibilidad
+                this.lastFocusedElement = document.activeElement;
                 this.selectedPerfume = perfume;
                 this.modalQuantity = 1;
-                this.newReview = {
-                    usuario: '',
-                    comentario: '',
-                    calificacion: 0
-                };
+                this.newReview = { usuario: '', comentario: '', calificacion: 0 };
                 this.currentRating = 0;
-                
                 this.fetchReviews(perfume.id_perfume);
                 
-                const modalElement = document.getElementById('perfumeDetailModal');
-                if (modalElement) {
-                    let modal = bootstrap.Modal.getInstance(modalElement);
-                    if (!modal) {
-                        modal = new bootstrap.Modal(modalElement);
-                    }
+                this.$nextTick(() => {
+                    const modalElement = document.getElementById('perfumeDetailModal');
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
                     modal.show();
-                }
+                });
             },
-
             closeModal() {
-                const modalElement = document.getElementById('perfumeDetailModal');
-                if (modalElement) {
-                    const modal = bootstrap.Modal.getInstance(modalElement);
-                    if (modal) {
-                        modal.hide();
-                    }
+                const modal = bootstrap.Modal.getInstance(document.getElementById('perfumeDetailModal'));
+                if (modal) {
+                    modal.hide();
                 }
                 this.selectedPerfume = null;
             },
+            addToCart(perfume, quantity, event) {
+                if (!perfume || quantity <= 0) return;
 
-            // ===== CARRITO DE COMPRAS =====
-            addToCart(perfume, quantity) {
-                if (!perfume || quantity <= 0) {
-                    this.showToast('warning', 'Cantidad inválida');
-                    return;
-                }
+                if (event) {
+                    const card = event.target.closest('.product-card, .modal-content');
+                    if (card) {
+                        const productImage = card.querySelector('.product-image, .product-modal-image img');
+                        const cartButton = document.querySelector('.cart-button');
 
-                const existingItemIndex = this.cart.findIndex(item => item.id_perfume === perfume.id_perfume);
-                const finalQuantity = Math.min(quantity, 10);
+                        if (productImage && cartButton) {
+                            const imageRect = productImage.getBoundingClientRect();
+                            const cartRect = cartButton.getBoundingClientRect();
 
-                if (existingItemIndex !== -1) {
-                    const newQuantity = this.cart[existingItemIndex].quantity + finalQuantity;
-                    
-                    if (newQuantity > 10) {
-                        this.showToast('warning', `Máximo 10 unidades permitidas por producto`);
-                        this.cart[existingItemIndex].quantity = 10;
-                    } else {
-                        this.cart[existingItemIndex].quantity = newQuantity;
-                        this.showToast('success', `${finalQuantity} ${finalQuantity === 1 ? 'unidad' : 'unidades'} de ${perfume.nombre} añadidas al carrito`);
+                            const flyingImage = productImage.cloneNode(true);
+                            flyingImage.classList.add('flying-image');
+
+                            flyingImage.style.position = 'fixed';
+                            flyingImage.style.left = `${imageRect.left}px`;
+                            flyingImage.style.top = `${imageRect.top}px`;
+                            flyingImage.style.width = `${imageRect.width}px`;
+                            flyingImage.style.height = `${imageRect.height}px`;
+
+                            document.body.appendChild(flyingImage);
+
+                            requestAnimationFrame(() => {
+                                flyingImage.style.transform = `translate(${cartRect.left - imageRect.left}px, ${cartRect.top - imageRect.top}px) scale(0.1)`;
+                                flyingImage.style.opacity = '0';
+                            });
+
+                            setTimeout(() => {
+                                flyingImage.remove();
+                            }, 1000); // Match transition duration
+                        }
                     }
-                } else {
-                    this.cart.push({
-                        ...perfume,
-                        quantity: finalQuantity
-                    });
-                    this.showToast('success', `${perfume.nombre} añadido al carrito`);
                 }
 
-                this.saveCartToStorage();
-            },
+                const existingItem = this.cart.find(item => item.id_perfume === perfume.id_perfume);
+                if (existingItem) {
+                    existingItem.quantity = Math.min(existingItem.quantity + quantity, 10);
+                } else {
+                    this.cart.push({ ...perfume, quantity });
+                }
+                this.showToast('success', `${perfume.nombre} añadido al carrito`);
 
+                const cartButton = document.querySelector('.cart-button');
+                if (cartButton) {
+                    cartButton.classList.add('jiggle');
+                    setTimeout(() => {
+                        cartButton.classList.remove('jiggle');
+                    }, 500);
+                }
+            },
             removeFromCart(perfumeId) {
                 const index = this.cart.findIndex(item => item.id_perfume === perfumeId);
                 if (index !== -1) {
-                    const removedPerfume = this.cart[index];
                     this.cart.splice(index, 1);
-                    this.showToast('danger', `${removedPerfume.nombre} eliminado del carrito`);
-                    this.saveCartToStorage();
+                    this.showToast('danger', 'Producto eliminado del carrito');
                 }
             },
-
             updateCartQuantity(perfumeId, newQuantity) {
-                if (newQuantity <= 0) {
-                    this.removeFromCart(perfumeId);
-                    return;
-                }
-
                 const item = this.cart.find(item => item.id_perfume === perfumeId);
                 if (item) {
-                    item.quantity = Math.min(newQuantity, 10);
-                    this.saveCartToStorage();
+                    if (newQuantity > 0) {
+                        item.quantity = Math.min(newQuantity, 10);
+                    } else {
+                        this.removeFromCart(perfumeId);
+                    }
                 }
             },
-
             clearCart() {
-                if (this.cart.length > 0) {
-                    this.cart = [];
-                    this.saveCartToStorage();
-                    this.showToast('info', 'Carrito vaciado correctamente');
-                }
+                this.cart = [];
+                this.showToast('info', 'Carrito vaciado');
             },
-
-            // ===== GESTIÓN DE CANTIDADES =====
             increaseQuantity() {
-                if (this.modalQuantity < 10) {
-                    this.modalQuantity++;
-                } else {
-                    this.showToast('warning', 'Máximo 10 unidades por producto');
-                }
+                if (this.modalQuantity < 10) this.modalQuantity++;
             },
-
             decreaseQuantity() {
-                if (this.modalQuantity > 1) {
-                    this.modalQuantity--;
-                }
+                if (this.modalQuantity > 1) this.modalQuantity--;
             },
-
-            // ===== FILTROS Y BÚSQUEDA =====
             filterPerfumes(publico) {
                 this.selectedPublico = publico;
             },
-
             onSearchInput() {
                 clearTimeout(this.searchTimeout);
-                this.searchTimeout = setTimeout(() => {
-                    this.filterPerfumes(this.selectedPublico);
-                }, 300);
+                this.searchTimeout = setTimeout(() => {}, 300);
             },
-
             clearSearch() {
                 this.searchTerm = '';
-                this.filterPerfumes(this.selectedPublico);
             },
-
-            // ===== RESEÑAS =====
             async submitReview() {
                 if (!this.selectedPerfume) return;
 
@@ -338,55 +303,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.isSubmittingReview = false;
                 }
             },
-
             setRating(rating) {
                 this.newReview.calificacion = rating;
             },
-
-            // ===== FAVORITOS =====
             isFavorite(perfume) {
-                const favorites = this.getFavorites();
-                return favorites.some(fav => fav.id_perfume === perfume.id_perfume);
+                return this.favoriteIds.includes(perfume.id_perfume);
             },
-
             toggleFavorite(perfume) {
-                const favorites = this.getFavorites();
-                const existingIndex = favorites.findIndex(fav => fav.id_perfume === perfume.id_perfume);
-
-                if (existingIndex !== -1) {
-                    favorites.splice(existingIndex, 1);
+                const index = this.favoriteIds.indexOf(perfume.id_perfume);
+                if (index !== -1) {
+                    this.favoriteIds.splice(index, 1);
                     this.showToast('info', `${perfume.nombre} eliminado de favoritos`);
                 } else {
-                    const favoritePerfume = {
-                        id_perfume: perfume.id_perfume,
-                        nombre: perfume.nombre,
-                        marca: perfume.marca,
-                        imagen_url: perfume.imagen_url
-                    };
-                    favorites.push(favoritePerfume);
+                    this.favoriteIds.push(perfume.id_perfume);
                     this.showToast('success', `${perfume.nombre} añadido a favoritos`);
                 }
-
-                this.saveFavorites(favorites);
             },
-
-            getFavorites() {
-                try {
-                    return JSON.parse(localStorage.getItem('perfumeriaFavorites')) || [];
-                } catch {
-                    return [];
+            loadFavorites() {
+                const favorites = localStorage.getItem('perfumeriaFavorites');
+                if (favorites) {
+                    this.favoriteIds = JSON.parse(favorites);
                 }
             },
-
-            saveFavorites(favorites) {
-                try {
-                    localStorage.setItem('perfumeriaFavorites', JSON.stringify(favorites));
-                } catch (error) {
-                    console.warn('No se pudieron guardar los favoritos');
-                }
+            saveFavorites() {
+                localStorage.setItem('perfumeriaFavorites', JSON.stringify(this.favoriteIds));
             },
-
-            // ===== CHECKOUT =====
             checkoutWhatsapp() {
                 if (this.cart.length === 0) {
                     this.showToast('warning', 'Tu carrito está vacío');
@@ -398,103 +339,56 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.cart.forEach((item, index) => {
                     message += `${index + 1}. ${item.nombre} (${item.marca}) - ${item.mililitros}ml\n`;
                     message += `   Cantidad: ${item.quantity}\n`;
-                    message += `   Precio unitario: $${item.precio_minimo}\n`;
-                    message += `   Subtotal: $${(item.precio_minimo * item.quantity).toFixed(2)}\n\n`;
+                    message += `   Precio unitario: ${item.precio_minimo}\n`;
+                    message += `   Subtotal: ${(item.precio_minimo * item.quantity).toFixed(2)}\n\n`;
                 });
                 
-                message += `💰 *TOTAL: $${this.cartTotalPrice.toFixed(2)} MXN*\n\n`;
-                message += `📦 *Información de envío:*\n`;
-                message += `📍 Dirección: [Completar]\n`;
-                message += `📞 Teléfono: [Completar]\n`;
-                message += `💳 Método de pago: [Completar]`;
-
+                message += `💰 *TOTAL: ${this.cartTotalPrice.toFixed(2)} MXN*\n\n`;
+               
                 const whatsappUrl = `https://wa.me/5212311877967?text=${encodeURIComponent(message)}`;
                 window.open(whatsappUrl, '_blank');
                 this.showToast('success', 'Redirigiendo a WhatsApp para completar tu compra');
             },
-
-            // ===== UTILIDADES =====
             sanitizeInput(input) {
                 const div = document.createElement('div');
                 div.textContent = input;
                 return div.innerHTML;
             },
-
             showToast(type, message) {
                 this.toast.type = type;
                 this.toast.message = message;
                 this.toast.show = true;
-
-                setTimeout(() => {
-                    this.toast.show = false;
-                }, 4000);
+                setTimeout(() => { this.toast.show = false; }, 4000);
             },
-
             formatPrice(price) {
-                return new Intl.NumberFormat('es-MX', {
-                    style: 'currency',
-                    currency: 'MXN'
-                }).format(price);
+                return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(price);
             },
-
             getToastIcon(type) {
-                switch(type) {
-                    case 'success': return 'bi-check-circle-fill';
-                    case 'danger': return 'bi-x-circle-fill';
-                    case 'warning': return 'bi-exclamation-triangle-fill';
-                    case 'info': return 'bi-info-circle-fill';
-                    default: return 'bi-info-circle-fill';
-                }
+                const icons = { success: 'bi-check-circle-fill', danger: 'bi-x-circle-fill', warning: 'bi-exclamation-triangle-fill', info: 'bi-info-circle-fill' };
+                return icons[type] || icons.info;
             }
         },
         watch: {
-            cart: {
-                handler() {
-                    this.saveCartToStorage();
-                },
-                deep: true
-            },
-            
-            searchTerm() {
-                this.onSearchInput();
-            },
-
-            perfumes: {
-                handler() {
-                    if (this.perfumes.length > 0) {
-                        this.loadCartFromStorage();
-                    }
-                },
-                deep: true
-            }
+            cart: { handler: 'saveCartToStorage', deep: true },
+            favoriteIds: { handler: 'saveFavorites' },
+            searchTerm: 'onSearchInput',
+            filteredPerfumes: 'initObserver',
+            favoriteItems: 'initObserver',
+            showFavoritesView: 'initObserver'
         },
         mounted() {
-            this.fetchPerfumes();
-            
+            this.fetchPerfumes().then(() => {
+                this.loadCartFromStorage();
+                this.loadFavorites();
+                this.initObserver();
+            });
             const modalElement = document.getElementById('perfumeDetailModal');
             if (modalElement) {
                 modalElement.addEventListener('hidden.bs.modal', () => {
                     this.selectedPerfume = null;
-                    this.modalQuantity = 1;
-                    if (this.lastFocusedElement) {
-                        this.lastFocusedElement.focus(); // Devolver foco para accesibilidad
-                    }
+                    if (this.lastFocusedElement) this.lastFocusedElement.focus();
                 });
             }
-            
-            const toastElement = document.getElementById('cartToast');
-            if (toastElement) {
-                this.toastInstance = new bootstrap.Toast(toastElement, {
-                    autohide: true,
-                    delay: 4000
-                });
-            }
-
-            document.addEventListener('click', (event) => {
-                if (this.mobileMenuOpen && !event.target.closest('.nav-actions')) {
-                    this.mobileMenuOpen = false;
-                }
-            });
         }
     });
 });

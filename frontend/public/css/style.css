@@ -1,8 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap');
 
-/* ===== VARIABLES CSS ===== */
 :root {
-    /* Colores */
     --primary-gold: #D4AF37;
     --gold-dark: #c99a2e;
     --gold-light: #f4e4c1;
@@ -17,26 +15,22 @@
     --warning: #ffc107;
     --info: #17a2b8;
     
-    /* Espaciado */
     --space-xs: 0.5rem;
     --space-sm: 1rem;
     --space-md: 1.5rem;
     --space-lg: 2rem;
     --space-xl: 3rem;
     
-    /* Transiciones */
     --transition-fast: 0.2s ease;
     --transition-normal: 0.3s ease;
     --transition-slow: 0.4s ease;
     
-    /* Sombras */
     --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
     --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
     --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
     --shadow-gold: 0 0 20px rgba(212, 175, 55, 0.3);
 }
 
-/* ===== RESET Y ESTILOS BASE ===== */
 * {
     margin: 0;
     padding: 0;
@@ -53,7 +47,7 @@ body {
     font-family: 'Poppins', sans-serif;
     background: var(--bg-light);
     overflow-x: hidden;
-    padding-top: 140px; /* Espacio para header fijo */
+    padding-top: 140px; 
     line-height: 1.6;
     color: var(--text-dark);
 }
@@ -62,7 +56,6 @@ body {
     display: none !important;
 }
 
-/* ===== TIPOGRAFÍA ===== */
 .font-playfair {
     font-family: 'Playfair Display', serif;
 }
@@ -75,7 +68,6 @@ body {
     background: var(--primary-gold) !important;
 }
 
-/* ===== HEADER PREMIUM ===== */
 .premium-header {
     position: fixed;
     top: 0;
@@ -87,7 +79,6 @@ body {
     border-bottom: 1px solid rgba(212, 175, 55, 0.2);
 }
 
-/* Header Top */
 .header-top {
     background: rgba(0, 0, 0, 0.8);
     padding: var(--space-xs) 0;
@@ -131,7 +122,6 @@ body {
     font-weight: 500;
 }
 
-/* Header Main */
 .header-main {
     padding: var(--space-sm) 0;
 }
@@ -143,7 +133,6 @@ body {
     gap: var(--space-lg);
 }
 
-/* Logo */
 .logo-container {
     display: flex;
     align-items: center;
@@ -188,7 +177,6 @@ body {
     margin-top: -2px;
 }
 
-/* Barra de Búsqueda */
 .search-container {
     flex: 1;
     max-width: 500px;
@@ -252,7 +240,6 @@ body {
     pointer-events: none;
 }
 
-/* Navegación */
 .nav-actions {
     display: flex;
     align-items: center;
@@ -330,6 +317,17 @@ body {
     font-size: 0.9rem;
 }
 
+.cart-button.jiggle {
+    animation: jiggle 0.5s ease;
+}
+
+@keyframes jiggle {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.1) rotate(-3deg); }
+    50% { transform: scale(1.1) rotate(3deg); }
+    75% { transform: scale(1.1) rotate(-3deg); }
+}
+
 .cart-badge {
     position: absolute;
     top: -8px;
@@ -352,7 +350,6 @@ body {
     50% { transform: scale(1.1); }
 }
 
-/* ===== HERO SECTION ===== */
 .hero-section {
     position: relative;
     height: 100vh;
@@ -416,7 +413,6 @@ body {
     box-shadow: var(--shadow-gold);
 }
 
-/* ===== ESTADOS DE CARGA Y ERROR ===== */
 .loading-container {
     text-align: center;
     padding: var(--space-xl);
@@ -466,7 +462,6 @@ body {
     margin-bottom: var(--space-md);
 }
 
-/* ===== SECCIÓN DE PRODUCTOS ===== */
 .products-section {
     padding: var(--space-xl) 0;
 }
@@ -480,7 +475,6 @@ body {
     color: var(--text-dark);
 }
 
-/* Filtros */
 .filters-section {
     display: flex;
     justify-content: center;
@@ -515,7 +509,6 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
-/* Grid de Productos */
 .products-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -523,14 +516,20 @@ body {
     margin-bottom: var(--space-xl);
 }
 
-/* Tarjetas de Producto */
 .product-card {
     background: var(--bg-light);
     border-radius: 15px;
     overflow: hidden;
-    transition: var(--transition-normal);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
     border: 1px solid var(--border-light);
     box-shadow: var(--shadow-sm);
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.product-card.is-visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .product-card:hover {
@@ -551,11 +550,11 @@ body {
     height: 100%;
     object-fit: contain;
     padding: var(--space-lg);
-    transition: var(--transition-normal);
+    transition: transform 0.4s ease;
 }
 
 .product-card:hover .product-image {
-    transform: scale(1.05);
+    transform: scale(1.08) rotate(2deg);
 }
 
 .product-badge {
@@ -603,6 +602,11 @@ body {
     font-weight: 700;
     margin-bottom: var(--space-sm);
     color: var(--text-dark);
+    transition: color var(--transition-fast);
+}
+
+.product-card:hover .product-title {
+    color: var(--primary-gold);
 }
 
 .product-meta {
@@ -645,6 +649,14 @@ body {
 .product-actions {
     display: flex;
     gap: var(--space-sm);
+    transition: var(--transition-normal);
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.product-card:hover .product-actions {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .btn-detail {
@@ -683,7 +695,6 @@ body {
     color: var(--text-dark);
 }
 
-/* Estado Vacío */
 .empty-state {
     text-align: center;
     padding: var(--space-xl);
@@ -696,6 +707,10 @@ body {
     color: var(--border-light);
 }
 
+.empty-icon.bi-heartbreak {
+    color: var(--danger);
+}
+
 .empty-title {
     font-size: 1.5rem;
     margin-bottom: var(--space-sm);
@@ -706,12 +721,16 @@ body {
     margin-bottom: var(--space-lg);
 }
 
-/* ===== CARRITO OFFCANVAS ===== */
+.cart-offcanvas.offcanvas {
+    transition-duration: 0.4s; /* Transición más suave */
+}
+
 .cart-offcanvas .offcanvas-header {
     background: var(--bg-dark);
     color: var(--text-white);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 
 .cart-offcanvas .offcanvas-body {
     padding: 0;
@@ -886,7 +905,6 @@ body {
     margin-bottom: var(--space-lg);
 }
 
-/* ===== MODAL DE DETALLES ===== */
 .modal-content {
     border: none;
     border-radius: 15px;
@@ -986,7 +1004,6 @@ body {
     margin-bottom: var(--space-lg);
 }
 
-/* Reseñas */
 .reviews-section {
     margin-top: var(--space-lg);
 }
@@ -1041,7 +1058,6 @@ body {
     margin-bottom: var(--space-lg);
 }
 
-/* Formulario de Reseña */
 .review-form-section {
     background: #f8f9fa;
     padding: var(--space-md);
@@ -1100,7 +1116,6 @@ body {
     font-weight: 600;
 }
 
-/* ===== FOOTER ===== */
 .premium-footer {
     background: var(--bg-dark);
     color: var(--text-white);
@@ -1165,12 +1180,19 @@ body {
     font-size: 0.9rem;
 }
 
-/* ===== SISTEMA DE NOTIFICACIONES ===== */
 .toast-container {
     position: fixed;
     bottom: 20px;
     right: 20px;
     z-index: 1055;
+}
+
+.flying-image {
+    z-index: 1060; /* Higher than toast */
+    pointer-events: none;
+    transition: transform 1s cubic-bezier(0.5, -0.5, 1, 1), opacity 1s ease-in;
+    object-fit: contain;
+    border-radius: 15px;
 }
 
 .toast {
@@ -1251,21 +1273,21 @@ body {
     
     .header-main-content {
         flex-wrap: wrap;
-        justify-content: space-between; /* Volver a space-between para mobile */
-        gap: var(--space-md); /* Restaurar gap para mobile */
+        justify-content: space-between; 
+        gap: var(--space-md); 
     }
     
     .search-container {
         order: 2;
         flex: 1;
-        max-width: 100%; /* Permitir que ocupe todo el ancho si es necesario, sin una restricción calc */
-        margin-top: 0; /* Asegura que no haya margen superior en esta vista */
+        max-width: 100%; 
+        margin-top: 0; 
     }
     
     .nav-actions {
-        order: 3; /* Asegura que el botón del menú esté a la derecha */
-        margin-left: var(--space-md); /* Espaciado con la barra de búsqueda */
-        display: flex; /* Asegura que sus elementos internos usen flexbox */
+        order: 3; 
+        margin-left: var(--space-md); 
+        display: flex; 
         align-items: center;
     }
 
@@ -1389,7 +1411,6 @@ body {
     }
 }
 
-/* ===== ACCESIBILIDAD ===== */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -1398,7 +1419,6 @@ body {
     }
 }
 
-/* Focus visible para mejor accesibilidad */
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
@@ -1407,7 +1427,6 @@ textarea:focus-visible {
     outline-offset: 2px;
 }
 
-/* Mejorar contraste para modo alto contraste */
 @media (prefers-contrast: high) {
     :root {
         --primary-gold: #000000;

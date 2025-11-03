@@ -368,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 message += `💰 *TOTAL: ${this.cartTotalPrice.toFixed(2)} MXN*\n\n`;
                
-                const whatsappUrl = `https://wa.me/5212311877967?text=${encodeURIComponent(message)}`;
+                const whatsappUrl = `https://wa.me/522311347021?text=${encodeURIComponent(message)}`;
                 window.open(whatsappUrl, '_blank');
                 this.showToast('success', 'Redirigiendo a WhatsApp para completar tu compra');
             },

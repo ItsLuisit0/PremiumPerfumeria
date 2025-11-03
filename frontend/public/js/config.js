@@ -14,8 +14,8 @@ const AppConfig = {
     },
     
     production: {
-        // ⚠️ IMPORTANTE: Cambia esta URL a tu servidor de producción
-        apiUrl: 'https://tu-servidor-backend.com'  // Ejemplo: https://api.tuperfumeria.com
+        // ✅ Backend desplegado en Railway
+        apiUrl: 'https://perfumeria-production.up.railway.app'
     },
     
     // Obtener la URL del API según el entorno

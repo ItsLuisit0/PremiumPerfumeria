@@ -94,9 +94,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         throw new Error(`Error ${response.status}: No se pudieron cargar los perfumes`);
                     }
                     const perfumesData = await response.json();
+                    // Las imágenes están en GitHub Pages, no en el backend
+                    const imageBaseUrl = AppConfig.isDevelopment 
+                        ? './' 
+                        : 'https://itsluisit0.github.io/Perfumeria/';
+                    
                     this.perfumes = perfumesData.map(p => ({
                         ...p,
-                        imagen_url: `${API_BASE_URL}/${p.imagen_url}`
+                        imagen_url: `${imageBaseUrl}${p.imagen_url}`
                     }));
                     this.showToast('success', 'Catálogo cargado correctamente');
                 } catch (error) {

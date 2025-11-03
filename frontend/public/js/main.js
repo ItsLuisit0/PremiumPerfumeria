@@ -1,14 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Detecta si estamos en desarrollo local o en producción
-    const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const API_BASE_URL = isDevelopment 
-        ? 'http://localhost:3000' 
-        : 'REPLACE_WITH_YOUR_BACKEND_URL'; // <-- IMPORTANTE: Reemplaza esto al desplegar
-
-    // Advertencia en consola si la URL de producción no ha sido cambiada
-    if (!isDevelopment && API_BASE_URL === 'REPLACE_WITH_YOUR_BACKEND_URL') {
-        console.warn('ATENCIÓN: La URL del backend (API_BASE_URL) no ha sido configurada para producción.');
-    }
+    // Obtener la URL del API desde la configuración
+    const API_BASE_URL = AppConfig.getApiUrl();
 
     new Vue({
         el: '#app',
@@ -253,35 +245,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.searchTerm = '';
             },
             async submitReview() {
-                if (!this.selectedPerfume) return;
+                if (!this.selectedPerfume) {
+                    console.error('No hay perfume seleccionado');
+                    this.showToast('error', 'No hay perfume seleccionado');
+                    return;
+                }
 
-                if (this.newReview.usuario.trim().length < 2) {
+                // Validaciones
+                if (!this.newReview.usuario || this.newReview.usuario.trim().length < 2) {
                     this.showToast('warning', 'El nombre debe tener al menos 2 caracteres');
                     return;
                 }
 
-                if (this.newReview.comentario.trim().length < 10) {
-                    this.showToast('warning', 'La reseña debe tener al menos 10 caracteres');
+                if (!this.newReview.comentario || this.newReview.comentario.trim().length < 10) {
+                    this.showToast('warning', 'El comentario debe tener al menos 10 caracteres');
                     return;
                 }
 
                 if (this.newReview.comentario.trim().length > 500) {
-                    this.showToast('warning', 'La reseña no puede exceder 500 caracteres');
+                    this.showToast('warning', 'El comentario no puede exceder 500 caracteres');
                     return;
                 }
 
-                if (this.newReview.calificacion === 0) {
-                    this.showToast('warning', 'Por favor selecciona una calificación');
+                if (!this.newReview.calificacion || this.newReview.calificacion === 0) {
+                    this.showToast('warning', 'Por favor selecciona una calificación (1 a 5 estrellas)');
                     return;
                 }
 
                 this.isSubmittingReview = true;
 
+                // NO incluir id_perfume en el body, va en la URL
                 const reviewData = {
-                    usuario: this.sanitizeInput(this.newReview.usuario.trim()),
-                    comentario: this.sanitizeInput(this.newReview.comentario.trim()),
-                    calificacion: this.newReview.calificacion,
-                    id_perfume: this.selectedPerfume.id_perfume
+                    usuario: this.newReview.usuario.trim(),
+                    comentario: this.newReview.comentario.trim(),
+                    calificacion: parseInt(this.newReview.calificacion)
                 };
 
                 try {
@@ -293,9 +290,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify(reviewData)
                     });
 
+                    const responseData = await response.json();
+
                     if (!response.ok) {
-                        const errorText = await response.text();
-                        throw new Error(`Error ${response.status}: ${errorText}`);
+                        // Mostrar errores específicos del servidor
+                        if (responseData.errors && Array.isArray(responseData.errors)) {
+                            responseData.errors.forEach(error => {
+                                this.showToast('warning', error);
+                            });
+                        } else if (responseData.message) {
+                            this.showToast('danger', responseData.message);
+                        } else {
+                            throw new Error(`Error ${response.status}`);
+                        }
+                        return;
                     }
 
                     this.showToast('success', '¡Reseña enviada con éxito!');
@@ -305,11 +313,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         calificacion: 0
                     };
                     this.currentRating = 0;
-                    
                     await this.fetchReviews(this.selectedPerfume.id_perfume);
                 } catch (error) {
                     console.error("Error al enviar reseña:", error);
-                    this.showToast('danger', 'Error al enviar la reseña. Intenta nuevamente.');
+                    this.showToast('danger', `Error: ${error.message}`);
                 } finally {
                     this.isSubmittingReview = false;
                 }

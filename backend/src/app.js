@@ -16,16 +16,23 @@ const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // ===== CONFIGURACIÓN CORS PARA PRODUCCIÓN Y DESARROLLO =====
-const allowedOrigins = process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : ['http://127.0.0.1:5500', 'http://localhost:3000', 'http://localhost:8080'];
+const allowedOrigins = process.env.CORS_ORIGIN 
+    ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+    : ['http://127.0.0.1:5500', 'http://localhost:3000', 'http://localhost:5500', 'http://localhost:8080'];
+
+console.log('🌐 Orígenes CORS permitidos:', allowedOrigins);
 
 app.use(cors({
     origin: function (origin, callback) {
         // Permitir solicitudes sin origen (como Postman o apps móviles)
         if (!origin) return callback(null, true);
+        
         if (allowedOrigins.indexOf(origin) === -1) {
             const msg = 'La política de CORS para este sitio no permite acceso desde el origen especificado.';
+            console.warn('❌ CORS bloqueado para origen:', origin);
             return callback(new Error(msg), false);
         }
+        
         return callback(null, true);
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],

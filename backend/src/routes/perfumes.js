@@ -22,25 +22,54 @@ const validateReview = (req, res, next) => {
     const { usuario, comentario, calificacion } = req.body;
     const errors = [];
 
-    if (!usuario || usuario.trim().length < 2 || usuario.trim().length > 50) {
-        errors.push('El nombre debe tener entre 2 y 50 caracteres');
+    // Log solo en desarrollo
+    if (process.env.NODE_ENV === 'development') {
+        console.log('🔍 Validando reseña:', { usuario, comentario, calificacion });
     }
 
-    if (!comentario || comentario.trim().length < 10 || comentario.trim().length > 500) {
-        errors.push('El comentario debe tener entre 10 y 500 caracteres');
+    // Validar usuario
+    if (!usuario || typeof usuario !== 'string') {
+        errors.push('El nombre es obligatorio');
+    } else if (usuario.trim().length < 2) {
+        errors.push('El nombre debe tener al menos 2 caracteres');
+    } else if (usuario.trim().length > 50) {
+        errors.push('El nombre no puede exceder 50 caracteres');
     }
 
-    if (!calificacion || calificacion < 1 || calificacion > 5) {
+    // Validar comentario
+    if (!comentario || typeof comentario !== 'string') {
+        errors.push('El comentario es obligatorio');
+    } else if (comentario.trim().length < 10) {
+        errors.push('El comentario debe tener al menos 10 caracteres');
+    } else if (comentario.trim().length > 500) {
+        errors.push('El comentario no puede exceder 500 caracteres');
+    }
+
+    // Validar calificación
+    const calificacionNum = Number(calificacion);
+    if (!calificacion) {
+        errors.push('La calificación es obligatoria');
+    } else if (isNaN(calificacionNum)) {
+        errors.push('La calificación debe ser un número');
+    } else if (calificacionNum < 1 || calificacionNum > 5) {
         errors.push('La calificación debe ser entre 1 y 5');
+    } else if (!Number.isInteger(calificacionNum)) {
+        errors.push('La calificación debe ser un número entero');
     }
 
     if (errors.length > 0) {
+        if (process.env.NODE_ENV === 'development') {
+            console.log('❌ Errores de validación:', errors);
+        }
         return res.status(400).json({
             success: false,
             errors: errors
         });
     }
 
+    if (process.env.NODE_ENV === 'development') {
+        console.log('✅ Validación exitosa');
+    }
     next();
 };
 

@@ -26,38 +26,74 @@ exports.addReview = async (req, res) => {
         const { id } = req.params;
         const { usuario, comentario, calificacion } = req.body;
 
-        // Validaciones
+        // Log solo en desarrollo
+        if (process.env.NODE_ENV === 'development') {
+            console.log('📝 Recibiendo reseña para perfume ID:', id);
+            console.log('📦 Datos recibidos:', { usuario, comentario, calificacion });
+        }
+
+        // Validaciones básicas (el middleware ya validó, pero por seguridad)
         if (!usuario || !comentario || !calificacion) {
-            return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+            return res.status(400).json({ 
+                success: false,
+                message: 'Todos los campos son obligatorios' 
+            });
         }
 
         if (calificacion < 1 || calificacion > 5) {
-            return res.status(400).json({ message: 'La calificación debe ser entre 1 y 5' });
+            return res.status(400).json({ 
+                success: false,
+                message: 'La calificación debe ser entre 1 y 5' 
+            });
         }
 
         // Verificar si el perfume existe
         const [perfume] = await pool.query('SELECT id_perfume FROM perfumes WHERE id_perfume = ?', [id]);
         if (perfume.length === 0) {
-            return res.status(404).json({ message: 'Perfume no encontrado' });
+            return res.status(404).json({ 
+                success: false,
+                message: 'Perfume no encontrado' 
+            });
         }
 
+        // Insertar la reseña
         const [result] = await pool.query(
             'INSERT INTO reseñas (id_perfume, usuario, comentario, calificacion) VALUES (?, ?, ?, ?)',
-            [id, usuario, comentario, calificacion]
+            [id, usuario.trim(), comentario.trim(), calificacion]
         );
 
+        // Log solo en desarrollo
+        if (process.env.NODE_ENV === 'development') {
+            console.log('✅ Reseña añadida con ID:', result.insertId);
+        }
+
         res.status(201).json({ 
+            success: true,
             message: 'Reseña añadida correctamente', 
             id_reseña: result.insertId 
         });
     } catch (error) {
         console.error('Error al añadir reseña:', error.message);
         
-        // Manejar error de FK constraint específico
+        // Manejar errores específicos de base de datos
         if (error.code === 'ER_NO_REFERENCED_ROW_2') {
-            return res.status(404).json({ message: 'Perfume no encontrado' });
+            return res.status(404).json({ 
+                success: false,
+                message: 'Perfume no encontrado' 
+            });
+        }
+
+        if (error.code === 'ER_NO_SUCH_TABLE') {
+            return res.status(500).json({ 
+                success: false,
+                message: 'Error de configuración de base de datos: tabla no existe' 
+            });
         }
         
-        res.status(500).json({ message: 'Error interno del servidor' });
+        res.status(500).json({ 
+            success: false,
+            message: 'Error interno del servidor',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 };

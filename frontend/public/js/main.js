@@ -160,11 +160,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.selectedPerfume = null;
                 this.currentPerfume = null;
                 this.perfumeReviews = [];
+                this.reviews = [];
                 this.newReview = {
                     usuario: '',
                     comentario: '',
                     calificacion: 0
                 };
+                // Forzar actualización de la vista
+                this.$nextTick(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
             },
             addToCart(perfume, quantity, event) {
                 if (!perfume || quantity <= 0) return;

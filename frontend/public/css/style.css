@@ -556,7 +556,7 @@ body {
     height: 100%;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(4px);
-    z-index: 9998;
+    z-index: 10001;
     opacity: 0;
     visibility: hidden;
     transition: var(--transition-normal);
@@ -575,7 +575,7 @@ body {
     max-width: 320px;
     height: 100%;
     background: var(--bg-card);
-    z-index: 9999;
+    z-index: 10002;
     transition: left 0.3s ease;
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
     display: flex;

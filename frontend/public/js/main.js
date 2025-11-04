@@ -31,7 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             showFavoritesView: false,
             observer: null,
-            favoriteIds: [] // Reactive list of favorite perfume IDs
+            favoriteIds: [], // Reactive list of favorite perfume IDs
+            isDarkMode: false // Dark mode state
         },
         computed: {
             filteredPerfumes() {
@@ -368,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 message += `💰 *TOTAL: ${this.cartTotalPrice.toFixed(2)} MXN*\n\n`;
                
-                const whatsappUrl = `https://wa.me/5212311877967?text=${encodeURIComponent(message)}`;
+                const whatsappUrl = `https://wa.me/522311347021?text=${encodeURIComponent(message)}`;
                 window.open(whatsappUrl, '_blank');
                 this.showToast('success', 'Redirigiendo a WhatsApp para completar tu compra');
             },
@@ -389,6 +390,37 @@ document.addEventListener('DOMContentLoaded', () => {
             getToastIcon(type) {
                 const icons = { success: 'bi-check-circle-fill', danger: 'bi-x-circle-fill', warning: 'bi-exclamation-triangle-fill', info: 'bi-info-circle-fill' };
                 return icons[type] || icons.info;
+            },
+            toggleTheme() {
+                this.isDarkMode = !this.isDarkMode;
+                this.applyTheme();
+                this.saveThemePreference();
+                const themeName = this.isDarkMode ? 'oscuro' : 'claro';
+                this.showToast('info', `Modo ${themeName} activado`);
+            },
+            applyTheme() {
+                if (this.isDarkMode) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                }
+            },
+            loadThemePreference() {
+                const savedTheme = localStorage.getItem('perfumeriaTheme');
+                if (savedTheme === 'dark') {
+                    this.isDarkMode = true;
+                    this.applyTheme();
+                } else if (savedTheme === null) {
+                    // Si no hay preferencia guardada, detectar preferencia del sistema
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (prefersDark) {
+                        this.isDarkMode = true;
+                        this.applyTheme();
+                    }
+                }
+            },
+            saveThemePreference() {
+                localStorage.setItem('perfumeriaTheme', this.isDarkMode ? 'dark' : 'light');
             }
         },
         watch: {
@@ -400,6 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showFavoritesView: 'initObserver'
         },
         mounted() {
+            this.loadThemePreference(); // Cargar tema antes que todo
             this.fetchPerfumes().then(() => {
                 this.loadCartFromStorage();
                 this.loadFavorites();

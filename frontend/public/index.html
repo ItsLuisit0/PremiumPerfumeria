@@ -43,7 +43,7 @@
                         </div>
                         <div class="header-contact">
                             <i class="bi bi-whatsapp"></i>
-                            <span>WhatsApp: 231-187-7967</span>
+                            <span>WhatsApp: 231-134-7021</span>
                         </div>
                     </div>
                 </div>
@@ -81,6 +81,12 @@
                                 <a href="#" @click.prevent="showFavoritesView = true" class="nav-link-custom">
                                     <i class="bi bi-heart-fill"></i> Favoritos
                                 </a>
+                                <button class="theme-toggle" 
+                                        @click="toggleTheme"
+                                        :aria-label="isDarkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
+                                    <i :class="isDarkMode ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill'"></i>
+                                    <span>{{ isDarkMode ? 'Claro' : 'Oscuro' }}</span>
+                                </button>
                                 <button class="cart-button position-relative" 
                                         data-bs-toggle="offcanvas" 
                                         data-bs-target="#cartOffcanvas" 
@@ -104,7 +110,7 @@
             <div class="hero-content">
                 <div class="hero-text">
                     <h1 id="hero-title" class="hero-title animate__animated animate__fadeInUp">
-                        Perfumería Elegancia
+                        Premium Perfumeria
                     </h1>
                     <p class="hero-subtitle animate__animated animate__fadeInUp animate__delay-1s">
                         Réplicas de alta calidad. Experimenta el lujo de las mejores fragancias del mundo a precios accesibles.
@@ -384,7 +390,7 @@
                            aria-label="Síguenos en Facebook">
                             <img src="./ImagenesPerfumes/facebook-logo.png" alt="Facebook - Perfumería Elegancia">
                         </a>
-                        <a href="https://wa.me/5212311877967" 
+                        <a href="https://wa.me/522311347021" 
                            target="_blank" 
                            class="social-icon"
                            aria-label="Contáctanos por WhatsApp">
@@ -395,7 +401,7 @@
                         <p class="footer-text">&copy; 2025 Elegancia Perfumería. Todos los derechos reservados.</p>
                         <p class="footer-contact">
                             <i class="bi bi-whatsapp"></i>
-                            WhatsApp: 231-187-7967
+                            WhatsApp: 231-134-7021
                         </p>
                     </div>
                 </div>

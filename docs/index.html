@@ -331,28 +331,22 @@
                         </button>
 
                         <div class="perfume-detail-container">
-                            <div class="perfume-detail-image">
-                                <img :src="selectedPerfume.imagen_url" 
+                            <h1 class="perfume-detail-title">{{ selectedPerfume.nombre }}</h1>
+                            
+                            <div class="perfume-detail-image-wrapper">
+                                <span class="perfume-detail-badge">{{ selectedPerfume.publico }}</span>
+                                <img class="perfume-detail-image" 
+                                     :src="selectedPerfume.imagen_url" 
                                      :alt="`${selectedPerfume.nombre} - ${selectedPerfume.marca}`"
                                      @error="handleImageError">
-                                <span class="perfume-detail-badge">{{ selectedPerfume.publico }}</span>
+                                
+                                <div class="perfume-detail-info-row">
+                                    <p class="perfume-detail-brand">{{ selectedPerfume.marca }}</p>
+                                    <p class="perfume-detail-ml">{{ selectedPerfume.mililitros }}ml</p>
+                                </div>
                             </div>
 
                             <div class="perfume-detail-info">
-                                <h1 class="perfume-detail-title">{{ selectedPerfume.nombre }}</h1>
-                                <p class="perfume-detail-brand">{{ selectedPerfume.marca }}</p>
-                                
-                                <div class="perfume-detail-meta">
-                                    <span class="meta-item">
-                                        <i class="bi bi-droplet-fill"></i>
-                                        {{ selectedPerfume.tipo }}
-                                    </span>
-                                    <span class="meta-item">
-                                        <i class="bi bi-boxes"></i>
-                                        {{ selectedPerfume.mililitros }}ml
-                                    </span>
-                                </div>
-
                                 <p class="perfume-detail-description">{{ selectedPerfume.descripcion }}</p>
 
                                 <div class="perfume-detail-price">

@@ -30,15 +30,15 @@
                         <div class="header-benefits">
                             <div class="benefit-item">
                                 <i class="bi bi-truck"></i>
-                                <span>Envío Rápido y Seguro</span>
+                                <span>Entregas y envíos a todo Teziutlán (Sin costo)</span>
                             </div>
                             <div class="benefit-item">
                                 <i class="bi bi-shield-check"></i>
                                 <span>Calidad Premium Garantizada</span>
                             </div>
                             <div class="benefit-item">
-                                <i class="bi bi-currency-dollar"></i>
-                                <span>Pago 100% Seguro</span>
+                                <i class="bi bi-tag-fill"></i>
+                                <span>Mayoreo desde 10 piezas</span>
                             </div>
                         </div>
                         <div class="header-contact">
@@ -69,6 +69,29 @@
                                     <i class="bi bi-x"></i>
                                 </button>
                                 <i class="bi bi-search search-icon"></i>
+                            </div>
+                            <!-- Filtros rápidos -->
+                            <div class="quick-filters" v-show="!showFavoritesView">
+                                <button class="quick-filter-btn" 
+                                        :class="{'active': selectedPublico === null}"
+                                        @click="filterPerfumes(null)">
+                                    Todos
+                                </button>
+                                <button class="quick-filter-btn" 
+                                        :class="{'active': selectedPublico === 'Hombre'}"
+                                        @click="filterPerfumes('Hombre')">
+                                    Hombres
+                                </button>
+                                <button class="quick-filter-btn" 
+                                        :class="{'active': selectedPublico === 'Mujer'}"
+                                        @click="filterPerfumes('Mujer')">
+                                    Mujeres
+                                </button>
+                                <button class="quick-filter-btn" 
+                                        :class="{'active': selectedPublico === 'Unisex'}"
+                                        @click="filterPerfumes('Unisex')">
+                                    Unisex
+                                </button>
                             </div>
                         </div>
 
@@ -103,14 +126,16 @@
             </div>
         </header>
 
-        <section class="hero-section" aria-labelledby="hero-title" 
+        <section class="hero-section" 
+                 v-show="!searchTerm && !showFavoritesView"
+                 aria-labelledby="hero-title" 
                  style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
                         url('http://localhost:3000/imagenesPerfumes/fondo.png') center/cover;">
             <div class="hero-overlay"></div>
             <div class="hero-content">
                 <div class="hero-text">
                     <h1 id="hero-title" class="hero-title animate__animated animate__fadeInUp">
-                        Perfumería Elegancia
+                        PREMIUM PERFUMERÍA
                     </h1>
                     <p class="hero-subtitle animate__animated animate__fadeInUp animate__delay-1s">
                         Réplicas de alta calidad. Experimenta el lujo de las mejores fragancias del mundo a precios accesibles.
@@ -168,11 +193,12 @@
                         </div>
 
                         <div v-if="filteredPerfumes.length > 0" class="products-grid">
-                            <article class="product-card"
+                            <article class="product-card clickable-card"
                                      v-for="(perfume, index) in filteredPerfumes"
                                      :key="perfume.id_perfume"
                                      :style="{ 'transition-delay': (index * 100) + 'ms' }"
                                      role="article"
+                                     @click="showPerfumeDetail(perfume)"
                                      aria-labelledby="product-title-{{perfume.id_perfume}}">
                                 <div class="product-image-container">
                                     <img :src="perfume.imagen_url" 
@@ -206,16 +232,11 @@
                                     <p class="product-description">{{ perfume.descripcion }}</p>
                                     <div class="product-price">{{ formatPrice(perfume.precio_minimo) }}</div>
                                     <div class="product-actions">
-                                        <button class="btn-detail" 
-                                                @click="showPerfumeDetail(perfume)"
-                                                aria-controls="perfumeDetailModal"
-                                                :aria-describedby="`product-title-${perfume.id_perfume}`">
-                                            Ver Detalles
-                                        </button>
-                                        <button class="btn-cart" 
-                                                @click="addToCart(perfume, 1, $event)"
+                                        <button class="btn-cart btn-cart-full" 
+                                                @click.stop="addToCart(perfume, 1, $event)"
                                                 :aria-label="`Añadir ${perfume.nombre} al carrito`">
                                             <i class="bi bi-cart-plus"></i>
+                                            Añadir al carrito
                                         </button>
                                     </div>
                                 </div>
@@ -235,11 +256,12 @@
                         <h2 id="favorites-title" class="section-title">Mis Perfumes Favoritos</h2>
                         
                         <div v-if="favoriteItems.length > 0" class="products-grid">
-                            <article class="product-card"
+                            <article class="product-card clickable-card"
                                      v-for="(perfume, index) in favoriteItems"
                                      :key="perfume.id_perfume"
                                      :style="{ 'transition-delay': (index * 100) + 'ms' }"
                                      role="article"
+                                     @click="showPerfumeDetail(perfume)"
                                      aria-labelledby="product-title-{{perfume.id_perfume}}">
                                 <div class="product-image-container">
                                     <img :src="perfume.imagen_url" 
@@ -273,16 +295,11 @@
                                     <p class="product-description">{{ perfume.descripcion }}</p>
                                     <div class="product-price">{{ formatPrice(perfume.precio_minimo) }}</div>
                                     <div class="product-actions">
-                                        <button class="btn-detail" 
-                                                @click="showPerfumeDetail(perfume)"
-                                                aria-controls="perfumeDetailModal"
-                                                :aria-describedby="`product-title-${perfume.id_perfume}`">
-                                            Ver Detalles
-                                        </button>
-                                        <button class="btn-cart" 
-                                                @click="addToCart(perfume, 1)"
+                                        <button class="btn-cart btn-cart-full" 
+                                                @click.stop="addToCart(perfume, 1, $event)"
                                                 :aria-label="`Añadir ${perfume.nombre} al carrito`">
                                             <i class="bi bi-cart-plus"></i>
+                                            Añadir al carrito
                                         </button>
                                     </div>
                                 </div>
@@ -384,24 +401,37 @@
             <div class="container">
                 <div class="footer-content">
                     <div class="footer-social">
-                        <a href="https://www.facebook.com/" 
+                        <a href="https://www.facebook.com/people/Premium-Perfumer%C3%ADa/61578055706575/" 
                            target="_blank" 
+                           rel="noopener noreferrer"
                            class="social-icon"
                            aria-label="Síguenos en Facebook">
-                            <img src="./ImagenesPerfumes/facebook-logo.png" alt="Facebook - Perfumería Elegancia">
+                            <i class="bi bi-facebook" style="font-size: 2rem; color: #1877f2;"></i>
+                        </a>
+                        <a href="https://www.instagram.com" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="social-icon"
+                           aria-label="Síguenos en Instagram">
+                            <i class="bi bi-instagram" style="font-size: 2rem; color: #e4405f;"></i>
                         </a>
                         <a href="https://wa.me/522311347021" 
                            target="_blank" 
+                           rel="noopener noreferrer"
                            class="social-icon"
                            aria-label="Contáctanos por WhatsApp">
-                            <img src="./ImagenesPerfumes/Whatsapp.png" alt="WhatsApp - Perfumería Elegancia">
+                            <i class="bi bi-whatsapp" style="font-size: 2rem; color: #25d366;"></i>
                         </a>
                     </div>
                     <div class="footer-info">
-                        <p class="footer-text">&copy; 2025 Elegancia Perfumería. Todos los derechos reservados.</p>
+                        <p class="footer-text">&copy; 2025 Premium Perfumería. Todos los derechos reservados.</p>
                         <p class="footer-contact">
                             <i class="bi bi-whatsapp"></i>
                             WhatsApp: 231-134-7021
+                        </p>
+                        <p class="footer-contact">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            Teziutlán, Puebla - Envíos gratis
                         </p>
                     </div>
                 </div>

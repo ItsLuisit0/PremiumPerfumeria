@@ -288,6 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
 
                 try {
+                    console.log('📤 Enviando reseña...', reviewData);
                     const response = await fetch(`${API_BASE_URL}/api/perfumes/${this.selectedPerfume.id_perfume}/reviews`, {
                         method: 'POST',
                         headers: {
@@ -296,23 +297,27 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify(reviewData)
                     });
 
+                    console.log('📥 Respuesta del servidor:', response.status);
                     const responseData = await response.json();
+                    console.log('📦 Datos de respuesta:', responseData);
 
                     if (!response.ok) {
                         // Mostrar errores específicos del servidor
                         if (responseData.errors && Array.isArray(responseData.errors)) {
-                            responseData.errors.forEach(error => {
-                                this.showToast('warning', error);
-                            });
+                            const errorMsg = responseData.errors.join(', ');
+                            this.showToast('warning', errorMsg);
+                            console.error('❌ Errores de validación:', responseData.errors);
                         } else if (responseData.message) {
                             this.showToast('danger', responseData.message);
+                            console.error('❌ Error del servidor:', responseData.message);
                         } else {
-                            throw new Error(`Error ${response.status}`);
+                            throw new Error(`Error ${response.status}: ${response.statusText}`);
                         }
                         return;
                     }
 
-                    this.showToast('success', '¡Reseña enviada con éxito!');
+                    console.log('✅ Reseña enviada exitosamente');
+                    this.showToast('success', '¡Gracias por tu reseña!');
                     this.newReview = {
                         usuario: '',
                         comentario: '',
@@ -321,8 +326,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.currentRating = 0;
                     await this.fetchReviews(this.selectedPerfume.id_perfume);
                 } catch (error) {
-                    console.error("Error al enviar reseña:", error);
-                    this.showToast('danger', `Error: ${error.message}`);
+                    console.error("❌ Error al enviar reseña:", error);
+                    this.showToast('danger', `Error: ${error.message || 'No se pudo enviar la reseña'}`);
                 } finally {
                     this.isSubmittingReview = false;
                 }

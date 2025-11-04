@@ -56,7 +56,7 @@
                         <button class="header-icon-btn sidebar-toggle" 
                                 @click="toggleSidebar" 
                                 aria-label="Abrir menú de filtros">
-                            <i class="bi bi-funnel-fill"></i>
+                            <i class="bi bi-list"></i>
                         </button>
 
                         <!-- Búsqueda (solo icono en móvil) -->
@@ -194,36 +194,9 @@
                     <button class="btn btn-warning" @click="fetchPerfumes">Reintentar</button>
                 </div>
 
-                <div v-else-if="!showFavoritesView">
+                <div v-else-if="!showFavoritesView && !selectedPerfume">
                     <section class="products-section" aria-labelledby="products-title">
                         <h2 id="products-title" class="section-title">Nuestra Colección Exclusiva</h2>
-                        
-                        <div class="filters-section" role="group" aria-label="Filtrar productos por público">
-                            <button class="filter-btn" 
-                                    :class="{'active': selectedPublico === null}"
-                                    @click="filterPerfumes(null)"
-                                    aria-pressed="selectedPublico === null">
-                                Todos
-                            </button>
-                            <button class="filter-btn" 
-                                    :class="{'active': selectedPublico === 'Hombre'}"
-                                    @click="filterPerfumes('Hombre')"
-                                    aria-pressed="selectedPublico === 'Hombre'">
-                                Hombre
-                            </button>
-                            <button class="filter-btn" 
-                                    :class="{'active': selectedPublico === 'Mujer'}"
-                                    @click="filterPerfumes('Mujer')"
-                                    aria-pressed="selectedPublico === 'Mujer'">
-                                Mujer
-                            </button>
-                            <button class="filter-btn" 
-                                    :class="{'active': selectedPublico === 'Unisex'}"
-                                    @click="filterPerfumes('Unisex')"
-                                    aria-pressed="selectedPublico === 'Unisex'">
-                                Unisex
-                            </button>
-                        </div>
 
                         <div v-if="filteredPerfumes.length > 0" class="products-grid">
                             <article class="product-card clickable-card"
@@ -344,6 +317,125 @@
                             <h3 class="empty-title">No tienes favoritos</h3>
                             <p class="empty-message">Haz clic en el corazón de un producto para guardarlo aquí.</p>
                             <button class="btn btn-warning" @click="showFavoritesView = false">Explorar Colección</button>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Vista Dedicada del Perfume -->
+                <div v-else-if="selectedPerfume" class="perfume-detail-view">
+                    <section class="perfume-detail-section">
+                        <button class="btn-back" @click="closePerfumeDetail">
+                            <i class="bi bi-arrow-left"></i>
+                            Volver al catálogo
+                        </button>
+
+                        <div class="perfume-detail-container">
+                            <div class="perfume-detail-image">
+                                <img :src="selectedPerfume.imagen_url" 
+                                     :alt="`${selectedPerfume.nombre} - ${selectedPerfume.marca}`"
+                                     @error="handleImageError">
+                                <span class="perfume-detail-badge">{{ selectedPerfume.publico }}</span>
+                            </div>
+
+                            <div class="perfume-detail-info">
+                                <h1 class="perfume-detail-title">{{ selectedPerfume.nombre }}</h1>
+                                <p class="perfume-detail-brand">{{ selectedPerfume.marca }}</p>
+                                
+                                <div class="perfume-detail-meta">
+                                    <span class="meta-item">
+                                        <i class="bi bi-droplet-fill"></i>
+                                        {{ selectedPerfume.tipo }}
+                                    </span>
+                                    <span class="meta-item">
+                                        <i class="bi bi-boxes"></i>
+                                        {{ selectedPerfume.mililitros }}ml
+                                    </span>
+                                </div>
+
+                                <p class="perfume-detail-description">{{ selectedPerfume.descripcion }}</p>
+
+                                <div class="perfume-detail-price">
+                                    {{ formatPrice(selectedPerfume.precio_minimo) }}
+                                </div>
+
+                                <div class="perfume-detail-actions">
+                                    <button class="btn btn-favorite-detail" 
+                                            @click.stop="toggleFavorite(selectedPerfume)"
+                                            :class="{'is-favorite': isFavorite(selectedPerfume.id_perfume)}"
+                                            :aria-label="isFavorite(selectedPerfume.id_perfume) ? 'Quitar de favoritos' : 'Agregar a favoritos'">
+                                        <i class="bi" :class="isFavorite(selectedPerfume.id_perfume) ? 'bi-heart-fill' : 'bi-heart'"></i>
+                                    </button>
+                                    <button class="btn btn-add-cart-detail" 
+                                            @click="addToCart(selectedPerfume, 1, $event)">
+                                        <i class="bi bi-cart-plus"></i>
+                                        Añadir al carrito
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección de Reseñas -->
+                        <div class="reviews-section">
+                            <h3 class="reviews-title">Reseñas de Clientes</h3>
+                            
+                            <div class="review-form">
+                                <h4 class="review-form-title">Deja tu reseña</h4>
+                                <form @submit.prevent="submitReview">
+                                    <div class="form-group">
+                                        <label for="reviewUser">Nombre</label>
+                                        <input type="text" 
+                                               id="reviewUser" 
+                                               v-model="newReview.usuario" 
+                                               class="form-control" 
+                                               required 
+                                               placeholder="Tu nombre">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reviewRating">Calificación</label>
+                                        <select id="reviewRating" 
+                                                v-model.number="newReview.calificacion" 
+                                                class="form-control" 
+                                                required>
+                                            <option value="">Selecciona una calificación</option>
+                                            <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                                            <option value="4">⭐⭐⭐⭐ Muy bueno</option>
+                                            <option value="3">⭐⭐⭐ Bueno</option>
+                                            <option value="2">⭐⭐ Regular</option>
+                                            <option value="1">⭐ Malo</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reviewComment">Comentario</label>
+                                        <textarea id="reviewComment" 
+                                                  v-model="newReview.comentario" 
+                                                  class="form-control" 
+                                                  rows="4" 
+                                                  required 
+                                                  placeholder="Cuéntanos tu experiencia con este perfume..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-submit-review">
+                                        <i class="bi bi-send-fill"></i>
+                                        Publicar Reseña
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="reviews-list" v-if="perfumeReviews && perfumeReviews.length > 0">
+                                <div class="review-item" v-for="review in perfumeReviews" :key="review.id_reseña">
+                                    <div class="review-header">
+                                        <span class="review-author">{{ review.usuario }}</span>
+                                        <span class="review-rating">
+                                            <i class="bi bi-star-fill" v-for="n in review.calificacion" :key="n"></i>
+                                        </span>
+                                    </div>
+                                    <p class="review-comment">{{ review.comentario }}</p>
+                                    <span class="review-date">{{ formatDate(review.fecha_creacion) }}</span>
+                                </div>
+                            </div>
+                            <div v-else class="no-reviews">
+                                <i class="bi bi-chat-square-text"></i>
+                                <p>Aún no hay reseñas. ¡Sé el primero en comentar!</p>
+                            </div>
                         </div>
                     </section>
                 </div>

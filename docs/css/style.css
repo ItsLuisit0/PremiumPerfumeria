@@ -2017,10 +2017,10 @@ body {
     display: flex;
     gap: var(--space-sm);
     padding: var(--space-md);
-    background: var(--bg-light);
+    background: transparent;
     border-radius: 10px;
     margin-bottom: var(--space-sm);
-    border: 1px solid var(--border-light);
+    border: 1px solid var(--border-color);
 }
 
 .cart-item-image {
@@ -2043,12 +2043,12 @@ body {
 .cart-item-title {
     font-weight: 600;
     margin-bottom: 4px;
-    color: var(--text-dark);
+    color: var(--text-primary);
 }
 
 .cart-item-meta {
     font-size: 0.85rem;
-    color: var(--text-light);
+    color: var(--text-secondary);
     margin-bottom: var(--space-sm);
 }
 
@@ -2061,8 +2061,9 @@ body {
 .quantity-btn {
     width: 30px;
     height: 30px;
-    border: 1px solid var(--border-light);
-    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -2074,6 +2075,7 @@ body {
 .quantity-btn:hover:not(:disabled) {
     background: var(--primary-gold);
     border-color: var(--primary-gold);
+    color: var(--text-dark);
 }
 
 .quantity-btn:disabled {
@@ -2085,6 +2087,7 @@ body {
     font-weight: 600;
     min-width: 30px;
     text-align: center;
+    color: var(--text-primary);
 }
 
 .cart-item-actions {

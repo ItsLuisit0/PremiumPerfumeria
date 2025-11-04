@@ -151,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.selectedPerfume = perfume;
                 this.currentPerfume = perfume;
                 this.modalQuantity = 1;
+                this.
                 this.newReview = { usuario: '', comentario: '', calificacion: 0 };
                 this.currentRating = 0;
                 this.fetchReviews(perfume.id_perfume);
@@ -259,6 +260,8 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             filterPerfumes(publico) {
                 this.selectedPublico = publico;
+                this.searchTerm = ''; // Limpiar búsqueda para ocultar hero
+                this.selectedPerfume = null; // Cerrar vista de perfume si está abierta
             },
             onSearchInput() {
                 clearTimeout(this.searchTimeout);
@@ -266,6 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             clearSearch() {
                 this.searchTerm = '';
+                this.selectedPublico = null; // Mostrar todos los perfumes al cancelar búsqueda
             },
             async submitReview() {
                 if (!this.selectedPerfume) {
@@ -369,6 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const favorites = localStorage.getItem('perfumeriaFavorites');
                 if (favorites) {
                     this.favoriteIds = JSON.parse(favorites);
+                    console.log
                 }
             },
             saveFavorites() {

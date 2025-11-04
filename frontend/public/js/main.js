@@ -34,7 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
             favoriteIds: [], // Reactive list of favorite perfume IDs
             isDarkMode: false, // Dark mode state
             sidebarOpen: false, // Sidebar state
-            searchModalOpen: false // Search modal state
+            searchModalOpen: false, // Search modal state
+            selectedPerfume: null, // Selected perfume for detailed view
+            perfumeReviews: [] // Reviews for selected perfume
         },
         computed: {
             filteredPerfumes() {
@@ -122,9 +124,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         throw new Error(`Error ${response.status} al cargar reseñas`);
                     }
                     this.reviews = await response.json();
+                    this.perfumeReviews = await response.json();
                 } catch (error) {
                     console.error("Error al obtener reseñas:", error);
                     this.reviews = [];
+                    this.perfumeReviews = [];
                 }
             },
             saveCartToStorage() {
@@ -143,25 +147,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('main-content').scrollIntoView({ behavior: 'smooth', block: 'start' });
             },
             showPerfumeDetail(perfume) {
-                this.lastFocusedElement = document.activeElement;
                 this.selectedPerfume = perfume;
+                this.currentPerfume = perfume;
                 this.modalQuantity = 1;
                 this.newReview = { usuario: '', comentario: '', calificacion: 0 };
                 this.currentRating = 0;
                 this.fetchReviews(perfume.id_perfume);
-                
-                this.$nextTick(() => {
-                    const modalElement = document.getElementById('perfumeDetailModal');
-                    const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-                    modal.show();
-                });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             },
-            closeModal() {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('perfumeDetailModal'));
-                if (modal) {
-                    modal.hide();
-                }
+            closePerfumeDetail() {
                 this.selectedPerfume = null;
+                this.currentPerfume = null;
+                this.perfumeReviews = [];
+                this.newReview = {
+                    usuario: '',
+                    comentario: '',
+                    calificacion: 0
+                };
             },
             addToCart(perfume, quantity, event) {
                 if (!perfume || quantity <= 0) return;
@@ -213,6 +215,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => {
                         cartButton.classList.remove('jiggle');
                     }, 500);
+                }
+
+                // Abrir el carrito automáticamente
+                const cartOffcanvas = document.getElementById('cartOffcanvas');
+                if (cartOffcanvas) {
+                    const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(cartOffcanvas);
+                    bsOffcanvas.show();
                 }
             },
             removeFromCart(perfumeId) {
@@ -457,6 +466,29 @@ document.addEventListener('DOMContentLoaded', () => {
             closeSearchModal() {
                 this.searchModalOpen = false;
                 document.body.style.overflow = '';
+            },
+            formatDate(dateString) {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffTime = Math.abs(now - date);
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays === 0) {
+                    return 'Hoy';
+                } else if (diffDays === 1) {
+                    return 'Ayer';
+                } else if (diffDays < 7) {
+                    return `Hace ${diffDays} días`;
+                } else if (diffDays < 30) {
+                    const weeks = Math.floor(diffDays / 7);
+                    return `Hace ${weeks} ${weeks === 1 ? 'semana' : 'semanas'}`;
+                } else if (diffDays < 365) {
+                    const months = Math.floor(diffDays / 30);
+                    return `Hace ${months} ${months === 1 ? 'mes' : 'meses'}`;
+                } else {
+                    const years = Math.floor(diffDays / 365);
+                    return `Hace ${years} ${years === 1 ? 'año' : 'años'}`;
+                }
             }
         },
         watch: {

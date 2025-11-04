@@ -491,6 +491,33 @@ body {
     .logo-img-mobile {
         height: 42px;
     }
+    
+    /* Vista dedicada responsive */
+    .perfume-detail-container {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .perfume-detail-title {
+        font-size: 1.8rem;
+    }
+    
+    .perfume-detail-price {
+        font-size: 2rem;
+    }
+    
+    .btn-add-cart-detail,
+    .btn-favorite-detail {
+        height: 50px;
+    }
+    
+    .reviews-section {
+        padding: 20px;
+    }
+    
+    .review-form {
+        padding: 20px;
+    }
 }
 
 .header-right-actions {
@@ -712,6 +739,316 @@ body {
 [data-theme="dark"] .sidebar-filter-item:hover {
     background: rgba(212, 175, 55, 0.2);
     border-color: var(--primary-gold);
+}
+
+/* Vista Dedicada del Perfume */
+.perfume-detail-view {
+    padding: 40px 0;
+    min-height: 60vh;
+}
+
+.btn-back {
+    background: transparent;
+    border: 2px solid var(--primary-gold);
+    color: var(--primary-gold);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 30px;
+    transition: var(--transition-normal);
+}
+
+.btn-back:hover {
+    background: var(--primary-gold);
+    color: var(--text-dark);
+    transform: translateX(-5px);
+}
+
+.perfume-detail-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    margin-bottom: 60px;
+}
+
+.perfume-detail-image {
+    position: relative;
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--card-shadow);
+}
+
+.perfume-detail-image img {
+    max-width: 100%;
+    max-height: 500px;
+    object-fit: contain;
+}
+
+.perfume-detail-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--primary-gold);
+    color: var(--text-dark);
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.perfume-detail-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.perfume-detail-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    font-family: 'Playfair Display', serif;
+}
+
+.perfume-detail-brand {
+    font-size: 1.3rem;
+    color: var(--primary-gold);
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.perfume-detail-meta {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+}
+
+.meta-item i {
+    color: var(--primary-gold);
+    font-size: 1.2rem;
+}
+
+.perfume-detail-description {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+}
+
+.perfume-detail-price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-gold);
+    margin-bottom: 30px;
+}
+
+.perfume-detail-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.btn-favorite-detail {
+    background: transparent;
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: var(--transition-normal);
+}
+
+.btn-favorite-detail:hover {
+    border-color: var(--primary-gold);
+    color: var(--primary-gold);
+    transform: scale(1.1);
+}
+
+.btn-favorite-detail.is-favorite {
+    background: var(--primary-gold);
+    border-color: var(--primary-gold);
+    color: var(--text-dark);
+}
+
+.btn-add-cart-detail {
+    flex: 1;
+    background: var(--primary-gold);
+    border: none;
+    color: var(--text-dark);
+    height: 60px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: var(--transition-normal);
+}
+
+.btn-add-cart-detail:hover {
+    background: #daa520;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
+}
+
+/* Sección de Reseñas */
+.reviews-section {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: var(--card-shadow);
+}
+
+.reviews-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 30px;
+    font-family: 'Playfair Display', serif;
+}
+
+.review-form {
+    background: var(--bg-primary);
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 40px;
+    border: 2px solid var(--border-color);
+}
+
+.review-form-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+
+.review-form .form-group {
+    margin-bottom: 20px;
+}
+
+.review-form label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.review-form .form-control {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 12px;
+    border-radius: 8px;
+    width: 100%;
+    font-size: 1rem;
+    transition: var(--transition-normal);
+}
+
+.review-form .form-control:focus {
+    outline: none;
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+.btn-submit-review {
+    background: var(--primary-gold);
+    border: none;
+    color: var(--text-dark);
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: var(--transition-normal);
+}
+
+.btn-submit-review:hover {
+    background: #daa520;
+    transform: translateY(-2px);
+}
+
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.review-item {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    transition: var(--transition-normal);
+}
+
+.review-item:hover {
+    border-color: var(--primary-gold);
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.review-author {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.review-rating {
+    color: var(--primary-gold);
+    font-size: 1rem;
+}
+
+.review-comment {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.review-date {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.no-reviews {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+}
+
+.no-reviews i {
+    font-size: 4rem;
+    color: var(--primary-gold);
+    margin-bottom: 20px;
+}
+
+.no-reviews p {
+    font-size: 1.1rem;
 }
 
 /* Modal de Búsqueda */

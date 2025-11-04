@@ -50,77 +50,110 @@
             </div>
 
             <div class="header-main">
-                <div class="container">
-                    <div class="header-main-content">
-                        <a href="./index.html" class="logo-container">
-                            <img src="./ImagenesPerfumes/logo.png" alt="Perfumería Elegancia - Réplicas de lujo" class="logo-img">
+                <div class="container-fluid">
+                    <div class="header-main-content-mobile">
+                        <!-- Sidebar izquierdo (Filtros) -->
+                        <button class="header-icon-btn sidebar-toggle" 
+                                @click="toggleSidebar" 
+                                aria-label="Abrir menú de filtros">
+                            <i class="bi bi-funnel-fill"></i>
+                        </button>
+
+                        <!-- Búsqueda (solo icono en móvil) -->
+                        <button class="header-icon-btn search-toggle" 
+                                @click="toggleSearchModal" 
+                                aria-label="Buscar perfumes">
+                            <i class="bi bi-search"></i>
+                        </button>
+
+                        <!-- Logo centrado -->
+                        <a href="./index.html" class="logo-container-mobile">
+                            <img src="./ImagenesPerfumes/logo.png" alt="Premium Perfumería" class="logo-img-mobile">
                         </a>
 
-                        <div class="search-container">
-                            <div class="search-wrapper">
-                                <input 
-                                    type="text" 
-                                    class="search-input"
-                                    placeholder="Buscar perfume por nombre, marca o tipo..."
-                                    v-model="searchTerm"
-                                    @input="onSearchInput"
-                                    aria-label="Buscar perfumes">
-                                <button class="search-clear" @click="clearSearch" v-if="searchTerm" aria-label="Limpiar búsqueda">
-                                    <i class="bi bi-x"></i>
-                                </button>
-                                <i class="bi bi-search search-icon"></i>
-                            </div>
-                            <!-- Filtros rápidos -->
-                            <div class="quick-filters" v-show="!showFavoritesView">
-                                <button class="quick-filter-btn" 
-                                        :class="{'active': selectedPublico === null}"
-                                        @click="filterPerfumes(null)">
-                                    Todos
-                                </button>
-                                <button class="quick-filter-btn" 
-                                        :class="{'active': selectedPublico === 'Hombre'}"
-                                        @click="filterPerfumes('Hombre')">
-                                    Hombres
-                                </button>
-                                <button class="quick-filter-btn" 
-                                        :class="{'active': selectedPublico === 'Mujer'}"
-                                        @click="filterPerfumes('Mujer')">
-                                    Mujeres
-                                </button>
-                                <button class="quick-filter-btn" 
-                                        :class="{'active': selectedPublico === 'Unisex'}"
-                                        @click="filterPerfumes('Unisex')">
-                                    Unisex
-                                </button>
-                            </div>
-                        </div>
-
-                        <nav class="nav-actions">
-                            <button class="mobile-menu-toggle" @click="toggleMobileMenu" aria-label="Menú principal">
-                                <i class="bi bi-list"></i>
+                        <!-- Acciones derecha -->
+                        <div class="header-right-actions">
+                            <button class="header-icon-btn theme-toggle-mobile" 
+                                    @click="toggleTheme"
+                                    :aria-label="isDarkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
+                                <i :class="isDarkMode ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill'"></i>
                             </button>
-                            <div class="nav-links" :class="{ 'active': mobileMenuOpen }">
-                                <a href="#" @click.prevent="showFavoritesView = false" class="nav-link-custom">Catálogo</a>
-                                <a href="#" @click.prevent="showFavoritesView = true" class="nav-link-custom">
-                                    <i class="bi bi-heart-fill"></i> Favoritos
-                                </a>
-                                <button class="theme-toggle" 
-                                        @click="toggleTheme"
-                                        :aria-label="isDarkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
-                                    <i :class="isDarkMode ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill'"></i>
-                                    <span>{{ isDarkMode ? 'Claro' : 'Oscuro' }}</span>
-                                </button>
-                                <button class="cart-button position-relative" 
-                                        data-bs-toggle="offcanvas" 
-                                        data-bs-target="#cartOffcanvas" 
-                                        aria-controls="cartOffcanvas"
-                                        aria-label="Ver carrito de compras">
-                                    <i class="bi bi-bag-fill"></i>
-                                    <span class="cart-text">Carrito</span>
-                                    <span class="cart-badge" v-if="cartItemCount > 0">{{ cartItemCount }}</span>
-                                </button>
-                            </div>
-                        </nav>
+                            
+                            <button class="header-icon-btn cart-button-mobile" 
+                                    data-bs-toggle="offcanvas" 
+                                    data-bs-target="#cartOffcanvas" 
+                                    aria-label="Ver carrito">
+                                <i class="bi bi-bag-fill"></i>
+                                <span class="cart-badge-mobile" v-if="cartItemCount > 0">{{ cartItemCount }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Filtros -->
+            <div class="sidebar-overlay" :class="{ 'active': sidebarOpen }" @click="closeSidebar"></div>
+            <div class="sidebar-filters" :class="{ 'active': sidebarOpen }">
+                <div class="sidebar-header">
+                    <h3 class="sidebar-title">Filtrar por</h3>
+                    <button class="sidebar-close" @click="closeSidebar" aria-label="Cerrar menú">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="sidebar-content">
+                    <button class="sidebar-filter-item" 
+                            :class="{'active': selectedPublico === null}"
+                            @click="filterPerfumes(null); closeSidebar()">
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Todos los perfumes</span>
+                    </button>
+                    <button class="sidebar-filter-item" 
+                            :class="{'active': selectedPublico === 'Hombre'}"
+                            @click="filterPerfumes('Hombre'); closeSidebar()">
+                        <i class="bi bi-person-fill"></i>
+                        <span>Hombres</span>
+                    </button>
+                    <button class="sidebar-filter-item" 
+                            :class="{'active': selectedPublico === 'Mujer'}"
+                            @click="filterPerfumes('Mujer'); closeSidebar()">
+                        <i class="bi bi-person-dress"></i>
+                        <span>Mujeres</span>
+                    </button>
+                    <button class="sidebar-filter-item" 
+                            :class="{'active': selectedPublico === 'Unisex'}"
+                            @click="filterPerfumes('Unisex'); closeSidebar()">
+                        <i class="bi bi-people-fill"></i>
+                        <span>Unisex</span>
+                    </button>
+                    <div class="sidebar-divider"></div>
+                    <div class="sidebar-info-item">
+                        <i class="bi bi-tag-fill"></i>
+                        <div>
+                            <div class="sidebar-info-title">Mayoreo</div>
+                            <div class="sidebar-info-text">A partir de 10 piezas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal de búsqueda -->
+            <div class="search-modal" :class="{ 'active': searchModalOpen }">
+                <div class="search-modal-header">
+                    <button class="search-modal-close" @click="closeSearchModal" aria-label="Cerrar búsqueda">
+                        <i class="bi bi-arrow-left"></i>
+                    </button>
+                    <div class="search-modal-input-wrapper">
+                        <input 
+                            type="text" 
+                            class="search-modal-input"
+                            placeholder="Buscar perfume..."
+                            v-model="searchTerm"
+                            @input="onSearchInput"
+                            ref="searchModalInput"
+                            aria-label="Buscar perfumes">
+                        <button class="search-modal-clear" @click="clearSearch" v-if="searchTerm">
+                            <i class="bi bi-x"></i>
+                        </button>
                     </div>
                 </div>
             </div>

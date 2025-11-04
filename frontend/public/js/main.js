@@ -32,7 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
             showFavoritesView: false,
             observer: null,
             favoriteIds: [], // Reactive list of favorite perfume IDs
-            isDarkMode: false // Dark mode state
+            isDarkMode: false, // Dark mode state
+            sidebarOpen: false, // Sidebar state
+            searchModalOpen: false // Search modal state
         },
         computed: {
             filteredPerfumes() {
@@ -426,6 +428,35 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             saveThemePreference() {
                 localStorage.setItem('perfumeriaTheme', this.isDarkMode ? 'dark' : 'light');
+            },
+            toggleSidebar() {
+                this.sidebarOpen = !this.sidebarOpen;
+                if (this.sidebarOpen) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            },
+            closeSidebar() {
+                this.sidebarOpen = false;
+                document.body.style.overflow = '';
+            },
+            toggleSearchModal() {
+                this.searchModalOpen = !this.searchModalOpen;
+                if (this.searchModalOpen) {
+                    this.$nextTick(() => {
+                        if (this.$refs.searchModalInput) {
+                            this.$refs.searchModalInput.focus();
+                        }
+                    });
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            },
+            closeSearchModal() {
+                this.searchModalOpen = false;
+                document.body.style.overflow = '';
             }
         },
         watch: {

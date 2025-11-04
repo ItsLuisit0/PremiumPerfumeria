@@ -413,9 +413,10 @@
                                                   required 
                                                   placeholder="Cuéntanos tu experiencia con este perfume..."></textarea>
                                     </div>
-                                    <button type="submit" class="btn btn-submit-review">
-                                        <i class="bi bi-send-fill"></i>
-                                        Publicar Reseña
+                                    <button type="submit" class="btn btn-submit-review" :disabled="isSubmittingReview">
+                                        <span v-if="isSubmittingReview" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                        <i v-else class="bi bi-send-fill"></i>
+                                        {{ isSubmittingReview ? 'Enviando...' : 'Publicar Reseña' }}
                                     </button>
                                 </form>
                             </div>
@@ -429,7 +430,7 @@
                                         </span>
                                     </div>
                                     <p class="review-comment">{{ review.comentario }}</p>
-                                    <span class="review-date">{{ formatDate(review.fecha_creacion) }}</span>
+                                    <span class="review-date">{{ formatDate(review.fecha) }}</span>
                                 </div>
                             </div>
                             <div v-else class="no-reviews">

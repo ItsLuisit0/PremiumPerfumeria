@@ -123,8 +123,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!response.ok) {
                         throw new Error(`Error ${response.status} al cargar reseñas`);
                     }
-                    this.reviews = await response.json();
-                    this.perfumeReviews = await response.json();
+                    const data = await response.json();
+                    this.reviews = data;
+                    this.perfumeReviews = data;
                 } catch (error) {
                     console.error("Error al obtener reseñas:", error);
                     this.reviews = [];

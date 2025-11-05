@@ -35,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
             isDarkMode: false, // Dark mode state
             sidebarOpen: false, // Sidebar state
             searchModalOpen: false, // Search modal state
-            selectedPerfume: null, // Selected perfume for detailed view
             perfumeReviews: [] // Reviews for selected perfume
         },
         computed: {
@@ -98,7 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!response.ok) {
                         throw new Error(`Error ${response.status}: No se pudieron cargar los perfumes`);
                     }
-                    const perfumesData = await response.json();
+                    const responseData = await response.json();
+                    
+                    // Manejar respuesta con paginación o array directo (retrocompatibilidad)
+                    const perfumesData = responseData.data || responseData;
+                    
                     // Las imágenes están en GitHub Pages, no en el backend
                     const imageBaseUrl = AppConfig.isDevelopment 
                         ? './' 
@@ -123,9 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!response.ok) {
                         throw new Error(`Error ${response.status} al cargar reseñas`);
                     }
-                    const data = await response.json();
-                    this.reviews = data;
-                    this.perfumeReviews = data;
+                    const responseData = await response.json();
+                    
+                    // Manejar respuesta con paginación o array directo (retrocompatibilidad)
+                    const reviewsData = responseData.data || responseData;
+                    
+                    this.reviews = reviewsData;
+                    this.perfumeReviews = reviewsData;
                 } catch (error) {
                     console.error("Error al obtener reseñas:", error);
                     this.reviews = [];
@@ -133,12 +140,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             },
             saveCartToStorage() {
-                localStorage.setItem('perfumeriaCart', JSON.stringify(this.cart));
+                try {
+                    localStorage.setItem('perfumeriaCart', JSON.stringify(this.cart));
+                } catch (error) {
+                    console.error('Error al guardar carrito:', error);
+                    this.showToast('warning', 'No se pudo guardar el carrito en este dispositivo');
+                }
             },
             loadCartFromStorage() {
-                const savedCart = localStorage.getItem('perfumeriaCart');
-                if (savedCart) {
-                    this.cart = JSON.parse(savedCart);
+                try {
+                    const savedCart = localStorage.getItem('perfumeriaCart');
+                    if (savedCart) {
+                        this.cart = JSON.parse(savedCart);
+                    }
+                } catch (error) {
+                    console.error('Error al cargar carrito:', error);
+                    this.cart = [];
                 }
             },
             toggleMobileMenu() {
@@ -149,9 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             showPerfumeDetail(perfume) {
                 this.selectedPerfume = perfume;
-                this.currentPerfume = perfume;
                 this.modalQuantity = 1;
-                this.
                 this.newReview = { usuario: '', comentario: '', calificacion: 0 };
                 this.currentRating = 0;
                 this.fetchReviews(perfume.id_perfume);
@@ -159,7 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             closePerfumeDetail() {
                 this.selectedPerfume = null;
-                this.currentPerfume = null;
                 this.perfumeReviews = [];
                 this.reviews = [];
                 this.newReview = {
@@ -370,14 +384,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             },
             loadFavorites() {
-                const favorites = localStorage.getItem('perfumeriaFavorites');
-                if (favorites) {
-                    this.favoriteIds = JSON.parse(favorites);
-                    console.log
+                try {
+                    const favorites = localStorage.getItem('perfumeriaFavorites');
+                    if (favorites) {
+                        this.favoriteIds = JSON.parse(favorites);
+                        console.log('✅ Favoritos cargados:', this.favoriteIds.length);
+                    }
+                } catch (error) {
+                    console.error('Error al cargar favoritos:', error);
+                    this.favoriteIds = [];
                 }
             },
             saveFavorites() {
-                localStorage.setItem('perfumeriaFavorites', JSON.stringify(this.favoriteIds));
+                try {
+                    localStorage.setItem('perfumeriaFavorites', JSON.stringify(this.favoriteIds));
+                } catch (error) {
+                    console.error('Error al guardar favoritos:', error);
+                }
             },
             checkoutWhatsapp() {
                 if (this.cart.length === 0) {
@@ -396,7 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 message += `💰 *TOTAL: ${this.cartTotalPrice.toFixed(2)} MXN*\n\n`;
                
-                const whatsappUrl = `https://wa.me/522311347021?text=${encodeURIComponent(message)}`;
+                const whatsappUrl = `https://wa.me/${AppConfig.whatsapp.number}?text=${encodeURIComponent(message)}`;
                 window.open(whatsappUrl, '_blank');
                 this.showToast('success', 'Redirigiendo a WhatsApp para completar tu compra');
             },
@@ -433,21 +456,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             },
             loadThemePreference() {
-                const savedTheme = localStorage.getItem('perfumeriaTheme');
-                if (savedTheme === 'dark') {
-                    this.isDarkMode = true;
-                    this.applyTheme();
-                } else if (savedTheme === null) {
-                    // Si no hay preferencia guardada, detectar preferencia del sistema
-                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    if (prefersDark) {
+                try {
+                    const savedTheme = localStorage.getItem('perfumeriaTheme');
+                    if (savedTheme === 'dark') {
                         this.isDarkMode = true;
                         this.applyTheme();
+                    } else if (savedTheme === null) {
+                        // Si no hay preferencia guardada, detectar preferencia del sistema
+                        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        if (prefersDark) {
+                            this.isDarkMode = true;
+                            this.applyTheme();
+                        }
                     }
+                } catch (error) {
+                    console.error('Error al cargar preferencia de tema:', error);
                 }
             },
             saveThemePreference() {
-                localStorage.setItem('perfumeriaTheme', this.isDarkMode ? 'dark' : 'light');
+                try {
+                    localStorage.setItem('perfumeriaTheme', this.isDarkMode ? 'dark' : 'light');
+                } catch (error) {
+                    console.error('Error al guardar preferencia de tema:', error);
+                }
             },
             toggleSidebar() {
                 this.sidebarOpen = !this.sidebarOpen;

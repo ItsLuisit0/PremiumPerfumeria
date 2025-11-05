@@ -2,11 +2,49 @@ const { pool } = require('../db/db');
 
 exports.getAllPerfumes = async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT id_perfume, marca, nombre, tipo, publico, descripcion, notas, precio_minimo, mililitros, imagen_url FROM perfumes');
-        res.json(rows);
+        // Paginación opcional
+        const limit = parseInt(req.query.limit) || 50;
+        const offset = parseInt(req.query.offset) || 0;
+        
+        // Validar parámetros
+        if (limit < 1 || limit > 100) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'El límite debe estar entre 1 y 100' 
+            });
+        }
+        
+        if (offset < 0) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'El offset debe ser mayor o igual a 0' 
+            });
+        }
+        
+        const [rows] = await pool.query(
+            'SELECT id_perfume, marca, nombre, tipo, publico, descripcion, notas, precio_minimo, mililitros, imagen_url FROM perfumes LIMIT ? OFFSET ?',
+            [limit, offset]
+        );
+        
+        // Obtener total de perfumes para paginación
+        const [total] = await pool.query('SELECT COUNT(*) as total FROM perfumes');
+        
+        res.json({
+            success: true,
+            data: rows,
+            pagination: {
+                limit,
+                offset,
+                total: total[0].total,
+                hasMore: offset + limit < total[0].total
+            }
+        });
     } catch (error) {
         console.error('Error al obtener perfumes:', error.message);
-        res.status(500).json({ message: 'Error interno del servidor' });
+        res.status(500).json({ 
+            success: false,
+            message: 'Error interno del servidor' 
+        });
     }
 };
 

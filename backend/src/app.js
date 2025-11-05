@@ -7,7 +7,6 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 
-// Database y rutas
 const { testConnection } = require('./db/db');
 const perfumeRoutes = require('./routes/perfumes');
 
@@ -15,7 +14,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// ===== CONFIGURACIÓN CORS PARA PRODUCCIÓN Y DESARROLLO =====
 const allowedOrigins = process.env.CORS_ORIGIN 
     ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
     : ['http://127.0.0.1:5500', 'http://localhost:3000', 'http://localhost:5500', 'http://localhost:8080'];
@@ -53,7 +51,7 @@ if (NODE_ENV === 'development') {
 }
 
 // ===== RATE LIMITING PERMISIVO PARA DESARROLLO =====
-/* if (NODE_ENV === 'development') {
+if (NODE_ENV === 'development') {
     app.use(rateLimit({
         windowMs: 1 * 60 * 1000, // 1 minuto
         max: 100, // 100 requests por minuto en desarrollo
@@ -62,11 +60,11 @@ if (NODE_ENV === 'development') {
             message: 'Demasiadas solicitudes. Por favor, espera un momento.' 
         }
     }));
-} */ else {
+} else {
     app.use(rateLimit({
-        windowMs: 15 * 60 * 1000,
-        max: 1000,
-        message: { success: false, message: 'Demasiadas solicitudes' }
+        windowMs: 15 * 60 * 1000, // 15 minutos
+        max: 100, // 100 requests por 15 minutos en producción
+        message: { success: false, message: 'Demasiadas solicitudes. Por favor, intenta más tarde.' }
     }));
 }
 
@@ -80,7 +78,7 @@ const staticOptions = {
 };
 
 app.use('/imagenesPerfumes', express.static(
-    path.join(__dirname, '../../frontend/public/imagenesPerfumes'), 
+    path.join(__dirname, 'ImagenesPerfumes'), 
     staticOptions
 ));
 
@@ -168,7 +166,7 @@ testConnection()
 🚀 Servidor iniciado en puerto ${PORT}
 📍 http://localhost:${PORT}
 🌍 Ambiente: ${NODE_ENV}
-📁 Serviendo imágenes desde: ${path.join(__dirname, '../../frontend/public/imagenesPerfumes')}
+📁 Serviendo imágenes desde: ${path.join(__dirname, 'ImagenesPerfumes')}
             `);
         });
     })

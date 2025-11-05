@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
             async submitReview() {
                 if (!this.selectedPerfume) {
                     console.error('No hay perfume seleccionado');
-                    this.showToast('error', 'No hay perfume seleccionado');
+                    this.showToast('danger', 'No hay perfume seleccionado');
                     return;
                 }
 

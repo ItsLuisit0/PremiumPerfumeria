@@ -162,12 +162,15 @@
                  v-show="!searchTerm && !showFavoritesView && !selectedPerfume && selectedPublico === null"
                  aria-labelledby="hero-title">
             <div class="hero-background"></div>
-            <div class="hero-content-minimal">
-                <img src="./ImagenesPerfumes/logo.png" alt="Premium Perfumería Logo" class="hero-logo-img animate__animated animate__fadeIn">
-                <p class="hero-description animate__animated animate__fadeInUp animate__delay-1s">
+            <img src="./ImagenesPerfumes/logo.png" alt="Premium Perfumería Logo" class="hero-logo-corner animate__animated animate__fadeInRight">
+            <div class="hero-content-center">
+                <p class="hero-description-main animate__animated animate__fadeInUp">
                     Réplicas de alta calidad. Experimenta el lujo de las mejores<br class="hide-mobile"> 
                     fragancias del mundo a precios accesibles
                 </p>
+                <button class="hero-btn-collection animate__animated animate__fadeInUp animate__delay-1s" @click="scrollToProducts">
+                    Ver Colección
+                </button>
             </div>
         </section>
 

@@ -1136,6 +1136,39 @@ body {
     border-color: var(--primary-gold);
 }
 
+/* Modo oscuro - Reseñas */
+[data-theme="dark"] .review-form {
+    background: rgba(30, 30, 30, 0.8);
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+[data-theme="dark"] .form-control-modern {
+    background: rgba(40, 40, 40, 0.8) !important;
+    border-color: rgba(212, 175, 55, 0.3) !important;
+    color: #e0e0e0 !important;
+}
+
+[data-theme="dark"] .form-control-modern::placeholder {
+    color: rgba(200, 200, 200, 0.5);
+}
+
+[data-theme="dark"] .review-item {
+    background: rgba(30, 30, 30, 0.8);
+    border-color: rgba(212, 175, 55, 0.2);
+}
+
+[data-theme="dark"] .review-comment {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .review-author {
+    color: var(--primary-gold);
+}
+
+[data-theme="dark"] .char-counter {
+    color: rgba(200, 200, 200, 0.6);
+}
+
 /* Vista Dedicada del Perfume */
 .perfume-detail-view {
     padding: 40px 0;
@@ -1396,6 +1429,81 @@ body {
     transform: translateY(-2px);
 }
 
+/* Estilos mejorados para labels e inputs */
+.form-label-modern {
+    display: block;
+    font-weight: 600;
+    color: var(--primary-gold) !important;
+    margin-bottom: 10px;
+    font-size: 1.05rem;
+}
+
+.form-control-modern {
+    background: var(--bg-card) !important;
+    border: 2px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+    padding: 14px !important;
+    border-radius: 10px !important;
+    font-size: 1rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.form-control-modern:focus {
+    outline: none !important;
+    border-color: var(--primary-gold) !important;
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.15) !important;
+}
+
+.form-control-modern::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+/* Sistema de calificación con estrellas */
+.star-rating-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0;
+}
+
+.star-icon {
+    font-size: 2rem;
+    color: var(--primary-gold);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.star-icon:hover {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.6));
+}
+
+.star-icon.bi-star {
+    color: var(--border-color);
+}
+
+.star-icon.bi-star:hover {
+    color: var(--primary-gold);
+    opacity: 0.7;
+}
+
+.rating-text {
+    margin-left: 10px;
+    font-weight: 600;
+    color: var(--primary-gold);
+    font-size: 1rem;
+}
+
+/* Contador de caracteres */
+.char-counter {
+    display: block;
+    margin-top: 6px;
+    text-align: right;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
 .reviews-list {
     display: flex;
     flex-direction: column;
@@ -1434,9 +1542,10 @@ body {
 }
 
 .review-comment {
-    color: var(--text-secondary);
-    line-height: 1.6;
+    color: var(--text-primary);
+    line-height: 1.8;
     margin-bottom: 10px;
+    font-size: 1rem;
 }
 
 .review-date {

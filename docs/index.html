@@ -117,7 +117,7 @@
                     <button class="sidebar-filter-item" 
                             :class="{'active': selectedPublico === 'Mujer'}"
                             @click="filterPerfumes('Mujer'); closeSidebar()">
-                        <i class="bi bi-person-dress"></i>
+                        <i class="bi bi-gender-female"></i>
                         <span>Mujeres</span>
                     </button>
                     <button class="sidebar-filter-item" 
@@ -377,36 +377,38 @@
                                 <h4 class="review-form-title">Deja tu reseña</h4>
                                 <form @submit.prevent="submitReview">
                                     <div class="form-group">
-                                        <label for="reviewUser">Nombre</label>
+                                        <label for="reviewUser" class="form-label-modern">Nombre</label>
                                         <input type="text" 
                                                id="reviewUser" 
                                                v-model="newReview.usuario" 
-                                               class="form-control" 
+                                               class="form-control form-control-modern" 
                                                required 
-                                               placeholder="Tu nombre">
+                                               placeholder="Escribe tu nombre">
                                     </div>
                                     <div class="form-group">
-                                        <label for="reviewRating">Calificación</label>
-                                        <select id="reviewRating" 
-                                                v-model.number="newReview.calificacion" 
-                                                class="form-control" 
-                                                required>
-                                            <option :value="null" disabled selected>Selecciona una calificación</option>
-                                            <option :value="5">⭐⭐⭐⭐⭐ Excelente</option>
-                                            <option :value="4">⭐⭐⭐⭐ Muy bueno</option>
-                                            <option :value="3">⭐⭐⭐ Bueno</option>
-                                            <option :value="2">⭐⭐ Regular</option>
-                                            <option :value="1">⭐ Malo</option>
-                                        </select>
+                                        <label class="form-label-modern">Calificación</label>
+                                        <div class="star-rating-input">
+                                            <i v-for="star in 5" 
+                                               :key="star"
+                                               class="bi star-icon"
+                                               :class="star <= newReview.calificacion ? 'bi-star-fill' : 'bi-star'"
+                                               @click="newReview.calificacion = star"
+                                               @mouseover="hoverRating = star"
+                                               @mouseleave="hoverRating = 0"></i>
+                                            <span v-if="newReview.calificacion" class="rating-text">
+                                                {{ getRatingText(newReview.calificacion) }}
+                                            </span>
+                                        </div>
                                     </div>
                                     <div class="form-group">
-                                        <label for="reviewComment">Comentario</label>
+                                        <label for="reviewComment" class="form-label-modern">Comentario</label>
                                         <textarea id="reviewComment" 
                                                   v-model="newReview.comentario" 
-                                                  class="form-control" 
+                                                  class="form-control form-control-modern" 
                                                   rows="4" 
                                                   required 
                                                   placeholder="Cuéntanos tu experiencia con este perfume..."></textarea>
+                                        <small class="char-counter">{{ newReview.comentario.length }}/500 caracteres</small>
                                     </div>
                                     <button type="submit" class="btn btn-submit-review" :disabled="isSubmittingReview">
                                         <span v-if="isSubmittingReview" class="spinner-border spinner-border-sm me-2" role="status"></span>

@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
             isSubmittingReview: false,
             searchTimeout: null,
             currentRating: 0,
+            hoverRating: 0,
             mobileMenuOpen: false,
             lastFocusedElement: null,
             toast: {
@@ -534,6 +535,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     const years = Math.floor(diffDays / 365);
                     return `Hace ${years} ${years === 1 ? 'año' : 'años'}`;
                 }
+            },
+            getRatingText(rating) {
+                const texts = {
+                    1: '⭐ Malo',
+                    2: '⭐⭐ Regular',
+                    3: '⭐⭐⭐ Bueno',
+                    4: '⭐⭐⭐⭐ Muy bueno',
+                    5: '⭐⭐⭐⭐⭐ Excelente'
+                };
+                return texts[rating] || '';
             }
         },
         watch: {

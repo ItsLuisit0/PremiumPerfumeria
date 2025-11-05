@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
             newReview: {
                 usuario: '',
                 comentario: '',
-                calificacion: 0
+                calificacion: null
             },
             reviews: [],
             searchTerm: '',
@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showPerfumeDetail(perfume) {
                 this.selectedPerfume = perfume;
                 this.modalQuantity = 1;
-                this.newReview = { usuario: '', comentario: '', calificacion: 0 };
+                this.newReview = { usuario: '', comentario: '', calificacion: null };
                 this.currentRating = 0;
                 this.fetchReviews(perfume.id_perfume);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.newReview = {
                     usuario: '',
                     comentario: '',
-                    calificacion: 0
+                    calificacion: null
                 };
                 // Forzar actualización de la vista
                 this.$nextTick(() => {
@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                if (!this.newReview.calificacion || this.newReview.calificacion === 0) {
+                if (!this.newReview.calificacion || this.newReview.calificacion === 0 || this.newReview.calificacion === null) {
                     this.showToast('warning', 'Por favor selecciona una calificación (1 a 5 estrellas)');
                     return;
                 }
@@ -356,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.newReview = {
                         usuario: '',
                         comentario: '',
-                        calificacion: 0
+                        calificacion: null
                     };
                     this.currentRating = 0;
                     await this.fetchReviews(this.selectedPerfume.id_perfume);

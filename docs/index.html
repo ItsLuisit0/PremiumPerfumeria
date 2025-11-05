@@ -391,12 +391,12 @@
                                                 v-model.number="newReview.calificacion" 
                                                 class="form-control" 
                                                 required>
-                                            <option value="">Selecciona una calificación</option>
-                                            <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
-                                            <option value="4">⭐⭐⭐⭐ Muy bueno</option>
-                                            <option value="3">⭐⭐⭐ Bueno</option>
-                                            <option value="2">⭐⭐ Regular</option>
-                                            <option value="1">⭐ Malo</option>
+                                            <option :value="null" disabled selected>Selecciona una calificación</option>
+                                            <option :value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                                            <option :value="4">⭐⭐⭐⭐ Muy bueno</option>
+                                            <option :value="3">⭐⭐⭐ Bueno</option>
+                                            <option :value="2">⭐⭐ Regular</option>
+                                            <option :value="1">⭐ Malo</option>
                                         </select>
                                     </div>
                                     <div class="form-group">

@@ -1728,7 +1728,7 @@ body {
 /* Hero Logo en esquina */
 .hero-logo-corner {
     position: absolute;
-    top: 30px;
+    top: 45px;
     right: 30px;
     width: 140px;
     height: auto;
@@ -2904,7 +2904,7 @@ body {
     
     .hero-logo-corner {
         width: 110px;
-        top: 20px;
+        top: 35px;
         right: 20px;
     }
     
@@ -3155,7 +3155,7 @@ body {
     
     .hero-logo-corner {
         width: 90px;
-        top: 15px;
+        top: 30px;
         right: 15px;
     }
     

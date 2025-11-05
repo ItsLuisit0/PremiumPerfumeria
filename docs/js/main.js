@@ -181,8 +181,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     comentario: '',
                     calificacion: null
                 };
+                this.searchTerm = ''; // Limpiar búsqueda
+                this.selectedPublico = null; // Mostrar todos los perfumes
                 // Forzar actualización de la vista
                 this.$nextTick(() => {
+                    this.initObserver(); // Re-inicializar observer para animaciones
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
             },

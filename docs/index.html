@@ -27,22 +27,20 @@
         <header class="premium-header">
             <div class="header-top">
                 <div class="container">
-                    <div class="header-top-content">
-                        <div class="header-benefits">
-                            <div class="benefit-item">
-                                <i class="bi bi-truck"></i>
-                                <span>Entregas y envíos a todo Teziutlán (Sin costo)</span>
-                            </div>
-                            <div class="benefit-item">
-                                <i class="bi bi-shield-check"></i>
-                                <span>Calidad Premium Garantizada</span>
-                            </div>
-                            <div class="benefit-item">
-                                <i class="bi bi-tag-fill"></i>
-                                <span>Mayoreo desde 10 piezas</span>
-                            </div>
+                    <div class="header-top-carousel">
+                        <div class="carousel-item" :class="{ 'active': currentCarouselIndex === 0 }">
+                            <i class="bi bi-truck"></i>
+                            <span>Entregas y envíos a todo Teziutlán (Sin costo)</span>
                         </div>
-                        <div class="header-contact">
+                        <div class="carousel-item" :class="{ 'active': currentCarouselIndex === 1 }">
+                            <i class="bi bi-shield-check"></i>
+                            <span>Calidad Premium Garantizada</span>
+                        </div>
+                        <div class="carousel-item" :class="{ 'active': currentCarouselIndex === 2 }">
+                            <i class="bi bi-tag-fill"></i>
+                            <span>Mayoreo desde 10 piezas</span>
+                        </div>
+                        <div class="carousel-item" :class="{ 'active': currentCarouselIndex === 3 }">
                             <i class="bi bi-whatsapp"></i>
                             <span>WhatsApp: 231-134-7021</span>
                         </div>

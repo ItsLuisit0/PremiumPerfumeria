@@ -36,7 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
             isDarkMode: false, // Dark mode state
             sidebarOpen: false, // Sidebar state
             searchModalOpen: false, // Search modal state
-            perfumeReviews: [] // Reviews for selected perfume
+            perfumeReviews: [], // Reviews for selected perfume
+            currentCarouselIndex: 0, // Carousel index
+            carouselInterval: null // Carousel timer
         },
         computed: {
             filteredPerfumes() {
@@ -547,6 +549,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     5: '⭐⭐⭐⭐⭐ Excelente'
                 };
                 return texts[rating] || '';
+            },
+            startCarousel() {
+                // Cambiar cada 3 segundos
+                this.carouselInterval = setInterval(() => {
+                    this.currentCarouselIndex = (this.currentCarouselIndex + 1) % 4;
+                }, 3000);
             }
         },
         watch: {
@@ -570,6 +578,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.selectedPerfume = null;
                     if (this.lastFocusedElement) this.lastFocusedElement.focus();
                 });
+            }
+            this.startCarousel(); // Iniciar carrusel
+        },
+        beforeDestroy() {
+            if (this.carouselInterval) {
+                clearInterval(this.carouselInterval);
             }
         }
     });

@@ -122,41 +122,45 @@ body {
     transition: background-color 0.3s ease;
 }
 
-.header-top-content {
+/* Carrusel del header top */
+.header-top-carousel {
+    position: relative;
+    height: 30px;
+    overflow: hidden;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: center;
+}
+
+.carousel-item {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
     font-size: 0.9rem;
     color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    pointer-events: none;
+    width: 100%;
 }
 
-.header-benefits {
-    display: flex;
-    gap: var(--space-lg);
+.carousel-item.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
 }
 
-.benefit-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    transition: var(--transition-normal);
-}
-
-.benefit-item:hover {
-    color: var(--primary-gold);
-    transform: translateY(-1px);
-}
-
-.benefit-item i {
+.carousel-item i {
     color: var(--primary-gold);
     font-size: 1rem;
 }
 
-.header-contact {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    font-weight: 500;
+.carousel-item:hover {
+    color: var(--primary-gold);
 }
 
 .header-main {
@@ -2648,10 +2652,6 @@ body {
         padding-top: 120px;
     }
     
-    .header-benefits {
-        display: none;
-    }
-    
     .header-main-content {
         flex-wrap: wrap;
         justify-content: space-between; 
@@ -2952,8 +2952,8 @@ body {
         padding: 8px 40px 8px 12px;
     }
     
-    .header-contact span {
-        font-size: 0.8rem;
+    .carousel-item {
+        font-size: 0.85rem;
     }
     
     /* Hero móvil pequeño */

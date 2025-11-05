@@ -1321,7 +1321,7 @@ body {
 .reviews-section {
     background: var(--bg-card);
     border-radius: 20px;
-    padding: 40px;
+    padding: 0;
     box-shadow: var(--card-shadow);
 }
 
@@ -1330,6 +1330,7 @@ body {
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 30px;
+    padding: 40px 40px 0 40px;
     font-family: 'Poppins', sans-serif;
 }
 
@@ -1337,7 +1338,7 @@ body {
     background: var(--bg-primary);
     border-radius: 16px;
     padding: 30px;
-    margin-bottom: 40px;
+    margin: 0 40px 40px 40px;
     border: 2px solid var(--border-color);
 }
 
@@ -1399,6 +1400,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    padding: 0 40px 40px 40px;
 }
 
 .review-item {
@@ -1444,7 +1446,7 @@ body {
 
 .no-reviews {
     text-align: center;
-    padding: 60px 20px;
+    padding: 60px 40px;
     color: var(--text-secondary);
 }
 

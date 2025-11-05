@@ -416,6 +416,22 @@
                                 </form>
                             </div>
 
+                            <div class="reviews-list" v-if="perfumeReviews && perfumeReviews.length > 0">
+                                <div class="review-item" v-for="review in perfumeReviews" :key="review.id_reseña">
+                                    <div class="review-header">
+                                        <span class="review-author">{{ review.usuario }}</span>
+                                        <span class="review-rating">
+                                            <i class="bi bi-star-fill" v-for="n in review.calificacion" :key="n"></i>
+                                        </span>
+                                    </div>
+                                    <p class="review-comment" v-html="sanitizeInput(review.comentario)"></p>
+                                    <span class="review-date">{{ formatDate(review.fecha) }}</span>
+                                </div>
+                            </div>
+                            <div v-else class="no-reviews">
+                                <i class="bi bi-chat-square-text"></i>
+                                <p>Aún no hay reseñas. ¡Sé el primero en comentar!</p>
+                            </div>
                         </div>
                     </section>
                 </div>

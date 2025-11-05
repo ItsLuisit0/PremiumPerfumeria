@@ -511,6 +511,8 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             closeSearchModal() {
                 this.searchModalOpen = false;
+                this.searchTerm = ''; // Limpiar búsqueda al cerrar
+                this.selectedPublico = null; // Mostrar todos los perfumes
                 document.body.style.overflow = '';
             },
             formatDate(dateString) {

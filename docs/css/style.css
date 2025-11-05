@@ -130,10 +130,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    text-align: center;
 }
 
 .carousel-item {
     position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, calc(-50% + 20px));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -142,15 +146,15 @@ body {
     color: rgba(255, 255, 255, 0.8);
     font-weight: 500;
     opacity: 0;
-    transform: translateY(20px);
     transition: opacity 0.5s ease, transform 0.5s ease;
     pointer-events: none;
     width: 100%;
+    white-space: nowrap;
 }
 
 .carousel-item.active {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, -50%);
     pointer-events: auto;
 }
 
@@ -1683,88 +1687,125 @@ body {
     50% { transform: scale(1.1); }
 }
 
+/* Hero Section - Nuevo Diseño Premium */
 .hero-section {
     position: relative;
     height: 100vh;
-    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-                url('../ImagenesPerfumes/fondo.png') center/cover;
+    min-height: 700px;
     display: flex;
     align-items: center;
     justify-content: center;
-    text-align: center;
     color: var(--text-white);
     margin-bottom: var(--space-xl);
+    overflow: hidden;
 }
 
-.hero-overlay {
+.hero-background {
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.3);
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), 
+                url('./ImagenesPerfumes/fondo_nuevo.png') center/cover;
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
 }
 
-.hero-content {
+.hero-content-new {
     position: relative;
     z-index: 2;
     max-width: 800px;
-    padding: 0 var(--space-md);
+    padding: 0 var(--space-lg);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
 }
 
-.hero-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 5rem;
-    font-weight: 900;
-    margin-bottom: var(--space-md);
-    letter-spacing: 3px;
-    background: linear-gradient(135deg, 
-        #ffffff 0%, 
-        #D4AF37 25%, 
-        #f4e4c1 50%, 
-        #D4AF37 75%, 
-        #ffffff 100%);
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.4));
-    animation: shimmer 3s ease-in-out infinite;
+/* Logo Section */
+.hero-logo-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
 }
 
-@keyframes shimmer {
-    0%, 100% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
+.hero-logo-icon {
+    width: 80px;
+    height: 80px;
+    border: 3px solid var(--primary-gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
 }
 
-.hero-subtitle {
-    font-size: 1.2rem;
-    margin-bottom: var(--space-lg);
-    color: rgba(255, 255, 255, 0.9);
-    line-height: 1.6;
+.hero-logo-icon i {
+    font-size: 2.5rem;
+    color: var(--primary-gold);
 }
 
-.hero-cta {
-    background: linear-gradient(135deg, var(--primary-gold), var(--gold-dark));
-    color: var(--text-dark);
-    border: none;
-    padding: 15px 40px;
-    border-radius: 30px;
-    font-weight: 600;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: var(--transition-normal);
+.hero-title-new {
+    font-family: 'Poppins', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 300;
+    letter-spacing: 8px;
+    color: var(--primary-gold);
+    line-height: 1.2;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    margin: 0;
 }
 
-.hero-cta:hover {
+/* Main Content */
+.hero-main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+.hero-subtitle-new {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.95);
+    max-width: 650px;
+    margin: 0;
+}
+
+.hero-cta-new {
+    background: var(--primary-gold);
+    color: #000;
+    border: none;
+    padding: 18px 60px;
+    border-radius: 50px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+}
+
+.hero-cta-new:hover {
     transform: translateY(-3px);
-    box-shadow: var(--shadow-gold);
+    box-shadow: 0 6px 25px rgba(212, 175, 55, 0.6);
+    background: #daa520;
+}
+
+.hero-discount-text {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
 }
 
 .loading-container {

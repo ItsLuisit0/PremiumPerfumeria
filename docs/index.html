@@ -160,21 +160,31 @@
 
         <section class="hero-section" 
                  v-show="!searchTerm && !showFavoritesView && !selectedPerfume && selectedPublico === null"
-                 aria-labelledby="hero-title" 
-                 style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-                        url('./ImagenesPerfumes/fondo.png') center/cover;">
-            <div class="hero-overlay"></div>
-            <div class="hero-content">
-                <div class="hero-text">
-                    <h1 id="hero-title" class="hero-title animate__animated animate__fadeInUp">
-                        PREMIUM PERFUMERÍA
+                 aria-labelledby="hero-title">
+            <div class="hero-background"></div>
+            <div class="hero-content-new">
+                <div class="hero-logo-section animate__animated animate__fadeIn">
+                    <div class="hero-logo-icon">
+                        <i class="bi bi-star-fill"></i>
+                    </div>
+                    <h1 id="hero-title" class="hero-title-new">
+                        PREMIUM<br>PERFUMERIA
                     </h1>
-                    <p class="hero-subtitle animate__animated animate__fadeInUp animate__delay-1s">
-                        Réplicas de alta calidad. Experimenta el lujo de las mejores fragancias del mundo a precios accesibles.
+                </div>
+                
+                <div class="hero-main-content animate__animated animate__fadeInUp animate__delay-1s">
+                    <p class="hero-subtitle-new">
+                        Réplicas de alta calidad. Experimenta el lujo de las mejores<br>
+                        fragancias del mundo a precios accesibles.
                     </p>
-                    <button class="hero-cta animate__animated animate__fadeInUp animate__delay-2s" @click="scrollToProducts">
-                        Descubrir Colección
+                    
+                    <button class="hero-cta-new animate__animated animate__pulse animate__delay-2s" @click="scrollToProducts">
+                        DESCUBRIR
                     </button>
+                    
+                    <p class="hero-discount-text animate__animated animate__fadeIn animate__delay-2s">
+                        Descuento en compra mayores a 10 piezas.
+                    </p>
                 </div>
             </div>
         </section>

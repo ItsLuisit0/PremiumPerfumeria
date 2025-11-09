@@ -9,7 +9,7 @@ const pool = mysql.createPool({
         }
         return '';
     })(),
-    database: process.env.DB_NAME || 'perfumeria',
+    database: process.env.DB_NAME || 'perfumeria2',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,

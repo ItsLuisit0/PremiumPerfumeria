@@ -25,14 +25,14 @@ const AppConfig = {
     
     // Información de contacto
     whatsapp: {
-        number: '522311347021',
-        formattedNumber: '231-134-7021'
+        number: '5212311877967',
+        formattedNumber: '231-187-7967'
     },
     
     // Redes sociales
     social: {
         facebook: 'https://www.facebook.com/',
-        whatsapp: 'https://wa.me/522311347021'
+        whatsapp: 'https://wa.me/5212311877967'
     }
 };
 

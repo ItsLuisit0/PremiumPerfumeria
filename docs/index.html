@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,157 +24,353 @@
 </head>
 <body>
     <div id="app" v-cloak>
-        <header class="premium-header">
-            <div class="header-top">
-                <div class="container">
-                    <div class="header-top-carousel">
-                        <div class="carousel-item" :class="{ 'active': currentCarouselIndex === 0 }">
+        <!-- BANNER PROMOCIONAL SUPERIOR -->
+        <div class="promo-banner-slider">
+            <div class="promo-banner-track">
+                <div class="promo-banner-item" :class="{ 'active': currentCarouselIndex === 0 }">
+                    <i class="bi bi-credit-card"></i>
+                    <span>LÍNEA DE CRÉDITO CON ATRATO</span>
+                </div>
+                <div class="promo-banner-item" :class="{ 'active': currentCarouselIndex === 1 }">
                             <i class="bi bi-truck"></i>
-                            <span>Entregas y envíos a todo Teziutlán (Sin costo)</span>
+                    <span>ENVÍOS GRATIS</span>
                         </div>
-                        <div class="carousel-item" :class="{ 'active': currentCarouselIndex === 1 }">
-                            <i class="bi bi-shield-check"></i>
-                            <span>Calidad Premium Garantizada</span>
-                        </div>
-                        <div class="carousel-item" :class="{ 'active': currentCarouselIndex === 2 }">
-                            <i class="bi bi-tag-fill"></i>
-                            <span>Mayoreo desde 10 piezas</span>
-                        </div>
-                        <div class="carousel-item" :class="{ 'active': currentCarouselIndex === 3 }">
-                            <i class="bi bi-whatsapp"></i>
-                            <span>WhatsApp: 231-134-7021</span>
+               
+                <div class="promo-banner-item" :class="{ 'active': currentCarouselIndex === 3 }">
+                    <i class="bi bi-clock"></i>
+                    <span>ENTREGA RÁPIDA A TODO TEZIUTLÁN</span>
                         </div>
                     </div>
                 </div>
+
+        <!-- HEADER PRINCIPAL -->
+        <header class="main-header">
+            <div class="header-container">
+                <!-- Logo -->
+                <div class="header-logo">
+                    <a href="./index.html">
+                        <img src="./ImagenesPerfumes/logo.png" alt="Premium Perfumería">
+                    </a>
             </div>
 
-            <div class="header-main">
-                <div class="container-fluid">
-                    <div class="header-main-content-mobile">
-                        <!-- Sidebar izquierdo (Filtros) -->
-                        <button class="header-icon-btn sidebar-toggle" 
-                                @click="toggleSidebar" 
-                                aria-label="Abrir menú de filtros">
-                            <i class="bi bi-list"></i>
-                        </button>
+                <!-- Navegación Desktop -->
+                <nav class="header-nav desktop-nav">
+                    <a href="#" @click.prevent="filterByCategory(null)" class="nav-link" :class="{'active': selectedCategory === null}">TODOS</a>
+                    <a href="#" @click.prevent="filterByCategory('Hombre')" class="nav-link" :class="{'active': selectedCategory === 'Hombre'}">POR GÉNERO</a>
+                    <a href="#" @click.prevent="showComingSoon('Por Diseñador')" class="nav-link">POR DISEÑADOR</a>
+                   
+                </nav>
 
-                        <!-- Búsqueda (solo icono en móvil) -->
-                        <button class="header-icon-btn search-toggle" 
-                                @click="toggleSearchModal" 
-                                aria-label="Buscar perfumes">
-                            <i class="bi bi-search"></i>
-                        </button>
-
-                        <!-- Logo centrado -->
-                        <a href="./index.html" class="logo-container-mobile">
-                            <img src="./ImagenesPerfumes/logo.png" alt="Premium Perfumería" class="logo-img-mobile">
-                        </a>
-
-                        <!-- Acciones derecha -->
-                        <div class="header-right-actions">
-                            <button class="header-icon-btn theme-toggle-mobile" 
-                                    @click="toggleTheme"
-                                    :aria-label="isDarkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
-                                <i :class="isDarkMode ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill'"></i>
-                            </button>
-                            
-                            <button class="header-icon-btn cart-button-mobile" 
-                                    data-bs-toggle="offcanvas" 
-                                    data-bs-target="#cartOffcanvas" 
-                                    aria-label="Ver carrito">
-                                <i class="bi bi-bag-fill"></i>
-                                <span class="cart-badge-mobile" v-if="cartItemCount > 0">{{ cartItemCount }}</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sidebar Filtros -->
-            <div class="sidebar-overlay" :class="{ 'active': sidebarOpen }" @click="closeSidebar"></div>
-            <div class="sidebar-filters" :class="{ 'active': sidebarOpen }">
-                <div class="sidebar-header">
-                    <h3 class="sidebar-title">Filtrar por</h3>
-                    <button class="sidebar-close" @click="closeSidebar" aria-label="Cerrar menú">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
-                <div class="sidebar-content">
-                    <button class="sidebar-filter-item" 
-                            :class="{'active': selectedPublico === null}"
-                            @click="filterPerfumes(null); closeSidebar()">
-                        <i class="bi bi-grid-fill"></i>
-                        <span>Todos los perfumes</span>
-                    </button>
-                    <button class="sidebar-filter-item" 
-                            :class="{'active': selectedPublico === 'Hombre'}"
-                            @click="filterPerfumes('Hombre'); closeSidebar()">
-                        <i class="bi bi-person-fill"></i>
-                        <span>Hombres</span>
-                    </button>
-                    <button class="sidebar-filter-item" 
-                            :class="{'active': selectedPublico === 'Mujer'}"
-                            @click="filterPerfumes('Mujer'); closeSidebar()">
-                        <i class="bi bi-gender-female"></i>
-                        <span>Mujeres</span>
-                    </button>
-                    <button class="sidebar-filter-item" 
-                            :class="{'active': selectedPublico === 'Unisex'}"
-                            @click="filterPerfumes('Unisex'); closeSidebar()">
-                        <i class="bi bi-people-fill"></i>
-                        <span>Unisex</span>
-                    </button>
-                    <div class="sidebar-divider"></div>
-                    <div class="sidebar-info-item">
-                        <i class="bi bi-tag-fill"></i>
-                        <div>
-                            <div class="sidebar-info-title">Mayoreo</div>
-                            <div class="sidebar-info-text">A partir de 10 piezas</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal de búsqueda -->
-            <div class="search-modal" :class="{ 'active': searchModalOpen }">
-                <div class="search-modal-header">
-                    <button class="search-modal-close" @click="closeSearchModal" aria-label="Cerrar búsqueda">
-                        <i class="bi bi-arrow-left"></i>
-                    </button>
-                    <div class="search-modal-input-wrapper">
+                <!-- Acciones Header -->
+                <div class="header-actions">
+                    <!-- Barra de búsqueda mejorada -->
+                    <div class="header-search-bar">
+                        <i class="bi bi-search search-icon-inline"></i>
                         <input 
                             type="text" 
-                            class="search-modal-input"
-                            placeholder="Buscar perfume..."
+                            class="search-input-inline"
+                            placeholder="Buscar perfumes..."
                             v-model="searchTerm"
-                            @input="onSearchInput"
-                            ref="searchModalInput"
-                            aria-label="Buscar perfumes">
-                        <button class="search-modal-clear" @click="clearSearch" v-if="searchTerm">
+                            @focus="onSearchFocus"
+                            @blur="onSearchBlur">
+                        <button v-if="searchTerm" class="clear-search-btn" @click="clearSearch">
                             <i class="bi bi-x"></i>
                         </button>
                     </div>
+                    
+                    <button class="header-action-btn mobile-search-btn" @click="toggleSearchModal" aria-label="Buscar">
+                        <i class="bi bi-search"></i>
+                    </button>
+                
+                    <button class="header-action-btn" @click="showFavoritesView = !showFavoritesView" aria-label="Favoritos">
+                        <i class="bi bi-heart"></i>
+                        <span class="badge-count" v-if="favoriteIds.length > 0">{{ favoriteIds.length }}</span>
+                    </button>
+                    <button class="header-action-btn" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas" aria-label="Carrito">
+                        <i class="bi bi-bag"></i>
+                        <span class="badge-count" v-if="cartItemCount > 0">{{ cartItemCount }}</span>
+                    </button>
                 </div>
+
+                <!-- Menú móvil -->
+                <button class="mobile-menu-btn" @click="toggleMobileMenu" aria-label="Menú">
+                    <i class="bi bi-list"></i>
+                </button>
             </div>
         </header>
 
-        <section class="hero-section" 
-                 v-show="!searchTerm && !showFavoritesView && !selectedPerfume && selectedPublico === null"
-                 aria-labelledby="hero-title">
-            <div class="hero-background"></div>
-            <img src="./ImagenesPerfumes/logo.png" alt="Premium Perfumería Logo" class="hero-logo-corner animate__animated animate__fadeInRight">
-            <div class="hero-content-center">
-                <p class="hero-description-main animate__animated animate__fadeInUp">
-                    Réplicas de alta calidad. Experimenta el lujo de las mejores<br class="hide-mobile"> 
-                    fragancias del mundo a precios accesibles
-                </p>
-                <button class="hero-btn-collection animate__animated animate__fadeInUp animate__delay-1s" @click="scrollToProducts">
-                    Ver Colección
+        <!-- Navegación Móvil -->
+        <div class="mobile-nav-overlay" :class="{ 'active': mobileMenuOpen }" @click="toggleMobileMenu"></div>
+        <nav class="mobile-nav" :class="{ 'active': mobileMenuOpen }">
+            <div class="mobile-nav-header">
+                <h3>Menú</h3>
+                <button @click="toggleMobileMenu" class="mobile-nav-close">
+                    <i class="bi bi-x-lg"></i>
                 </button>
+            </div>
+            <div class="mobile-nav-content">
+                <a href="#" @click.prevent="filterByCategory(null); toggleMobileMenu()" class="mobile-nav-link">
+                    <i class="bi bi-grid-fill"></i> TODOS LOS PERFUMES
+                </a>
+                <a href="#" @click.prevent="filterByCategory('Hombre'); toggleMobileMenu()" class="mobile-nav-link">
+                    <i class="bi bi-person-fill"></i> PARA HOMBRE
+                </a>
+                <a href="#" @click.prevent="filterByCategory('Mujer'); toggleMobileMenu()" class="mobile-nav-link">
+                    <i class="bi bi-person-dress"></i> PARA MUJER
+                </a>
+                <a href="#" @click.prevent="filterByCategory('Unisex'); toggleMobileMenu()" class="mobile-nav-link">
+                    <i class="bi bi-people-fill"></i> UNISEX
+                </a>
+                
+        </nav>
+
+        <!-- Modal de búsqueda -->
+        <div class="search-overlay" :class="{ 'active': searchModalOpen }" @click="closeSearchModal"></div>
+        <div class="search-modal-modern" :class="{ 'active': searchModalOpen }">
+            <div class="search-modal-content">
+                <button class="search-close-btn" @click="closeSearchModal">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                <div class="search-input-wrapper">
+                    <i class="bi bi-search search-icon"></i>
+                    <input 
+                        type="text" 
+                        class="search-input-modern"
+                        placeholder="Buscar perfumes, marcas..."
+                        v-model="searchTerm"
+                        @input="onSearchInput"
+                        ref="searchModalInput"
+                        autocomplete="off">
+                    <button class="search-clear-btn" @click="clearSearch" v-if="searchTerm">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                
+                <!-- Sugerencias de búsqueda (opcional) -->
+                <div class="search-hints" v-if="!searchTerm">
+                    <p class="search-hints-title">Búsquedas populares:</p>
+                    <div class="search-hints-tags">
+                        <button class="search-hint-tag" @click="searchTerm = 'sauvage'; onSearchInput();">Sauvage</button>
+                        <button class="search-hint-tag" @click="searchTerm = 'aventus'; onSearchInput();">Aventus</button>
+                        <button class="search-hint-tag" @click="searchTerm = 'yara'; onSearchInput();">Yara</button>
+                        <button class="search-hint-tag" @click="searchTerm = 'chanel'; onSearchInput();">Chanel</button>
+                        <button class="search-hint-tag" @click="searchTerm = 'dior'; onSearchInput();">Dior</button>
+                    </div>
+                </div>
+                
+                <!-- Mensaje de búsqueda activa -->
+                <div class="search-active-message" v-if="searchTerm && searchTerm.length >= 2">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <p>Buscando "{{ searchTerm }}"... Cierra este modal para ver los resultados</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- HERO SECTION REDISEÑADO -->
+        <section class="hero-section-modern" 
+                 v-show="!searchTerm && !showFavoritesView && !selectedPerfume && !showComingSoonView && selectedCategory === null && selectedPublico === null"
+                 aria-labelledby="hero-title"
+                 style="background: linear-gradient(90deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.4) 100%), url('./ImagenesPerfumes/fondoDefinitivo.png'); background-size: cover; background-position: left center; min-height: 80vh; display: flex; align-items: center; justify-content: flex-end; position: relative; padding-right: 5%;">
+            
+            <!-- Contenido alineado a la derecha -->
+            <div class="hero-content-wrapper" style="text-align: center; max-width: 550px; padding: 3rem 2rem; background: transparent; border-radius: 0; box-shadow: none;">
+                <!-- Logo arriba -->
+                <div style="margin-bottom: 2rem;">
+                    <img src="./ImagenesPerfumes/logo.png" alt="Premium Perfumería" style="height: 70px; filter: brightness(0) invert(1);">
+                </div>
+                
+                <!-- Imagen de perfume para móvil (oculta en desktop) -->
+                <div class="hero-perfume-image-mobile" style="display: none;">
+                    <img src="./ImagenesPerfumes/Sauvage.PNG" alt="Perfume Destacado" style="width: 100%; height: auto; object-fit: contain;">
+            </div>
+
+                <!-- Contenido de texto -->
+                <div class="hero-text-content">
+                    <!-- Título Principal -->
+                    <h1 class="hero-title-gradient" style="font-size: 3rem; color: #ffffff; background: none; -webkit-text-fill-color: #ffffff; text-shadow: 2px 2px 8px rgba(0,0,0,0.5);">
+                        Réplicas de<br>Alta Calidad
+                    </h1>
+                    
+                    <!-- Subtítulo con tonalidades doradas -->
+                    <p class="hero-subtitle-golden" style="font-size: 0.85rem; color: #ffffff; letter-spacing: 0.25em; text-shadow: 1px 1px 4px rgba(0,0,0,0.5);">
+                        Experimenta el <span style="color: #d4af37; font-weight: 500;">lujo</span> de las mejores <span style="color: #d4af37; font-weight: 500;">fragancias</span> del mundo a <span style="color: #d4af37; font-weight: 500;">precios accesibles</span>
+                    </p>
+                    
+                    <!-- Botón con estilo dorado -->
+                    <button class="hero-btn-shop hero-btn-golden" @click="scrollToProducts" style="margin-top: 1.5rem;">
+                        <i class="bi bi-bag-fill"></i>
+                        <span class="hide-mobile-text">Descubre Nuestro Catálogo</span>
+                        <span class="show-mobile-text" style="display: none;">Ver Catálogo</span>
+                    </button>
+                </div>
             </div>
         </section>
 
-        <main id="main-content">
+        <!-- SECCIÓN DE CATEGORÍAS -->
+        <section class="categories-section" v-show="!searchTerm && !showFavoritesView && !selectedPerfume && !showComingSoonView && selectedCategory === null && selectedPublico === null">
+            <div class="container">
+                <h2 style="text-align: center; font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 3rem; color: var(--text-primary);">
+                    Explora por <span style="color: #d4af37;">Categoría</span>
+                </h2>
+                <div class="categories-grid">
+                    <!-- Perfumes para Dama -->
+                    <div class="category-card" @click="filterByCategory('Mujer')">
+                        <div class="category-image">
+                            <img src="./ImagenesPerfumes/Perfumes_Dama.png" alt="Perfumes para Dama" loading="lazy">
+                            <div class="category-overlay">
+                                <h3 class="category-title">PERFUMES PARA<br><strong>DAMA</strong></h3>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Perfumes para Caballero -->
+                    <div class="category-card" @click="filterByCategory('Hombre')">
+                        <div class="category-image">
+                            <img src="./ImagenesPerfumes/Perfumes_Caballero.png" alt="Perfumes para Caballero" loading="lazy">
+                            <div class="category-overlay">
+                                <h3 class="category-title">PERFUMES PARA<br><strong>CABALLERO</strong></h3>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Árabes (Hombre) -->
+                    <div class="category-card" @click="filterByCategoryAdvanced('Hombre', 'Árabes', 'ArabesHombre')">
+                        <div class="category-image">
+                            <img src="./ImagenesPerfumes/Perfumes_ArabeHombre.png" alt="Perfumes Árabes Hombre" loading="lazy">
+                            <div class="category-overlay">
+                                <h3 class="category-title">PERFUMES<br><strong>ÁRABES HOMBRE</strong></h3>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Diseñador -->
+                    <div class="category-card" @click="filterByCategoryAdvanced(null, 'Diseñador', 'Disenador')">
+                        <div class="category-image">
+                            <img src="./ImagenesPerfumes/fondoDefinitivo.png" alt="Perfumes Diseñador" loading="lazy">
+                            <div class="category-overlay">
+                                <h3 class="category-title">PERFUMES<br><strong>DISEÑADOR</strong></h3>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Nicho -->
+                    <div class="category-card" @click="filterByCategoryAdvanced(null, 'Nicho', 'Nicho')">
+                        <div class="category-image">
+                            <img src="./ImagenesPerfumes/fondoDefinitivo.png" alt="Perfumes Nicho" loading="lazy">
+                            <div class="category-overlay">
+                                <h3 class="category-title">PERFUMES<br><strong>NICHO</strong></h3>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Árabes de Mujer -->
+                    <div class="category-card" @click="filterByCategoryAdvanced('Mujer', 'Árabes', 'ArabesMujer')">
+                        <div class="category-image">
+                            <img src="./ImagenesPerfumes/fondoDefinitivo.png" alt="Perfumes Árabes Mujer" loading="lazy">
+                            <div class="category-overlay">
+                                <h3 class="category-title">PERFUMES<br><strong>ÁRABES MUJER</strong></h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN DE MARCAS -->
+        <section class="brands-section" v-show="!searchTerm && !showFavoritesView && !selectedPerfume && !showComingSoonView && selectedCategory === null && selectedPublico === null">
+            <div class="container">
+                <h2 class="brands-title">ALGUNAS DE NUESTRAS MARCAS</h2>
+                <p class="brands-subtitle">Estas son solo algunas de las marcas que puedes encontrar en Premium Perfumería</p>
+                
+                <div class="brands-carousel-wrapper">
+                    <div class="brands-carousel">
+                        <!-- Primera fila de marcas -->
+                        <div class="brands-track brands-track-1">
+                            <div class="brand-item">
+                                <div class="brand-logo">CHANEL</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">BVLGARI</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">GIORGIO ARMANI</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">D&G</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">VERSACE</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">NAUTICA</div>
+                            </div>
+                            <!-- Duplicado para loop infinito -->
+                            <div class="brand-item">
+                                <div class="brand-logo">CHANEL</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">BVLGARI</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">GIORGIO ARMANI</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">D&G</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">VERSACE</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">NAUTICA</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Segunda fila de marcas (dirección inversa) -->
+                        <div class="brands-track brands-track-2">
+                            <div class="brand-item">
+                                <div class="brand-logo">BOSS</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">DIOR</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">PRADA</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">GUCCI</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">CAROLINA HERRERA</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">CALVIN KLEIN</div>
+                            </div>
+                            <!-- Duplicado para loop infinito -->
+                            <div class="brand-item">
+                                <div class="brand-logo">BOSS</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">DIOR</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">PRADA</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">GUCCI</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">CAROLINA HERRERA</div>
+                            </div>
+                            <div class="brand-item">
+                                <div class="brand-logo">CALVIN KLEIN</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <main id="main-content" v-show="!showComingSoonView">
             <div class="container py-5">
                 <div v-if="isLoading" class="loading-container">
                     <div class="loading-spinner"></div>
@@ -190,57 +386,124 @@
 
                 <div v-else-if="!showFavoritesView && !selectedPerfume">
                     <section class="products-section" aria-labelledby="products-title">
-                        <h2 id="products-title" class="section-title">Nuestra Colección Exclusiva</h2>
+                        <h2 id="products-title" class="section-title-modern">
+                            {{ selectedCategory ? getCategoryTitle(selectedCategory) : 'LO MÁS NUEVO' }}
+                        </h2>
+                        <p class="section-subtitle">Conoce nuestro catálogo de productos recién llegados</p>
 
-                        <div v-if="filteredPerfumes.length > 0" class="products-grid">
-                            <article class="product-card clickable-card"
-                                     v-for="(perfume, index) in filteredPerfumes"
+                        <div v-if="filteredPerfumes.length > 0" class="products-grid-modern">
+                            <template v-for="(perfume, index) in filteredPerfumes">
+                                <!-- Sección divisoria especial para Diseñador -->
+                                <div v-if="index === 13 && selectedCategory === 'Disenador'" :key="'divider-disenador-' + index" class="product-divider-section">
+                                    <div class="divider-content">
+                                        <div class="divider-image-side">
+                                            <img src="./ImagenesPerfumes/Perfumes_Dama.png" alt="Perfumes para Mujeres" class="divider-bg-image">
+                                        </div>
+                                        <div class="divider-text-side">
+                                            <h2 class="divider-title">PERFUMES PARA</h2>
+                                            <h2 class="divider-title-bold">MUJERES</h2>
+                                            <p class="divider-subtitle">Conoce nuestro catálogo de perfumes para mujer de diseñador</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Sección divisoria después de 4 productos (categorías normales) -->
+                                <div v-if="index === 4 && selectedCategory !== 'Disenador'" :key="'divider-' + index" class="product-divider-section">
+                                    <div class="divider-content">
+                                        <div class="divider-image-side">
+                                            <img src="./ImagenesPerfumes/fondoDefinitivo.png" alt="Perfumes Destacados" class="divider-bg-image">
+                                        </div>
+                                        <div class="divider-text-side">
+                                            <h2 class="divider-title">LOS MÁS</h2>
+                                            <h2 class="divider-title-bold">VENDIDOS</h2>
+                                            <p class="divider-subtitle">Conoce nuestro catálogo de perfumes más vendidos</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Sección divisoria después de 8 productos más (categorías normales) -->
+                                <div v-if="index === 12 && selectedCategory !== 'Disenador'" :key="'divider2-' + index" class="product-divider-section">
+                                    <div class="divider-content">
+                                        <div class="divider-text-side">
+                                            <h2 class="divider-title">PERFUMES</h2>
+                                            <h2 class="divider-title-bold">ÁRABES</h2>
+                                            <p class="divider-subtitle">Conoce nuestro catálogo de perfumes árabes</p>
+                                        </div>
+                                        <div class="divider-image-side">
+                                            <img src="./ImagenesPerfumes/fondoDefinitivo.png" alt="Perfumes Árabes" class="divider-bg-image">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Card de producto normal -->
+                                <article class="product-card-modern"
                                      :key="perfume.id_perfume"
-                                     :style="{ 'transition-delay': (index * 100) + 'ms' }"
+                                     :style="{ 'transition-delay': (index * 50) + 'ms' }"
                                      role="article"
-                                     @click="showPerfumeDetail(perfume)"
-                                     aria-labelledby="product-title-{{perfume.id_perfume}}">
-                                <div class="product-image-container">
-                                    <img :src="perfume.imagen_url" 
-                                         :alt="`Botella de perfume ${perfume.nombre} de ${perfume.marca} - ${perfume.mililitros}ml`" 
-                                         class="card-img-top img-fluid p-3 product-image"
-                                         loading="lazy"
-                                         @error="handleImageError">
-                                    <span class="product-badge">{{ perfume.publico }}</span>
-                                    <button class="product-favorite" 
+                                     aria-labelledby="product-title-{{perfume.id_perfume}}"
+                                     @click="showPerfumeDetail(perfume)">
+                                    
+                                    <!-- Header: Marca y Género -->
+                                    <div class="product-header-new">
+                                        <div class="product-info-left">
+                                            <p class="product-brand-new">{{ perfume.marca.toUpperCase() }}</p>
+                                            <span class="product-gender-badge" :class="`badge-${perfume.publico.toLowerCase()}`">
+                                                <i class="bi bi-circle-fill"></i>
+                                                {{ perfume.publico }}
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- Botón de favorito -->
+                                        <button class="product-favorite-btn-new" 
                                             @click.stop="toggleFavorite(perfume)"
                                             :aria-label="isFavorite(perfume) ? 'Quitar de favoritos' : 'Añadir a favoritos'">
-                                        <i :class="[isFavorite(perfume) ? 'bi-heart-fill' : 'bi-heart']"></i>
-                                    </button>
-                                </div>
-                                <div class="product-body">
-                                    <h3 :id="`product-title-${perfume.id_perfume}`" class="product-title">{{ perfume.nombre }}</h3>
-                                    <div class="product-meta">
-                                        <span class="product-meta-item">
-                                            <i class="bi bi-tag-fill"></i>
-                                            <span>{{ perfume.marca }}</span>
-                                        </span>
-                                        <span class="product-meta-item">
-                                            <i class="bi bi-droplet-fill"></i>
-                                            <span>{{ perfume.tipo }}</span>
-                                        </span>
-                                        <span class="product-meta-item">
-                                            <i class="bi bi-boxes"></i>
-                                            <span>{{ perfume.mililitros }}ml</span>
-                                        </span>
-                                    </div>
-                                    <p class="product-description">{{ perfume.descripcion }}</p>
-                                    <div class="product-price">{{ formatPrice(perfume.precio_minimo) }}</div>
-                                    <div class="product-actions">
-                                        <button class="btn-cart btn-cart-full" 
-                                                @click.stop="addToCart(perfume, 1, $event)"
-                                                :aria-label="`Añadir ${perfume.nombre} al carrito`">
-                                            <i class="bi bi-cart-plus"></i>
-                                            Añadir al carrito
+                                            <i :class="[isFavorite(perfume) ? 'bi-heart-fill' : 'bi-heart']"></i>
                                         </button>
                                     </div>
-                                </div>
+                                    
+                                    <!-- Imagen del producto -->
+                                    <div class="product-image-wrapper-new">
+                                        <img :src="perfume.imagen_url" 
+                                             :alt="`${perfume.nombre} de ${perfume.marca} - ${perfume.mililitros}ml`" 
+                                             class="product-image-new"
+                                             loading="lazy"
+                                             @error="handleImageError">
+                                    </div>
+                                    
+                                    <!-- Información del producto -->
+                                    <div class="product-info-new">
+                                        <h3 :id="`product-title-${perfume.id_perfume}`" class="product-name-new">
+                                            {{ perfume.nombre }}
+                                        </h3>
+                                        <p class="product-description-new" v-if="perfume.descripcion">
+                                            {{ perfume.descripcion.substring(0, 60) }}{{ perfume.descripcion.length > 60 ? '...' : '' }}
+                                        </p>
+                                        <p class="product-size-new">{{ perfume.mililitros }}ml</p>
+                                        
+                                        <!-- Precios -->
+                                        <div class="product-prices-new">
+                                            <div class="price-main-new">
+                                                <span v-if="perfume.descuento_porcentaje > 0" class="price-original-new">
+                                                    {{ formatPrice(perfume.precio_minimo) }}
+                                                </span>
+                                                <span class="price-current-new">
+                                                    {{ formatPrice(perfume.descuento_porcentaje > 0 ? perfume.precio_con_descuento : perfume.precio_minimo) }}
+                                                    <small>MXN</small>
+                                                </span>
+                                            </div>
+                                            <p class="price-wholesale-new">Mayoreo (6+ pzs): {{ formatPrice((perfume.descuento_porcentaje > 0 ? perfume.precio_con_descuento : perfume.precio_minimo) * 0.8) }}</p>
+                                        </div>
+                                        
+                                        <!-- Botón agregar al carrito -->
+                                        <button class="btn-add-cart-new" 
+                                                @click.stop="addToCart(perfume, 1, $event)"
+                                                :aria-label="`Añadir ${perfume.nombre} al carrito`">
+                                            <i class="bi bi-cart-fill"></i>
+                                            Agregar al Carrito
+                                        </button>
+                                    </div>
                             </article>
+                            </template>
                         </div>
 
                         <div v-else class="empty-state">
@@ -253,55 +516,76 @@
                 </div>
                 <div v-else-if="showFavoritesView">
                     <section class="favorites-section" aria-labelledby="favorites-title">
-                        <h2 id="favorites-title" class="section-title">Mis Perfumes Favoritos</h2>
+                        <h2 id="favorites-title" class="section-title-modern">MIS FAVORITOS</h2>
+                        <p class="section-subtitle">Tus perfumes guardados</p>
                         
-                        <div v-if="favoriteItems.length > 0" class="products-grid">
-                            <article class="product-card clickable-card"
+                        <div v-if="favoriteItems.length > 0" class="products-grid-modern">
+                            <article class="product-card-modern"
                                      v-for="(perfume, index) in favoriteItems"
                                      :key="perfume.id_perfume"
-                                     :style="{ 'transition-delay': (index * 100) + 'ms' }"
+                                     :style="{ 'transition-delay': (index * 50) + 'ms' }"
                                      role="article"
-                                     @click="showPerfumeDetail(perfume)"
-                                     aria-labelledby="product-title-{{perfume.id_perfume}}">
-                                <div class="product-image-container">
-                                    <img :src="perfume.imagen_url" 
-                                         :alt="`Botella de perfume ${perfume.nombre} de ${perfume.marca} - ${perfume.mililitros}ml`" 
-                                         class="card-img-top img-fluid p-3 product-image"
-                                         loading="lazy"
-                                         @error="handleImageError">
-                                    <span class="product-badge">{{ perfume.publico }}</span>
-                                    <button class="product-favorite" 
+                                     aria-labelledby="product-title-{{perfume.id_perfume}}"
+                                     @click="showPerfumeDetail(perfume)">
+                                
+                                <!-- Header: Marca y Género -->
+                                <div class="product-header-new">
+                                    <div class="product-info-left">
+                                        <p class="product-brand-new">{{ perfume.marca.toUpperCase() }}</p>
+                                        <span class="product-gender-badge" :class="`badge-${perfume.publico.toLowerCase()}`">
+                                            <i class="bi bi-circle-fill"></i>
+                                            {{ perfume.publico }}
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- Botón de favorito -->
+                                    <button class="product-favorite-btn-new active" 
                                             @click.stop="toggleFavorite(perfume)"
-                                            :aria-label="isFavorite(perfume) ? 'Quitar de favoritos' : 'Añadir a favoritos'">
-                                        <i :class="[isFavorite(perfume) ? 'bi-heart-fill' : 'bi-heart']"></i>
+                                            aria-label="Quitar de favoritos">
+                                        <i class="bi-heart-fill"></i>
                                     </button>
                                 </div>
-                                <div class="product-body">
-                                    <h3 :id="`product-title-${perfume.id_perfume}`" class="product-title">{{ perfume.nombre }}</h3>
-                                    <div class="product-meta">
-                                        <span class="product-meta-item">
-                                            <i class="bi bi-tag-fill"></i>
-                                            <span>{{ perfume.marca }}</span>
-                                        </span>
-                                        <span class="product-meta-item">
-                                            <i class="bi bi-droplet-fill"></i>
-                                            <span>{{ perfume.tipo }}</span>
-                                        </span>
-                                        <span class="product-meta-item">
-                                            <i class="bi bi-boxes"></i>
-                                            <span>{{ perfume.mililitros }}ml</span>
-                                        </span>
+                                
+                                <!-- Imagen del producto -->
+                                <div class="product-image-wrapper-new">
+                                    <img :src="perfume.imagen_url" 
+                                         :alt="`${perfume.nombre} de ${perfume.marca} - ${perfume.mililitros}ml`" 
+                                         class="product-image-new"
+                                         loading="lazy"
+                                         @error="handleImageError">
+                                </div>
+                                
+                                <!-- Información del producto -->
+                                <div class="product-info-new">
+                                    <h3 :id="`product-title-${perfume.id_perfume}`" class="product-name-new">
+                                        {{ perfume.nombre }}
+                                    </h3>
+                                    <p class="product-description-new" v-if="perfume.descripcion">
+                                        {{ perfume.descripcion.substring(0, 60) }}{{ perfume.descripcion.length > 60 ? '...' : '' }}
+                                    </p>
+                                    <p class="product-size-new">{{ perfume.mililitros }}ml</p>
+                                    
+                                    <!-- Precios -->
+                                    <div class="product-prices-new">
+                                        <div class="price-main-new">
+                                            <span v-if="perfume.descuento_porcentaje > 0" class="price-original-new">
+                                                {{ formatPrice(perfume.precio_minimo) }}
+                                            </span>
+                                            <span class="price-current-new">
+                                                {{ formatPrice(perfume.descuento_porcentaje > 0 ? perfume.precio_con_descuento : perfume.precio_minimo) }}
+                                                <small>MXN</small>
+                                            </span>
+                                        </div>
+                                        <p class="price-wholesale-new">Mayoreo (6+ pzs): {{ formatPrice((perfume.descuento_porcentaje > 0 ? perfume.precio_con_descuento : perfume.precio_minimo) * 0.8) }}</p>
                                     </div>
-                                    <p class="product-description">{{ perfume.descripcion }}</p>
-                                    <div class="product-price">{{ formatPrice(perfume.precio_minimo) }}</div>
-                                    <div class="product-actions">
-                                        <button class="btn-cart btn-cart-full" 
-                                                @click.stop="addToCart(perfume, 1, $event)"
-                                                :aria-label="`Añadir ${perfume.nombre} al carrito`">
-                                            <i class="bi bi-cart-plus"></i>
-                                            Añadir al carrito
-                                        </button>
-                                    </div>
+                                    
+                                    <!-- Botón agregar al carrito -->
+                                    <button class="btn-add-cart-new" 
+                                            @click.stop="addToCart(perfume, 1, $event)"
+                                            :aria-label="`Añadir ${perfume.nombre} al carrito`">
+                                        <i class="bi bi-cart-fill"></i>
+                                        Agregar al Carrito
+                                    </button>
                                 </div>
                             </article>
                         </div>
@@ -318,45 +602,130 @@
                 <!-- Vista Dedicada del Perfume -->
                 <div v-else-if="selectedPerfume" class="perfume-detail-view">
                     <section class="perfume-detail-section">
-                        <button class="btn-back" @click="closePerfumeDetail">
+                        <button class="btn-back-detail" @click="closePerfumeDetail">
                             <i class="bi bi-arrow-left"></i>
-                            Volver al catálogo
+                            <span>Volver al catálogo</span>
                         </button>
 
-                        <div class="perfume-detail-container">
-                            <h1 class="perfume-detail-title">{{ selectedPerfume.nombre }}</h1>
-                            
-                            <div class="perfume-detail-image-wrapper">
-                                <span class="perfume-detail-badge">{{ selectedPerfume.publico }}</span>
-                                <img class="perfume-detail-image" 
-                                     :src="selectedPerfume.imagen_url" 
-                                     :alt="`${selectedPerfume.nombre} - ${selectedPerfume.marca}`"
-                                     @error="handleImageError">
-                                
-                                <div class="perfume-detail-info-row">
-                                    <p class="perfume-detail-brand">{{ selectedPerfume.marca }}</p>
-                                    <p class="perfume-detail-ml">{{ selectedPerfume.mililitros }}ml</p>
+                        <div class="perfume-detail-container-modern">
+                            <!-- Columna izquierda: Imagen -->
+                            <div class="perfume-detail-left">
+                                <div class="perfume-detail-image-wrapper-modern">
+                                    <div class="perfume-detail-badges">
+                                        <span class="perfume-detail-badge-gender" :class="`badge-${selectedPerfume.publico.toLowerCase()}`">
+                                            <i class="bi bi-circle-fill"></i>
+                                            {{ selectedPerfume.publico }}
+                                        </span>
+                                        <div v-if="selectedPerfume.descuento_porcentaje > 0" class="perfume-detail-badge-discount">
+                                            -{{ selectedPerfume.descuento_porcentaje }}%
+                                        </div>
+                                    </div>
+                                    <img class="perfume-detail-image-modern" 
+                                         :src="selectedPerfume.imagen_url" 
+                                         :alt="`${selectedPerfume.nombre} - ${selectedPerfume.marca}`"
+                                         @error="handleImageError">
                                 </div>
                             </div>
 
-                            <div class="perfume-detail-info">
-                                <p class="perfume-detail-description">{{ selectedPerfume.descripcion }}</p>
-
-                                <div class="perfume-detail-price">
-                                    {{ formatPrice(selectedPerfume.precio_minimo) }}
+                            <!-- Columna derecha: Información -->
+                            <div class="perfume-detail-right">
+                                <div class="perfume-detail-header">
+                                    <div class="perfume-brand-badge-detail">{{ selectedPerfume.marca }}</div>
+                                    <h1 class="perfume-detail-title-modern">{{ selectedPerfume.nombre }}</h1>
                                 </div>
 
-                                <div class="perfume-detail-actions">
-                                    <button class="btn btn-favorite-detail" 
+                                <div class="perfume-detail-description-modern">
+                                    <p>{{ selectedPerfume.descripcion }}</p>
+                                </div>
+
+                                <!-- Información del producto en grid -->
+                                <div class="perfume-info-grid">
+                                    <div class="perfume-info-card">
+                                        <div class="info-card-label">Familia Olfativa</div>
+                                        <div class="info-card-value">{{ selectedPerfume.tipo }}</div>
+                                    </div>
+                                    <div class="perfume-info-card">
+                                        <div class="info-card-label">Tamaño</div>
+                                        <div class="info-card-value">{{ selectedPerfume.mililitros }}ml</div>
+                                    </div>
+                                </div>
+
+                                <!-- Pirámide Olfativa -->
+                                <div v-if="selectedPerfume.notas" class="perfume-pyramid">
+                                    <h3 class="pyramid-title">
+                                        <i class="bi bi-stack"></i>
+                                        Pirámide Olfativa
+                                    </h3>
+                                    <div class="pyramid-content">
+                                        <div class="pyramid-layer pyramid-top">
+                                            <div class="pyramid-layer-title">
+                                                <i class="bi bi-brightness-high"></i>
+                                                Notas de Salida
+                                            </div>
+                                            <div class="pyramid-layer-notes">{{ getNotasSalida(selectedPerfume.notas) }}</div>
+                                        </div>
+                                        <div class="pyramid-layer pyramid-heart">
+                                            <div class="pyramid-layer-title">
+                                                <i class="bi bi-heart"></i>
+                                                Notas de Corazón
+                                            </div>
+                                            <div class="pyramid-layer-notes">{{ getNotasCorazon(selectedPerfume.notas) }}</div>
+                                        </div>
+                                        <div class="pyramid-layer pyramid-base">
+                                            <div class="pyramid-layer-title">
+                                                <i class="bi bi-circle-fill"></i>
+                                                Notas de Fondo
+                                            </div>
+                                            <div class="pyramid-layer-notes">{{ getNotasFondo(selectedPerfume.notas) }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Selector de tipo de compra -->
+                                <div class="purchase-type-selector">
+                                    <button class="purchase-type-btn" 
+                                            :class="{ 'active': !isMayoreo }"
+                                            @click="selectMenudeo">
+                                        <div class="purchase-type-label">Menudeo</div>
+                                    </button>
+                                    <button class="purchase-type-btn"
+                                            :class="{ 'active': isMayoreo }"
+                                            @click="selectMayoreo(selectedPerfume)">
+                                        <div class="purchase-type-label">Mayoreo</div>
+                                        <div class="purchase-type-note">(6+ piezas)</div>
+                                    </button>
+                                </div>
+
+                                <!-- Precio -->
+                                <div class="perfume-price-display">
+                                    <div class="price-main-display">
+                                        <div v-if="selectedPerfume.descuento_porcentaje > 0 || isMayoreo" class="price-original-display">
+                                            {{ formatPrice(getPrecioBase(selectedPerfume)) }}
+                                        </div>
+                                        <div class="price-current-display" :class="{ 'has-discount': selectedPerfume.descuento_porcentaje > 0 || isMayoreo }">
+                                            {{ formatPrice(getPrecioFinal(selectedPerfume)) }}
+                                        </div>
+                                    </div>
+                                    <div class="price-unit">MXN por unidad</div>
+                                    <div v-if="isMayoreo" class="price-savings">
+                                        <i class="bi bi-tag-fill"></i>
+                                        Ahorras {{ formatPrice(getPrecioBase(selectedPerfume) - getPrecioFinal(selectedPerfume)) }} por unidad
+                                    </div>
+                                </div>
+
+                                <!-- Botones de acción -->
+                                <div class="perfume-detail-actions-modern">
+                                    <button class="btn-add-cart-detail-modern" 
+                                            @click="addToCart(selectedPerfume, isMayoreo ? 6 : 1, $event, isMayoreo)">
+                                        <i class="bi bi-cart-plus-fill"></i>
+                                        <span v-if="!isMayoreo">Agregar al Carrito</span>
+                                        <span v-else>Agregar 6 Unidades (Mayoreo)</span>
+                                    </button>
+                                    <button class="btn-favorite-detail-modern" 
                                             @click.stop="toggleFavorite(selectedPerfume)"
                                             :class="{'is-favorite': isFavorite(selectedPerfume.id_perfume)}"
                                             :aria-label="isFavorite(selectedPerfume.id_perfume) ? 'Quitar de favoritos' : 'Agregar a favoritos'">
                                         <i class="bi" :class="isFavorite(selectedPerfume.id_perfume) ? 'bi-heart-fill' : 'bi-heart'"></i>
-                                    </button>
-                                    <button class="btn btn-add-cart-detail" 
-                                            @click="addToCart(selectedPerfume, 1, $event)">
-                                        <i class="bi bi-cart-plus"></i>
-                                        Añadir al carrito
                                     </button>
                                 </div>
                             </div>
@@ -433,6 +802,46 @@
             </div>
         </main>
 
+        <!-- VISTA PRÓXIMAMENTE -->
+        <section class="coming-soon-section" v-if="showComingSoonView">
+            <div class="coming-soon-container">
+                <button class="btn-back-coming-soon" @click="closeComingSoon">
+                    <i class="bi bi-arrow-left"></i>
+                    Volver
+                </button>
+                
+                <div class="coming-soon-content">
+                    <div class="coming-soon-icon">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <h1 class="coming-soon-title">{{ comingSoonSection }}</h1>
+                    <h2 class="coming-soon-subtitle">PRÓXIMAMENTE</h2>
+                    <p class="coming-soon-text">
+                        Estamos trabajando en esta sección para ofrecerte la mejor experiencia.<br>
+                        <strong>¡Espera nuevas novedades muy pronto!</strong>
+                    </p>
+                    <div class="coming-soon-features">
+                        <div class="feature-item">
+                            <i class="bi bi-star-fill"></i>
+                            <span>Nuevos productos</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="bi bi-lightning-fill"></i>
+                            <span>Experiencia mejorada</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="bi bi-heart-fill"></i>
+                            <span>Ofertas exclusivas</span>
+                        </div>
+                    </div>
+                    <button class="btn-explore-products" @click="closeComingSoon">
+                        <i class="bi bi-grid-fill"></i>
+                        Explorar Productos Disponibles
+                    </button>
+                </div>
+            </div>
+        </section>
+
         <div class="offcanvas offcanvas-end cart-offcanvas" tabindex="-1" id="cartOffcanvas" aria-labelledby="cartOffcanvasLabel">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="cartOffcanvasLabel">Tu Carrito de Compras</h5>
@@ -441,8 +850,8 @@
             <div class="offcanvas-body">
                 <div v-if="cart.length > 0" class="cart-content">
                     <div class="cart-items">
-                        <div v-for="item in cart" 
-                             :key="item.id_perfume" 
+                        <div v-for="(item, index) in cart" 
+                             :key="`${item.id_perfume}-${item.es_mayoreo ? 'mayoreo' : 'menudeo'}`" 
                              class="cart-item"
                              role="listitem">
                             <div class="cart-item-image">
@@ -452,28 +861,31 @@
                                      @error="handleImageError">
                             </div>
                             <div class="cart-item-details">
-                                <h6 class="cart-item-title">{{ item.nombre }}</h6>
+                                <h6 class="cart-item-title">
+                                    {{ item.nombre }}
+                                    <span v-if="item.es_mayoreo" class="cart-mayoreo-badge">MAYOREO</span>
+                                </h6>
                                 <p class="cart-item-meta">{{ item.marca }} - {{ item.mililitros }}ml</p>
                                 <div class="cart-item-quantity">
                                     <button class="quantity-btn" 
-                                            @click="updateCartQuantity(item.id_perfume, item.quantity - 1)"
+                                            @click="updateCartQuantity(index, item.quantity - 1)"
                                             :disabled="item.quantity <= 1"
                                             aria-label="Reducir cantidad">
                                         <i class="bi bi-dash"></i>
                                     </button>
                                     <span class="quantity-display">{{ item.quantity }}</span>
                                     <button class="quantity-btn" 
-                                            @click="updateCartQuantity(item.id_perfume, item.quantity + 1)"
-                                            :disabled="item.quantity >= 10"
+                                            @click="updateCartQuantity(index, item.quantity + 1)"
+                                            :disabled="item.quantity >= 100"
                                             aria-label="Aumentar cantidad">
                                         <i class="bi bi-plus"></i>
                                     </button>
                                 </div>
                             </div>
                             <div class="cart-item-actions">
-                                <div class="cart-item-price">{{ formatPrice(item.precio_minimo * item.quantity) }}</div>
+                                <div class="cart-item-price">{{ formatPrice((item.descuento_porcentaje > 0 ? item.precio_con_descuento : item.precio_minimo) * item.quantity) }}</div>
                                 <button class="btn-remove" 
-                                        @click="removeFromCart(item.id_perfume)"
+                                        @click="removeFromCart(index)"
                                         aria-label="Eliminar producto">
                                     <i class="bi bi-trash"></i>
                                 </button>
@@ -567,6 +979,16 @@
                 </div>
             </div>
         </div>
+
+        <!-- BOTÓN FLOTANTE DE WHATSAPP -->
+        <a href="https://wa.me/5212311877967" 
+           target="_blank" 
+           rel="noopener noreferrer"
+           class="whatsapp-float-btn"
+           aria-label="Contactar por WhatsApp">
+            <i class="bi bi-whatsapp"></i>
+            <span class="whatsapp-tooltip">¿Necesitas ayuda?</span>
+        </a>
     </div>
 
     <script src="js/config.js"></script>

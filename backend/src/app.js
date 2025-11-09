@@ -5,10 +5,12 @@ const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 
 const { testConnection } = require('./db/db');
 const perfumeRoutes = require('./routes/perfumes');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -33,7 +35,7 @@ app.use(cors({
         
         return callback(null, true);
     },
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -45,6 +47,7 @@ app.use(helmet({
 
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
+app.use(cookieParser());
 
 if (NODE_ENV === 'development') {
     app.use(morgan('dev'));
@@ -77,7 +80,7 @@ const staticOptions = {
     }
 };
 
-app.use('/imagenesPerfumes', express.static(
+app.use('/ImagenesPerfumes', express.static(
     path.join(__dirname, 'ImagenesPerfumes'), 
     staticOptions
 ));
@@ -95,6 +98,8 @@ app.get('/', (req, res) => {
             'GET /api/perfumes/:id': 'Perfume por ID', 
             'GET /api/perfumes/:id/reviews': 'Reseñas del perfume',
             'POST /api/perfumes/:id/reviews': 'Añadir reseña',
+            'POST /api/admin/login': 'Login de administrador',
+            'GET /api/admin/estadisticas': 'Estadísticas del dashboard',
             'GET /health': 'Estado del servidor',
             'GET /imagenesPerfumes/*': 'Servir imágenes de perfumes'
         },
@@ -128,6 +133,7 @@ if (NODE_ENV === 'development') {
 
 // Rutas principales
 app.use('/api/perfumes', perfumeRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ===== MANEJO DE ERRORES =====
 

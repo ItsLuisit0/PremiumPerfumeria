@@ -37,15 +37,15 @@ if (NODE_ENV === 'production' && allowedOrigins.length === defaultDevOrigins.len
 
 app.use(cors({
     origin: function (origin, callback) {
-        // Permitir solicitudes sin origen (como Postman o apps móviles) solo en desarrollo
+        // Permitir solicitudes sin origen en desarrollo
         if (!origin && NODE_ENV === 'development') {
             return callback(null, true);
         }
         
-        // En producción, requerir origen
+        // En producción, permitir requests sin origen (healthchecks de Railway, etc)
         if (!origin && NODE_ENV === 'production') {
-            console.warn('❌ CORS bloqueado: Sin origen en producción');
-            return callback(new Error('Origen no proporcionado'), false);
+            console.log('✅ CORS: Request sin origen permitido (healthcheck)');
+            return callback(null, true);
         }
         
         // Verificar si el origen está en la lista permitida

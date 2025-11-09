@@ -16,17 +16,39 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+// Configuración de CORS según el entorno
+const defaultDevOrigins = [
+    'http://127.0.0.1:5500', 
+    'http://localhost:3000', 
+    'http://localhost:5500', 
+    'http://localhost:8080'
+];
+
 const allowedOrigins = process.env.CORS_ORIGIN 
     ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
-    : ['http://127.0.0.1:5500', 'http://localhost:3000', 'http://localhost:5500', 'http://localhost:8080'];
+    : defaultDevOrigins;
 
 console.log('🌐 Orígenes CORS permitidos:', allowedOrigins);
 
+if (NODE_ENV === 'production' && allowedOrigins.length === defaultDevOrigins.length) {
+    console.warn('⚠️  ADVERTENCIA: Usando orígenes CORS por defecto en producción');
+    console.warn('📝 Configura CORS_ORIGIN en las variables de entorno');
+}
+
 app.use(cors({
     origin: function (origin, callback) {
-        // Permitir solicitudes sin origen (como Postman o apps móviles)
-        if (!origin) return callback(null, true);
+        // Permitir solicitudes sin origen (como Postman o apps móviles) solo en desarrollo
+        if (!origin && NODE_ENV === 'development') {
+            return callback(null, true);
+        }
         
+        // En producción, requerir origen
+        if (!origin && NODE_ENV === 'production') {
+            console.warn('❌ CORS bloqueado: Sin origen en producción');
+            return callback(new Error('Origen no proporcionado'), false);
+        }
+        
+        // Verificar si el origen está en la lista permitida
         if (allowedOrigins.indexOf(origin) === -1) {
             const msg = 'La política de CORS para este sitio no permite acceso desde el origen especificado.';
             console.warn('❌ CORS bloqueado para origen:', origin);

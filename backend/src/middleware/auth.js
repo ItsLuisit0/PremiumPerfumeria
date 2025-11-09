@@ -1,9 +1,20 @@
 const jwt = require('jsonwebtoken');
 const { pool } = require('../db/db');
 
-// Secret key para JWT (debe estar en .env en producción)
-const JWT_SECRET = process.env.JWT_SECRET || 'tu-secret-key-super-seguro-cambiame-en-produccion';
+// Secret key para JWT (OBLIGATORIO en .env)
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
+
+// Validar que JWT_SECRET esté configurado
+if (!JWT_SECRET) {
+    console.error('❌ ERROR CRÍTICO: JWT_SECRET no está configurado en las variables de entorno');
+    console.error('📝 Configura JWT_SECRET en tu archivo .env');
+    console.error('💡 Genera un secret seguro con: node -e "console.log(require(\'crypto\').randomBytes(64).toString(\'hex\'))"');
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error('JWT_SECRET es obligatorio en producción');
+    }
+    console.warn('⚠️  Usando secret temporal para desarrollo (NO USAR EN PRODUCCIÓN)');
+}
 
 /**
  * Middleware para verificar el token JWT

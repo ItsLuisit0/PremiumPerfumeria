@@ -1,35 +1,126 @@
+# ============================================
+# PERFUMERÍA PREMIUM - .gitignore
+# ============================================
+
 # Dependencies
 node_modules/
 backend/node_modules/
 frontend/node_modules/
+package-lock.json
 
 # Environment variables
 .env
 backend/.env
+frontend/.env
 *.env.local
 *.env.production
+*.env.staging
+.env.*.local
 
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
 
 # OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+Desktop.ini
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*.swn
+*~
+.project
+.settings/
+.classpath
 
 # Build
 dist/
 build/
+.next/
+out/
 
 # Temporary files
 *.tmp
 temp/
+tmp/
+.cache/
+
+# Database
+*.sql.bak
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads (si hay)
+uploads/
+public/uploads/
+
+# Railway / Render
+.railway/
+.render/
+
+# Mac
+.AppleDouble
+.LSOverride
+
+# Windows
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Compressed files (excepto assets necesarios)
+# *.zip
+# *.tar
+# *.gz
+
+# Documentation builds
+docs/_build/
+site/
+
+# Certificados SSL (nunca commitear)
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# Secrets y configuraciones sensibles
+secrets/
+config/secrets.js
+config/production.json

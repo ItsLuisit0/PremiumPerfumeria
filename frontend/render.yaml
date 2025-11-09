@@ -1,0 +1,6 @@
+﻿# Render Static Site Configuration
+# Build Command: npm install (si hubiera dependencias, pero aquÃ­ es HTML estÃ¡tico)
+# Publish Directory: public
+
+# Este archivo no es estrictamente necesario para sitios estÃ¡ticos simples
+# Render detectarÃ¡ automÃ¡ticamente el directorio 'public'

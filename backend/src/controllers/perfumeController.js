@@ -2,25 +2,57 @@ const { pool } = require('../db/db');
 const fs = require('fs');
 const path = require('path');
 
-// Función auxiliar para encontrar la imagen correcta
-function encontrarImagenPerfume(nombrePerfume) {
-    const dirImagenes = path.join(__dirname, '../ImagenesPerfumes');
-    const nombreBase = nombrePerfume.replace(/\s+/g, '_');
+// Caché de imágenes para evitar búsquedas repetidas en filesystem
+const imagenCache = new Map();
+let imagenesCacheInitialized = false;
+
+// Inicializar caché de imágenes al arrancar
+function inicializarCacheImagenes() {
+    if (imagenesCacheInitialized) return;
     
-    // Extensiones posibles a buscar
-    const extensiones = ['.PNG', '.png', '.jpg', '.jpeg', '.JPG', '.JPEG'];
-    
-    // Buscar archivo con cualquier extensión
-    for (const ext of extensiones) {
-        const nombreArchivo = `${nombreBase}${ext}`;
-        const rutaCompleta = path.join(dirImagenes, nombreArchivo);
+    try {
+        const dirImagenes = path.join(__dirname, '../ImagenesPerfumes');
         
-        if (fs.existsSync(rutaCompleta)) {
-            return `ImagenesPerfumes/${nombreArchivo}`;
+        // Verificar si el directorio existe
+        if (!fs.existsSync(dirImagenes)) {
+            console.warn('⚠️  Directorio de imágenes no encontrado:', dirImagenes);
+            imagenesCacheInitialized = true;
+            return;
         }
+        
+        // Leer todos los archivos del directorio
+        const archivos = fs.readdirSync(dirImagenes);
+        
+        archivos.forEach(archivo => {
+            // Obtener nombre sin extensión y normalizado
+            const nombreSinExt = path.parse(archivo).name.toLowerCase().replace(/\s+/g, '_');
+            imagenCache.set(nombreSinExt, `ImagenesPerfumes/${archivo}`);
+        });
+        
+        console.log(`✅ Caché de imágenes inicializado: ${imagenCache.size} imágenes`);
+        imagenesCacheInitialized = true;
+    } catch (error) {
+        console.error('❌ Error al inicializar caché de imágenes:', error.message);
+        imagenesCacheInitialized = true;
+    }
+}
+
+// Función optimizada para encontrar la imagen correcta
+function encontrarImagenPerfume(nombrePerfume) {
+    // Inicializar caché si no está inicializado
+    if (!imagenesCacheInitialized) {
+        inicializarCacheImagenes();
     }
     
-    // Si no se encuentra, devolver null para usar placeholder
+    // Normalizar nombre del perfume
+    const nombreNormalizado = nombrePerfume.toLowerCase().replace(/\s+/g, '_');
+    
+    // Buscar en caché
+    if (imagenCache.has(nombreNormalizado)) {
+        return imagenCache.get(nombreNormalizado);
+    }
+    
+    // Si no se encuentra, devolver null
     return null;
 }
 

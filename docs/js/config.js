@@ -15,7 +15,7 @@ const AppConfig = {
     
     production: {
         // ✅ Backend desplegado en Railway
-        apiUrl: 'https://perfumeria-production.up.railway.app'
+        apiUrl: 'https://perfumeriapremium-production.up.railway.app'
     },
     
     // Obtener la URL del API según el entorno

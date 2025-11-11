@@ -16,6 +16,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+// Confiar en proxies (Railway, Render, etc)
+if (NODE_ENV === 'production') {
+    app.set('trust proxy', 1); // Confiar en el primer proxy
+    console.log('✅ Trust proxy habilitado para producción');
+}
+
 // Configuración de CORS según el entorno
 const defaultDevOrigins = [
     'http://127.0.0.1:5500', 

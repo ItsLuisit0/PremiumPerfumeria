@@ -1,4 +1,16 @@
-const API_URL = 'http://localhost:3000/api';
+// Detectar entorno y usar la API correcta
+const isDevelopment = window.location.hostname === 'localhost' || 
+                     window.location.hostname === '127.0.0.1' ||
+                     window.location.port === '5500' ||
+                     window.location.port === '5501';
+
+const API_URL = isDevelopment 
+    ? 'http://localhost:3000/api'
+    : 'https://perfumeriapremium-production.up.railway.app/api';
+
+console.log('🌐 Dashboard - Entorno:', isDevelopment ? 'Desarrollo' : 'Producción');
+console.log('🔗 API URL:', API_URL);
+
 let adminToken = null;
 let adminUser = null;
 

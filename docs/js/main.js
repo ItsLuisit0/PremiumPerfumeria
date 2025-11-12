@@ -566,6 +566,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     this.favoriteIds.push(perfume.id_perfume);
                     this.showToast('success', `${perfume.nombre} añadido a favoritos`);
+                    
+                    // Abrir automáticamente la colección de favoritos
+                    this.$nextTick(() => {
+                        this.showFavoritesView = true;
+                        this.selectedCategory = null;
+                        this.selectedPublico = null;
+                        this.selectedTipo = null;
+                        this.searchTerm = '';
+                        this.selectedPerfume = null;
+                        this.showComingSoonView = false;
+                        
+                        // Scroll suave a la sección de productos
+                        setTimeout(() => {
+                            this.scrollToProducts();
+                        }, 100);
+                    });
                 }
             },
             loadFavorites() {

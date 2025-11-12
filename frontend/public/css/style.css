@@ -1514,22 +1514,25 @@ textarea::placeholder {
 }
 
 .price-original-new {
-    font-size: 0.85rem;
-    color: #666;
+    font-size: 0.7rem;
+    color: #999999;
     text-decoration: line-through;
+    opacity: 0.6;
 }
 
 .price-current-new {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    color: #ffffff;
+    color: #ffd700 !important; /* Dorado brillante */
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
 }
 
 .price-current-new small {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     font-weight: 500;
     margin-left: 4px;
-    color: #999;
+    color: #ffd700;
+    opacity: 0.7;
 }
 
 .price-wholesale-new {
@@ -3898,7 +3901,9 @@ textarea::placeholder {
     }
     
     .price-current-new {
-        font-size: 1.3rem;
+        font-size: 1.1rem !important;
+        color: #ffd700 !important;
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.3) !important;
     }
     
     .btn-add-cart-new {

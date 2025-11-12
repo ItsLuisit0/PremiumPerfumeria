@@ -3465,6 +3465,129 @@ textarea::placeholder {
         top: 8px !important;
         right: 8px !important;
     }
+    
+    /* ===== DETALLE DEL PERFUME EN MÓVIL ===== */
+    .perfume-detail-view {
+        padding: 20px 16px !important;
+    }
+    
+    .btn-back-detail {
+        padding: 8px 16px !important;
+        font-size: 0.85rem !important;
+        margin-bottom: 20px !important;
+    }
+    
+    .perfume-detail-container-modern {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+    
+    /* Imagen del perfume */
+    .perfume-detail-image-wrapper-modern {
+        padding: 20px !important;
+        min-height: auto !important;
+    }
+    
+    .perfume-detail-image-modern {
+        max-height: 300px !important;
+    }
+    
+    /* Badge de descuento */
+    .perfume-detail-badge-discount {
+        top: 12px !important;
+        left: 12px !important;
+        font-size: 0.85rem !important;
+        padding: 6px 12px !important;
+    }
+    
+    /* Info del perfume */
+    .perfume-detail-info-modern {
+        padding: 0 !important;
+    }
+    
+    .perfume-detail-title-modern {
+        font-size: 1.5rem !important;
+        line-height: 1.3 !important;
+        margin-bottom: 12px !important;
+    }
+    
+    .perfume-detail-brand-modern {
+        font-size: 0.85rem !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .perfume-detail-meta {
+        font-size: 0.8rem !important;
+        margin-bottom: 16px !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+    }
+    
+    /* Precio compacto */
+    .perfume-price-display {
+        margin: 20px 0 !important;
+        padding: 16px !important;
+    }
+    
+    .price-current-display {
+        font-size: 2rem !important;
+    }
+    
+    .price-original-display {
+        font-size: 1rem !important;
+    }
+    
+    /* Selectores de cantidad y tipo */
+    .perfume-purchase-options {
+        margin-bottom: 20px !important;
+    }
+    
+    .purchase-type-selector {
+        gap: 10px !important;
+        margin-bottom: 16px !important;
+    }
+    
+    .type-option {
+        padding: 10px 16px !important;
+        font-size: 0.85rem !important;
+    }
+    
+    .quantity-selector-modern {
+        justify-content: center !important;
+        margin-bottom: 16px !important;
+    }
+    
+    .quantity-btn-modern {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 1.2rem !important;
+    }
+    
+    .quantity-value-modern {
+        font-size: 1.1rem !important;
+        min-width: 50px !important;
+    }
+    
+    /* Botones de acción */
+    .btn-add-cart-detail-modern,
+    .btn-favorite-detail-modern {
+        padding: 14px 20px !important;
+        font-size: 0.9rem !important;
+    }
+    
+    /* Sección de reseñas compacta */
+    .perfume-reviews-section {
+        padding: 20px 0 !important;
+    }
+    
+    .review-card {
+        padding: 16px !important;
+        margin-bottom: 16px !important;
+    }
+    
+    .review-form {
+        padding: 20px !important;
+    }
 }
 
 /* Móvil */

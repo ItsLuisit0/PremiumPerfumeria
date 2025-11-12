@@ -1521,7 +1521,7 @@ textarea::placeholder {
 }
 
 .price-current-new {
-    font-size: 1.1rem;
+    font-size: 0.9rem; /* Igual al nombre del perfume */
     font-weight: 700;
     color: #ffd700 !important; /* Dorado brillante */
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
@@ -3902,7 +3902,7 @@ textarea::placeholder {
     }
     
     .price-current-new {
-        font-size: 1.1rem !important;
+        font-size: 0.9rem !important; /* Igual al nombre del perfume en móvil */
         color: #ffd700 !important;
         text-shadow: 0 0 10px rgba(255, 215, 0, 0.3) !important;
     }

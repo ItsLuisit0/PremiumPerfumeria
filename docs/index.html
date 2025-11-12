@@ -766,8 +766,16 @@
                                                   class="form-control form-control-modern" 
                                                   rows="4" 
                                                   required 
-                                                  placeholder="Cuéntanos tu experiencia con este perfume..."></textarea>
-                                        <small class="char-counter">{{ newReview.comentario.length }}/500 caracteres</small>
+                                                  placeholder="Cuéntanos tu experiencia con este perfume... (mínimo 20 caracteres)"></textarea>
+                                        <div class="review-char-counter">
+                                            <small :class="['char-counter', newReview.comentario.length >= 20 ? 'char-valid' : 'char-invalid']">
+                                                <i class="bi" :class="newReview.comentario.length >= 20 ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'"></i>
+                                                {{ newReview.comentario.length }}/500 caracteres
+                                                <span v-if="newReview.comentario.length < 20" class="char-needed">
+                                                    (faltan {{ 20 - newReview.comentario.length }})
+                                                </span>
+                                            </small>
+                                        </div>
                                     </div>
                                     <button type="submit" class="btn btn-submit-review" :disabled="isSubmittingReview">
                                         <span v-if="isSubmittingReview" class="spinner-border spinner-border-sm me-2" role="status"></span>

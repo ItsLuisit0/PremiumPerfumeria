@@ -2967,12 +2967,51 @@ textarea::placeholder {
     color: var(--text-secondary);
 }
 
-.char-counter {
-    display: block;
+/* Contador de caracteres mejorado */
+.review-char-counter {
+    margin-top: 8px;
     text-align: right;
+}
+
+.char-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-top: 4px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.char-counter i {
+    font-size: 1rem;
+}
+
+/* Estado inválido (menos de 20 caracteres) */
+.char-invalid {
+    background-color: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.char-invalid i {
+    color: #ffc107;
+}
+
+/* Estado válido (20+ caracteres) */
+.char-valid {
+    background-color: rgba(76, 175, 80, 0.15);
+    color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.char-valid i {
+    color: #4caf50;
+}
+
+.char-needed {
+    font-weight: 600;
+    color: #ff9800;
 }
 
 .btn-submit-review {

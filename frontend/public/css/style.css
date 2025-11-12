@@ -1460,7 +1460,7 @@ textarea::placeholder {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    background: #1a1a1a; /* Fondo oscuro */
+    background: #000000; /* Fondo completamente negro */
     margin-bottom: 15px;
 }
 

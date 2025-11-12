@@ -81,21 +81,29 @@ if (NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
 
-// ===== RATE LIMITING PERMISIVO PARA DESARROLLO =====
+// ===== RATE LIMITING =====
 if (NODE_ENV === 'development') {
     app.use(rateLimit({
         windowMs: 1 * 60 * 1000, // 1 minuto
-        max: 100, // 100 requests por minuto en desarrollo
+        max: 200, // 200 requests por minuto en desarrollo
         message: { 
             success: false, 
             message: 'Demasiadas solicitudes. Por favor, espera un momento.' 
         }
     }));
 } else {
+    // Producción: más permisivo para múltiples usuarios
     app.use(rateLimit({
         windowMs: 15 * 60 * 1000, // 15 minutos
-        max: 100, // 100 requests por 15 minutos en producción
-        message: { success: false, message: 'Demasiadas solicitudes. Por favor, intenta más tarde.' }
+        max: 1000, // 1000 requests por 15 minutos (aprox 67 req/min)
+        standardHeaders: true, // Retorna info de rate limit en headers `RateLimit-*`
+        legacyHeaders: false, // Deshabilita headers `X-RateLimit-*`
+        message: { 
+            success: false, 
+            message: 'Demasiadas solicitudes. Por favor, intenta más tarde.' 
+        },
+        // Excluir healthchecks del rate limit
+        skip: (req) => req.path === '/health' || req.path === '/'
     }));
 }
 

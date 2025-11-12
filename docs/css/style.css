@@ -3258,6 +3258,68 @@ textarea::placeholder {
     }
 }
 
+/* Móvil Grande (iPhone 15 Pro Max, etc.) */
+@media (max-width: 768px) and (min-width: 430px) {
+    .header-container {
+        padding: 0 20px;
+        height: 75px;
+    }
+    
+    .header-logo img {
+        height: 50px;
+    }
+    
+    .hero-section-modern {
+        min-height: 65vh !important;
+        padding: 2rem 1.5rem !important;
+    }
+    
+    .hero-content-wrapper {
+        display: grid !important;
+        grid-template-columns: 40% 60% !important;
+        gap: 1.5rem !important;
+        padding: 1.5rem !important;
+        max-width: 100% !important;
+    }
+    
+    .hero-perfume-image-mobile img {
+        max-height: 280px !important;
+    }
+    
+    .hero-title-gradient {
+        font-size: 1.8rem !important;
+        line-height: 1.2 !important;
+    }
+    
+    .hero-subtitle-golden {
+        font-size: 0.75rem !important;
+        line-height: 1.5 !important;
+    }
+    
+    .hero-btn-golden {
+        padding: 0.7rem 1.5rem !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .products-grid-modern {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 20px;
+        padding: 0 20px;
+    }
+    
+    .product-card {
+        min-height: 450px;
+    }
+    
+    .product-name {
+        font-size: 1.1rem;
+    }
+    
+    .product-brand {
+        font-size: 0.95rem;
+    }
+}
+
 /* Móvil */
 @media (max-width: 576px) {
     .header-container {

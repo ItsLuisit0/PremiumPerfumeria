@@ -243,9 +243,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.newReview = { usuario: '', comentario: '', calificacion: null };
                 this.currentRating = 0;
                 this.fetchReviews(perfume.id_perfume);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // Solo scroll al top si el detalle está visible, no resetear categorías
+                this.$nextTick(() => {
+                    const detailSection = document.querySelector('.perfume-detail-section-modern');
+                    if (detailSection) {
+                        detailSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
             },
             closePerfumeDetail() {
+                const previousCategory = this.selectedCategory;
+                const previousPublico = this.selectedPublico;
+                const previousTipo = this.selectedTipo;
+                const previousSearch = this.searchTerm;
+                
                 this.selectedPerfume = null;
                 this.perfumeReviews = [];
                 this.reviews = [];
@@ -254,11 +265,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     comentario: '',
                     calificacion: null
                 };
-                this.isMayoreo = false; // Resetear modo mayoreo
-                // No resetear búsqueda, categoría ni tipo para mantener el contexto
+                this.isMayoreo = false;
+                
+                // Mantener el contexto de búsqueda/filtros
+                this.selectedCategory = previousCategory;
+                this.selectedPublico = previousPublico;
+                this.selectedTipo = previousTipo;
+                this.searchTerm = previousSearch;
+                
                 this.$nextTick(() => {
                     this.initObserver();
-                    this.scrollToProducts();
+                    // Solo hacer scroll si hay una categoría activa
+                    if (previousCategory || previousSearch) {
+                        this.scrollToProducts();
+                    }
                 });
             },
             addToCart(perfume, quantity, event, esMayoreo = false) {
@@ -456,13 +476,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                if (!this.newReview.comentario || this.newReview.comentario.trim().length < 10) {
-                    this.showToast('warning', 'El comentario debe tener al menos 10 caracteres');
+                // Validación mejorada de comentario con contador
+                const comentarioLength = this.newReview.comentario ? this.newReview.comentario.trim().length : 0;
+                const minLength = 20; // Aumentado a 20 caracteres para comentarios más útiles
+                const maxLength = 500;
+                
+                if (!this.newReview.comentario || comentarioLength < minLength) {
+                    const faltantes = minLength - comentarioLength;
+                    this.showToast('warning', `⚠️ Tu comentario es muy corto. Necesitas ${faltantes} caracteres más para enviarlo (mínimo ${minLength} caracteres)`);
                     return;
                 }
 
-                if (this.newReview.comentario.trim().length > 500) {
-                    this.showToast('warning', 'El comentario no puede exceder 500 caracteres');
+                if (comentarioLength > maxLength) {
+                    const excedentes = comentarioLength - maxLength;
+                    this.showToast('warning', `⚠️ Tu comentario es muy largo. Reduce ${excedentes} caracteres (máximo ${maxLength} caracteres)`);
                     return;
                 }
 

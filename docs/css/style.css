@@ -3420,16 +3420,20 @@ textarea::placeholder {
     }
     
     .price-current {
-        font-size: 1.3rem !important;
+        font-size: 1.1rem !important; /* Más pequeño */
         margin-bottom: 3px !important;
         line-height: 1.2 !important;
+        font-weight: 700 !important;
+        color: #ffd700 !important; /* Color dorado que resalta */
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.3) !important;
     }
     
     .price-original {
-        font-size: 0.75rem !important;
+        font-size: 0.7rem !important;
         line-height: 1 !important;
         text-decoration: line-through !important;
-        opacity: 0.7 !important;
+        opacity: 0.6 !important;
+        color: #999999 !important;
     }
     
     .price-mayoreo {

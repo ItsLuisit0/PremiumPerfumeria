@@ -1,10 +1,11 @@
 # 💜 Perfumería Premium - E-Commerce de Fragancias
 
-> **Sistema completo de e-commerce** especializado en la venta de réplicas premium de fragancias de lujo. Plataforma web moderna con gestión de productos, carrito de compras, sistema de reseñas y panel de administración completo.
+> **Sistema completo de e-commerce** especializado en la venta de réplicas premium de fragancias de lujo. Plataforma web moderna con diseño premium, buscador inteligente, carrito de compras, sistema de reseñas y panel de administración completo.
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
 ![Node](https://img.shields.io/badge/node-18.x-green.svg)
 ![MySQL](https://img.shields.io/badge/mysql-8.0-orange.svg)
+![Tailwind](https://img.shields.io/badge/tailwind-3.4-38bdf8.svg)
 ![License](https://img.shields.io/badge/license-Propietario-red.svg)
 
 ---
@@ -31,12 +32,14 @@
 
 **Perfumería Premium** es una plataforma de e-commerce completa diseñada para la venta en línea de réplicas premium de fragancias de marcas reconocidas. El sistema permite a los clientes:
 
-- 🛍️ **Explorar** un catálogo extenso de perfumes
-- 🔍 **Buscar y filtrar** productos por categoría, marca y género
-- 🛒 **Agregar al carrito** y realizar pedidos vía WhatsApp
+- 🛍️ **Explorar** un catálogo extenso de perfumes con diseño premium
+- 🔍 **Buscar inteligentemente** con resultados en tiempo real y autocompletado
+- 🎯 **Filtrar** productos por categoría, marca, género y tipo (Árabes, Diseñador, etc.)
+- 🛒 **Agregar al carrito** con slide-over moderno y realizar pedidos vía WhatsApp
 - ⭐ **Dejar reseñas** y calificaciones de productos
-- ❤️ **Guardar favoritos** para compras futuras
-- 💰 **Ver precios** de menudeo y mayoreo (6+ unidades)
+- ❤️ **Guardar favoritos** para compras futuras con vista dedicada
+- 💰 **Ver precios** de menudeo con descuentos dinámicos visibles
+- 📱 **Experiencia responsive** optimizada para móviles y escritorio
 
 Mientras que los administradores pueden:
 
@@ -78,11 +81,12 @@ El proyecto sigue una **arquitectura cliente-servidor** separada, con comunicaci
 │                         CLIENTE                             │
 │  ┌──────────────────────┐    ┌──────────────────────┐      │
 │  │   Frontend Público    │    │  Dashboard Admin     │      │
-│  │   (Vue.js + Bootstrap)│    │  (Vue.js + Highcharts)│     │
-│  │   - Catálogo          │    │  - Estadísticas      │      │
-│  │   - Carrito           │    │  - CRUD Perfumes     │      │
-│  │   - Búsqueda          │    │  - Gestión Stock     │      │
-│  │   - Reseñas           │    │  - Moderación        │      │
+│  │   (Vue.js + Tailwind) │    │  (Vue.js + Highcharts)│     │
+│  │   - Catálogo Premium  │    │  - Estadísticas      │      │
+│  │   - Búsqueda RT       │    │  - CRUD Perfumes     │      │
+│  │   - Carrito Slide-over│    │  - Gestión Stock     │      │
+│  │   - Favoritos         │    │  - Moderación        │      │
+│  │   - Reseñas           │    │  - Descuentos        │      │
 │  └──────────────────────┘    └──────────────────────┘      │
 │              ▲                          ▲                    │
 │              │                          │                    │
@@ -133,17 +137,25 @@ El proyecto sigue una **arquitectura cliente-servidor** separada, con comunicaci
 | Tecnología | Versión | Propósito |
 |------------|---------|-----------|
 | **Vue.js** | 2.7 | Framework JavaScript reactivo para interfaz dinámica |
-| **Bootstrap** | 5.3 | Framework CSS para diseño responsive |
+| **Tailwind CSS** | 3.4 (CDN) | Framework CSS utility-first para diseño moderno |
 | **Vanilla JS** | ES6+ | JavaScript puro para funcionalidades específicas |
 | **Highcharts** | Latest | Gráficos interactivos en el dashboard admin |
 | **Bootstrap Icons** | 1.11 | Iconografía moderna |
 | **HTML5/CSS3** | - | Estructura y estilos base |
+| **Google Fonts** | - | Tipografía premium (Playfair Display, Poppins) |
 
 **¿Por qué Vue.js?**
 - Curva de aprendizaje suave
 - Reactivo y eficiente
 - Ideal para SPAs sin necesidad de build complejo
 - Perfecto para integración CDN
+
+**¿Por qué Tailwind CSS?**
+- Diseño utility-first para desarrollo rápido
+- Altamente personalizable con tema custom
+- Animaciones y transiciones fluidas
+- Responsive design simplificado
+- Componentes modernos sin escribir CSS personalizado
 
 ### **Backend (Servidor)**
 
@@ -326,11 +338,18 @@ Parámetros:
 - Badges visuales para género (Hombre/Mujer/Unisex)
 - Indicador de descuentos aplicados
 
-#### 🔍 **2. Búsqueda Inteligente**
-- Búsqueda en tiempo real (sin recargar página)
-- Busca por: nombre, marca, tipo
-- Resultados instantáneos mientras escribes
-- Modal de búsqueda responsive en móviles
+#### 🔍 **2. Búsqueda Inteligente con IA**
+- **Desktop:** Dropdown con resultados en tiempo real al escribir
+- **Autocompletado:** Muestra hasta 6 resultados con imagen, nombre, marca y precio
+- **Highlight:** Resalta términos buscados en nombre y marca
+- **Contador dinámico:** Muestra cantidad de resultados encontrados
+- **Búsquedas populares:** Sugerencias predefinidas (Sauvage, Aventus, Yara, etc.)
+- **Categorías rápidas:** Filtros directos a Árabes, Diseñador, Hombre, Mujer
+- **Modal móvil:** Full-screen con animación slide-down elegante
+- **Limpieza automática:** Borra búsqueda al seleccionar perfume o volver al catálogo
+- **Búsqueda ampliada:** Busca en nombre, marca, tipo y público
+- Mínimo 2 caracteres para activar resultados
+- **Sin resultados:** Mensaje personalizado con opción de limpiar
 
 #### 🏷️ **3. Sistema de Filtrado**
 - Filtrar por género (Hombre, Mujer, Unisex)
@@ -338,18 +357,27 @@ Parámetros:
 - Categorías predefinidas con imágenes
 - Combinación de múltiples filtros
 
-#### 🛒 **4. Carrito de Compras**
-- Agregar/quitar productos
-- Incrementar/decrementar cantidades
-- Persistencia con localStorage (no se pierde al cerrar)
-- Cálculo automático de totales
-- Vista lateral (offcanvas) moderna
+#### 🛒 **4. Carrito de Compras (Slide-Over Tailwind)**
+- **Diseño moderno:** Slide-over panel con animación suave desde la derecha
+- **Overlay oscuro:** Backdrop con blur para enfocar atención
+- Agregar/quitar productos con animaciones
+- Incrementar/decrementar cantidades con controles intuitivos
+- **Persistencia:** localStorage (no se pierde al cerrar navegador)
+- **Cálculo automático:** Totales y subtotales en tiempo real
+- **Badges visuales:** Indicador de cantidad en ícono del carrito
+- **Vista optimizada:** Imágenes miniatura, nombre, precio y cantidad
+- **Botón checkout:** Enlace directo a WhatsApp con pedido formateado
+- **Carrito vacío:** Mensaje elegante con botón "Explorar Colección"
 
 #### ❤️ **5. Sistema de Favoritos**
-- Guardar productos favoritos
-- Persistencia en localStorage
-- Vista dedicada de favoritos
-- Contador en el header
+- **Guardar/quitar favoritos** con un solo click (ícono corazón)
+- **Persistencia:** localStorage sincronizado
+- **Vista dedicada:** Sección completa para explorar favoritos
+- **Auto-apertura:** Al agregar favorito se abre automáticamente la colección
+- **Contador dinámico:** Badge con cantidad en el header
+- **Tarjetas premium:** Mismo diseño que catálogo con hover effects
+- **Mensaje vacío:** Estado vacío elegante con call-to-action
+- **Botón amarillo:** "Explorar Colección" con colores del tema
 
 #### ⭐ **6. Reseñas y Calificaciones**
 - Ver reseñas de otros clientes
@@ -357,28 +385,52 @@ Parámetros:
 - Sistema de moderación (pendientes de aprobación)
 - Formato de fecha relativo ("Hace 2 días")
 
-#### 💰 **7. Precios Dinámicos**
-- Precio de menudeo
-- Precio de mayoreo (6+ unidades, -20%)
-- Descuentos aplicados automáticamente
-- Vista previa del ahorro
+#### 💰 **7. Precios y Descuentos**
+- **Precio menudeo:** Claramente visible en tarjetas de producto
+- **Descuentos dinámicos:** Badges circulares rojos en esquina superior derecha
+- **Precio tachado:** Muestra precio original cuando hay descuento
+- **Ahorro visible:** Cálculo automático del descuento aplicado
+- **Vista compacta:** Diseño eficiente sin romper layout
+- **Botón mayoreo:** Información de compras al por mayor vía WhatsApp
 
 #### 📱 **8. Checkout por WhatsApp**
 - Resumen automático del pedido
 - Formato de mensaje estructurado
 - Envío directo a WhatsApp Business
 - Incluye productos, cantidades y total
+- **Botón flotante:** WhatsApp siempre visible (se oculta cuando carrito está abierto)
 
-#### 🌙 **9. Modo Oscuro/Claro**
-- Toggle automático según preferencias del sistema
-- Variables CSS para fácil personalización
-- Transiciones suaves
+#### 🎨 **9. Diseño Premium con Tailwind CSS**
+- **Hero Section:** Fondo de imagen con gradiente, tipografía Playfair Display
+- **Navbar sticky:** Glassmorphism con backdrop-blur y transparencias
+- **Tarjetas de producto:** Hover effects con elevación, bordes dorados, animaciones suaves
+- **Animaciones:** Fade-in, slide-up, zoom-in, marquee en banner promocional
+- **Colores tema:** Dorado (#d4af37), negro (#1a1a1a), acento (#ffd700)
+- **Tipografía:** Playfair Display (títulos Hero), Poppins (subtítulos)
+- **Separadores de categoría:** Imágenes a pantalla completa con texto superpuesto
+- **Badges:** Circulares para descuentos, píldoras para tipos de perfume
+- **Botones:** Rectangular dorado con hover effects y sombras
+- **Vista de detalle:** Diseño compacto con pirámide olfativa discreta
 
-#### 📱 **10. Diseño Responsive**
-- Optimizado para móviles, tablets y desktop
-- Navegación adaptativa
-- Imágenes optimizadas
-- Menú hamburguesa en móviles
+#### 📱 **10. Responsive Design & Mobile-First**
+- **Diseño móvil optimizado:** iPhone 13/15 Pro Max tested
+- **Breakpoints:** Tailwind responsive utilities (sm, md, lg, xl)
+- **Navbar móvil:** Sidebar con animación slide-in desde la derecha
+- **Modal búsqueda:** Full-screen en móviles con animación slide-down
+- **Tarjetas adaptables:** Grid responsive 1/2/3/4 columnas según pantalla
+- **Imágenes compactas:** Aspect ratio square perfecto para productos
+- **Botones táctiles:** Tamaño mínimo 44x44px para facilidad de uso
+- **Sin zoom accidental:** Viewport configurado correctamente
+
+#### ⚡ **11. Experiencia de Usuario (UX)**
+- **Scroll inteligente:** Al seleccionar perfume o categoría, scroll al inicio automático
+- **Limpieza automática:** Búsqueda se limpia al ver detalle o volver al catálogo
+- **Toasts mínimos:** Solo notificaciones importantes (sin spam)
+- **Lazy loading:** Imágenes de productos con observer para mejor rendimiento
+- **Persistencia inteligente:** Carrito y favoritos en localStorage
+- **Vista de detalle:** Información completa con pirámide olfativa, notas, familia
+- **Sin interrupciones:** WhatsApp flotante se oculta cuando carrito está abierto
+- **Feedback visual:** Hover states, animaciones de carga, badges dinámicos
 
 ### **Para Administradores (Dashboard)**
 
@@ -903,10 +955,12 @@ Backend:
 - Controladores: 4
 
 Frontend:
-- Archivos HTML: 3
-- Archivos JS: 2
-- Líneas de CSS: 3,660+
-- Componentes Vue: 1 app principal
+- Archivos HTML: 2 (index.html, dashboard.html)
+- Archivos JS: 2 (main.js, config.js)
+- Líneas de CSS: 4,200+ (legacy + Tailwind utilities)
+- Framework CSS: Tailwind 3.4 (CDN)
+- Componentes Vue: 1 app principal con 50+ métodos
+- Computed properties: 2 (filteredPerfumes, searchResults)
 
 Base de Datos:
 - Tablas: 5
@@ -931,6 +985,77 @@ Base de Datos:
 - 🎨 [Frontend](frontend/README.md) - Configuración del frontend
 - 🔐 [Panel Admin](docs/admin/README.md) - Guía del dashboard
 - 📊 [Analíticas](docs/admin/ANALITICAS.md) - Sistema de estadísticas
+
+---
+
+## 🚀 Changelog - Versión 2.0.0 (Enero 2025)
+
+### **🎨 Rediseño Completo con Tailwind CSS**
+- ✅ Migración de Bootstrap a Tailwind CSS vía CDN
+- ✅ Tema personalizado con colores premium (dorado #d4af37)
+- ✅ Tipografía profesional: Playfair Display + Poppins
+- ✅ Sistema de animaciones: fade-in, slide-up, zoom-in, marquee
+- ✅ Glassmorphism en navbar con backdrop-blur
+- ✅ Hero section rediseñado con imagen de fondo y gradientes
+
+### **🔍 Buscador Inteligente**
+- ✅ Dropdown con resultados en tiempo real (desktop)
+- ✅ Autocompletado con imágenes y precios
+- ✅ Highlight de términos buscados con marca dorada
+- ✅ Contador dinámico de resultados
+- ✅ Modal full-screen para móviles con animación
+- ✅ Búsquedas populares predefinidas
+- ✅ Categorías rápidas para filtrado directo
+- ✅ Limpieza automática al seleccionar perfume
+
+### **🛒 Carrito Modernizado**
+- ✅ Slide-over panel con Tailwind (reemplaza offcanvas)
+- ✅ Overlay oscuro con blur
+- ✅ Animaciones suaves de entrada/salida
+- ✅ Diseño optimizado con imágenes miniatura
+- ✅ Badges dinámicos en ícono del carrito
+
+### **❤️ Sistema de Favoritos Mejorado**
+- ✅ Auto-apertura al agregar favorito
+- ✅ Vista dedicada con diseño premium
+- ✅ Botón "Explorar Colección" con colores tema
+- ✅ Sincronización con localStorage
+
+### **📱 UX y Responsive**
+- ✅ Scroll automático al inicio al cambiar vistas
+- ✅ Diseño mobile-first testeado en iPhone 13/15 Pro Max
+- ✅ Separadores de categoría a pantalla completa
+- ✅ Badges de descuento circulares en esquina superior
+- ✅ WhatsApp flotante se oculta cuando carrito está abierto
+- ✅ Toasts reducidos (solo notificaciones importantes)
+- ✅ Lazy loading de imágenes con IntersectionObserver
+
+### **🎯 Vista de Detalle Rediseñada**
+- ✅ Pirámide olfativa discreta con líneas verticales
+- ✅ Componente de precio compacto no-sticky
+- ✅ Info cards horizontales para familia y tamaño
+- ✅ Sección de comentarios modernizada
+- ✅ Imagen del perfume más compacta con hover zoom
+- ✅ Eliminado mensaje de mayoreo en detalle
+
+### **🐛 Correcciones**
+- ✅ Método `getImageUrl()` agregado para buscador
+- ✅ Placeholders SVG oscuros para imágenes faltantes
+- ✅ Rate limiting ajustado en producción
+- ✅ Rutas de imágenes corregidas (relative paths)
+- ✅ Nombres de archivos sincronizados con BD
+
+### **📊 Estadísticas**
+```
+Archivos modificados: 3 principales
+- docs/index.html: ~1,500 líneas (Tailwind + Vue)
+- docs/js/main.js: ~890 líneas (lógica mejorada)
+- docs/css/style.css: ~4,200 líneas (estilos legacy)
+
+Nuevas funcionalidades: 15+
+Mejoras UX: 20+
+Bugs corregidos: 10+
+```
 
 ---
 

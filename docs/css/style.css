@@ -2688,7 +2688,55 @@ textarea::placeholder {
     margin: 0;
 }
 
-/* Selector de tipo de compra */
+/* Mensaje de información de mayoreo */
+.wholesale-info-message {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px dashed #dee2e6;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.wholesale-info-message i.bi-box-seam {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    display: block;
+}
+
+.wholesale-info-message p {
+    font-size: 1rem;
+    color: #495057;
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.btn-whatsapp-mayoreo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #25D366;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-whatsapp-mayoreo:hover {
+    background: #128C7E;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+.btn-whatsapp-mayoreo i {
+    font-size: 1.2rem;
+}
+
+/* Selector de tipo de compra (DEPRECATED) */
 .purchase-type-selector {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

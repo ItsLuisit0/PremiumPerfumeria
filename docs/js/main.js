@@ -172,10 +172,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Manejar respuesta con paginación o array directo (retrocompatibilidad)
                     const perfumesData = responseData.data || responseData;
                     
-                    // Las imágenes están en GitHub Pages, no en el backend
-                    const imageBaseUrl = AppConfig.isDevelopment 
-                        ? './' 
-                        : 'https://itsluisit0.github.io/Perfumeria/';
+                    // Las imágenes están en el mismo servidor (Render - carpeta docs/)
+                    // Siempre usar rutas relativas
+                    const imageBaseUrl = './';
                     
                     this.perfumes = perfumesData.map(p => ({
                         ...p,

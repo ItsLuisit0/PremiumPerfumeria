@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentRating: 0,
             hoverRating: 0,
             mobileMenuOpen: false,
+            cartOpen: false, // Carrito Tailwind slide-over
             lastFocusedElement: null,
             toast: {
                 show: false,

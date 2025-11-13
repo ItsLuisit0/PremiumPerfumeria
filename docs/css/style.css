@@ -3708,7 +3708,7 @@ textarea::placeholder {
     .hero-section-modern {
         min-height: 60vh !important;
         padding: 1rem !important;
-        background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('./ImagenesPerfumes/fondoDefinitivo.PNG') !important;
+        background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('../ImagenesPerfumes/fondoDefinitivo.PNG') !important;
         background-size: cover !important;
         background-position: left center !important;
         justify-content: center !important;

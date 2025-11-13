@@ -30,8 +30,8 @@
                         accent: '#ffd700',
                     },
                     fontFamily: {
-                        display: ['Playfair Display', 'serif'],
-                        sans: ['Poppins', 'sans-serif'],
+                        display: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
                     },
                     animation: {
                         'fade-in': 'fadeIn 0.5s ease-in',
@@ -63,7 +63,7 @@
     </script>
     
     <!-- Fuentes Google -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -297,8 +297,8 @@
                 </div>
                 
                     <!-- Título Principal -->
-                <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-normal text-white mb-4 leading-tight tracking-wider animate-slide-up"
-                    style="text-shadow: 2px 2px 12px rgba(0,0,0,0.7); letter-spacing: 0.05em;">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-normal text-white mb-4 leading-tight tracking-wider animate-slide-up"
+                    style="font-family: 'Playfair Display', serif; text-shadow: 2px 2px 12px rgba(0,0,0,0.7); letter-spacing: 0.05em;">
                     RÉPLICAS<br>
                     DE ALTA<br>
                     CALIDAD
@@ -306,7 +306,7 @@
                     
                 <!-- Subtítulo -->
                 <p class="text-sm md:text-base text-primary mb-8 leading-relaxed tracking-wide animate-slide-up uppercase font-light"
-                   style="animation-delay: 0.1s; text-shadow: 1px 1px 4px rgba(0,0,0,0.5); letter-spacing: 0.1em;">
+                   style="font-family: 'Poppins', sans-serif; animation-delay: 0.1s; text-shadow: 1px 1px 4px rgba(0,0,0,0.5); letter-spacing: 0.1em;">
                     Experimenta el lujo de las mejores<br class="hidden md:block">
                     fragancias del mundo a precios accesibles
                 </p>
@@ -331,7 +331,7 @@
         <!-- SECCIÓN DE CATEGORÍAS -->
         <section class="categories-section" v-show="!searchTerm && !showFavoritesView && !selectedPerfume && !showComingSoonView && selectedCategory === null && selectedPublico === null">
             <div class="container">
-                <h2 style="text-align: center; font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 3rem; color: var(--text-primary);">
+                <h2 style="text-align: center; font-family: 'Inter', system-ui, sans-serif; font-size: 2.5rem; font-weight: 600; margin-bottom: 3rem; color: var(--text-primary);">
                     Explora por <span style="color: #d4af37;">Categoría</span>
                 </h2>
                 <div class="categories-grid">
@@ -517,9 +517,9 @@
                             <template v-for="(perfume, index) in filteredPerfumes">
                                 <!-- Sección divisoria especial para Diseñador - Tailwind Design -->
                                 <div v-if="index === 13 && selectedCategory === 'Disenador'" :key="'divider-disenador-' + index" class="col-span-full my-8">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-0 bg-gradient-to-r from-pink-950 via-black to-pink-950 rounded-2xl overflow-hidden border border-pink-500/20 shadow-2xl max-h-64">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-0 bg-gradient-to-r from-pink-950 via-black to-pink-950 rounded-2xl overflow-hidden border border-pink-500/20 shadow-2xl">
                                         <!-- Imagen -->
-                                        <div class="relative h-48 md:h-64 overflow-hidden">
+                                        <div class="relative h-64 md:h-64 overflow-hidden">
                                             <img src="./ImagenesPerfumes/Perfumes_Dama.png" 
                                                  alt="Perfumes para Mujeres" 
                                                  class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-500">
@@ -543,9 +543,9 @@
                                 
                                 <!-- Sección divisoria después de 4 productos (categorías normales) - Tailwind Design -->
                                 <div v-if="index === 4 && selectedCategory !== 'Disenador'" :key="'divider-' + index" class="col-span-full my-8">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-0 bg-gradient-to-r from-gray-900 via-black to-gray-900 rounded-2xl overflow-hidden border border-white/10 shadow-2xl max-h-64">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-0 bg-gradient-to-r from-gray-900 via-black to-gray-900 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
                                         <!-- Imagen -->
-                                        <div class="relative h-48 md:h-64 overflow-hidden">
+                                        <div class="relative h-64 md:h-64 overflow-hidden">
                                             <img src="./ImagenesPerfumes/CATEGORIA.PNG" 
                                                  alt="Perfumes Destacados" 
                                                  class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-500">
@@ -569,7 +569,7 @@
                                 
                                 <!-- Sección divisoria después de 8 productos más (categorías normales) - Tailwind Design -->
                                 <div v-if="index === 12 && selectedCategory !== 'Disenador'" :key="'divider2-' + index" class="col-span-full my-8">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-0 bg-gradient-to-r from-amber-950 via-black to-amber-950 rounded-2xl overflow-hidden border border-amber-500/20 shadow-2xl max-h-64">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-0 bg-gradient-to-r from-amber-950 via-black to-amber-950 rounded-2xl overflow-hidden border border-amber-500/20 shadow-2xl">
                                         <!-- Texto -->
                                         <div class="flex flex-col items-center justify-center p-8 md:p-12 text-center order-2 md:order-1">
                                             <h2 class="font-display text-3xl md:text-4xl font-normal text-white mb-2 tracking-widest">
@@ -584,7 +584,7 @@
                                         </div>
                                         
                                         <!-- Imagen -->
-                                        <div class="relative h-48 md:h-64 overflow-hidden order-1 md:order-2">
+                                        <div class="relative h-64 md:h-64 overflow-hidden order-1 md:order-2">
                                             <img src="./ImagenesPerfumes/ARABES.PNG" 
                                                  alt="Perfumes Árabes" 
                                                  class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-500">
@@ -946,7 +946,7 @@
                                 </div>
 
                                 <!-- Precio y Acciones - Diseño Integrado -->
-                                <div class="sticky bottom-0 bg-black/95 backdrop-blur-lg border border-white/10 rounded-2xl p-6 shadow-2xl animate-slide-up" style="animation-delay: 0.4s;">
+                                <div class="bg-black/95 backdrop-blur-lg border border-white/10 rounded-2xl p-6 shadow-2xl animate-slide-up" style="animation-delay: 0.4s;">
                                     <!-- Precio -->
                                     <div class="flex items-baseline justify-between mb-4 pb-4 border-b border-white/10">
                                         <div>

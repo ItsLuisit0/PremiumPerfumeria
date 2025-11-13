@@ -245,12 +245,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.newReview = { usuario: '', comentario: '', calificacion: null };
                 this.currentRating = 0;
                 this.fetchReviews(perfume.id_perfume);
-                // Solo scroll al top si el detalle está visible, no resetear categorías
+                // Scroll al inicio de la página
                 this.$nextTick(() => {
-                    const detailSection = document.querySelector('.perfume-detail-section-modern');
-                    if (detailSection) {
-                        detailSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
             },
             closePerfumeDetail() {
@@ -277,10 +274,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 this.$nextTick(() => {
                     this.initObserver();
-                    // Solo hacer scroll si hay una categoría activa
-                    if (previousCategory || previousSearch) {
-                        this.scrollToProducts();
-                    }
+                    // Volver al inicio siempre
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
             },
             addToCart(perfume, quantity, event, esMayoreo = false) {
@@ -404,12 +399,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.showFavoritesView = false;
                 this.showComingSoonView = false;
                 
-                // Si category es null, volver al inicio
-                if (category === null) {
+                // Siempre volver al inicio cuando se cambia de categoría
+                this.$nextTick(() => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                } else {
-                    this.scrollToProducts();
-                }
+                });
             },
             filterByCategoryAdvanced(publico, tipo, categoryName) {
                 this.selectedPublico = publico;
@@ -579,9 +572,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         this.selectedPerfume = null;
                         this.showComingSoonView = false;
                         
-                        // Scroll suave a la sección de productos
+                        // Scroll al inicio
                         setTimeout(() => {
-                            this.scrollToProducts();
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
                         }, 100);
                     });
                 }

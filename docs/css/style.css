@@ -1268,15 +1268,15 @@ textarea::placeholder {
 /* === ESTILOS DE DESCUENTO === */
 .product-discount-badge {
     position: absolute;
-    top: 12px;
-    left: 12px;
+    top: 8px;
+    right: 8px; /* Cambiado a esquina superior derecha */
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #FF0000; /* Rojo sólido como en la referencia */
+    background: #FF0000; /* Rojo sólido */
     color: white;
-    width: 50px;
-    height: 50px;
+    width: 40px; /* Más pequeño */
+    height: 40px; /* Más pequeño */
     border-radius: 50%; /* Circular */
     font-size: 0.85rem;
     font-weight: 700;
@@ -2688,52 +2688,54 @@ textarea::placeholder {
     margin: 0;
 }
 
-/* Mensaje de información de mayoreo */
+/* Mensaje de información de mayoreo - Diseño limpio y discreto */
 .wholesale-info-message {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border: 2px dashed #dee2e6;
-    border-radius: 12px;
-    padding: 20px;
-    margin: 20px 0;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
     text-align: center;
 }
 
 .wholesale-info-message i.bi-box-seam {
-    font-size: 2.5rem;
-    color: var(--primary-color);
-    margin-bottom: 15px;
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 8px;
     display: block;
 }
 
 .wholesale-info-message p {
-    font-size: 1rem;
-    color: #495057;
-    margin-bottom: 15px;
-    line-height: 1.6;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 12px;
+    line-height: 1.5;
 }
 
 .btn-whatsapp-mayoreo {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    background: #25D366;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 8px;
+    gap: 6px;
+    background: rgba(37, 211, 102, 0.15);
+    border: 1px solid rgba(37, 211, 102, 0.3);
+    color: #25D366;
+    padding: 8px 16px;
+    border-radius: 6px;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500;
+    font-size: 0.85rem;
     transition: all 0.3s ease;
 }
 
 .btn-whatsapp-mayoreo:hover {
-    background: #128C7E;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+    background: rgba(37, 211, 102, 0.25);
+    border-color: #25D366;
+    color: #25D366;
+    transform: translateY(-1px);
 }
 
 .btn-whatsapp-mayoreo i {
-    font-size: 1.2rem;
+    font-size: 1rem;
 }
 
 /* Selector de tipo de compra (DEPRECATED) */
@@ -3541,15 +3543,16 @@ textarea::placeholder {
         margin-right: 4px !important;
     }
     
-    /* Badge de descuento - posición izquierda superior */
-    .discount-badge {
-        font-size: 0.7rem !important;
-        padding: 4px 8px !important;
-        top: 8px !important;
-        left: 8px !important;
-        right: auto !important;
+    /* Badge de descuento - posición derecha superior, más pequeño */
+    .discount-badge, .product-discount-badge {
+        font-size: 0.65rem !important;
+        width: 32px !important;
+        height: 32px !important;
+        top: 6px !important;
+        right: 6px !important;
+        left: auto !important;
         font-weight: 700 !important;
-        border-radius: 6px !important;
+        border-radius: 50% !important;
     }
     
     /* Botón de favorito más pequeño */
@@ -3708,7 +3711,7 @@ textarea::placeholder {
     .hero-section-modern {
         min-height: 60vh !important;
         padding: 1rem !important;
-        background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('../ImagenesPerfumes/fondoDefinitivo.PNG') !important;
+        background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('../ImagenesPerfumes/Fondo_Definitivo.PNG') !important;
         background-size: cover !important;
         background-position: left center !important;
         justify-content: center !important;

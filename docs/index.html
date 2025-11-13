@@ -157,16 +157,77 @@
                         <!-- Barra de búsqueda Desktop -->
                         <div class="hidden md:flex items-center relative">
                             <i class="bi bi-search absolute left-3 text-gray-400"></i>
-                        <input 
-                            type="text" 
+                            <input 
+                                type="text" 
                                 class="w-64 pl-10 pr-10 py-2 bg-white/5 border border-white/10 rounded-full text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                            placeholder="Buscar perfumes..."
-                            v-model="searchTerm"
-                            @focus="onSearchFocus"
-                            @blur="onSearchBlur">
+                                placeholder="Buscar perfumes..."
+                                v-model="searchTerm"
+                                @focus="onSearchFocus"
+                                @blur="onSearchBlur"
+                                @input="onSearchInput">
                             <button v-if="searchTerm" @click="clearSearch" class="absolute right-3 text-gray-400 hover:text-white transition-colors">
                                 <i class="bi bi-x-circle-fill"></i>
-                        </button>
+                            </button>
+                            
+                            <!-- Dropdown de resultados en tiempo real -->
+                            <div v-if="searchTerm && searchFocused && searchResults.length > 0" 
+                                 class="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl overflow-hidden z-50 max-h-96 overflow-y-auto"
+                                 @mousedown.prevent>
+                                <!-- Contador de resultados -->
+                                <div class="px-3 py-2 bg-black/30 border-b border-white/10">
+                                    <p class="text-xs text-gray-400">
+                                        {{ searchResults.length }} {{ searchResults.length === 1 ? 'resultado' : 'resultados' }}
+                                    </p>
+                                </div>
+                                
+                                <!-- Lista de resultados -->
+                                <div class="divide-y divide-white/5">
+                                    <button 
+                                        v-for="perfume in searchResults.slice(0, 6)" 
+                                        :key="perfume.id"
+                                        @click="selectSearchResult(perfume)"
+                                        class="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-white/5 transition-colors group/item">
+                                        <!-- Imagen del perfume -->
+                                        <div class="w-10 h-10 rounded bg-black/50 flex-shrink-0 overflow-hidden">
+                                            <img :src="getImageUrl(perfume.imagen_url)" 
+                                                 :alt="perfume.nombre"
+                                                 class="w-full h-full object-cover"
+                                                 @error="handleImageError">
+                                        </div>
+                                        
+                                        <!-- Info del perfume -->
+                                        <div class="flex-1 text-left min-w-0">
+                                            <p class="text-sm font-medium text-white group-hover/item:text-primary transition-colors truncate" v-html="highlightMatch(perfume.nombre)"></p>
+                                            <p class="text-xs text-gray-400 truncate" v-html="highlightMatch(perfume.marca)"></p>
+                                        </div>
+                                        
+                                        <!-- Precio -->
+                                        <div class="text-right flex-shrink-0">
+                                            <p class="text-sm font-semibold text-primary">${{ perfume.precio_menudeo }}</p>
+                                        </div>
+                                        
+                                        <i class="bi bi-arrow-right text-gray-500 group-hover/item:text-primary transition-all text-xs"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Ver todos los resultados -->
+                                <div v-if="searchResults.length > 6" class="px-3 py-2 bg-black/30 border-t border-white/10">
+                                    <button @click="viewAllResults" class="w-full text-center text-xs text-primary hover:text-accent transition-colors">
+                                        Ver todos ({{ searchResults.length }})
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Mensaje cuando no hay resultados -->
+                            <div v-if="searchTerm && searchFocused && searchResults.length === 0" 
+                                 class="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl p-4 text-center z-50"
+                                 @mousedown.prevent>
+                                <i class="bi bi-search text-3xl text-gray-600 mb-2"></i>
+                                <p class="text-xs text-gray-400">Sin resultados para "<span class="text-white">{{ searchTerm }}</span>"</p>
+                                <button @click="clearSearch" class="mt-2 text-xs text-primary hover:text-accent transition-colors">
+                                    Limpiar
+                                </button>
+                            </div>
                     </div>
                     
                         <!-- Botón búsqueda móvil -->
@@ -233,44 +294,159 @@
         </nav>
         </div>
 
-        <!-- Modal de búsqueda -->
-        <div class="search-overlay" :class="{ 'active': searchModalOpen }" @click="closeSearchModal"></div>
-        <div class="search-modal-modern" :class="{ 'active': searchModalOpen }">
-            <div class="search-modal-content">
-                <button class="search-close-btn" @click="closeSearchModal">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-                <div class="search-input-wrapper">
-                    <i class="bi bi-search search-icon"></i>
-                    <input 
-                        type="text" 
-                        class="search-input-modern"
-                        placeholder="Buscar perfumes, marcas..."
-                        v-model="searchTerm"
-                        @input="onSearchInput"
-                        ref="searchModalInput"
-                        autocomplete="off">
-                    <button class="search-clear-btn" @click="clearSearch" v-if="searchTerm">
-                        <i class="bi bi-x"></i>
-                    </button>
-                </div>
-                
-                <!-- Sugerencias de búsqueda (opcional) -->
-                <div class="search-hints" v-if="!searchTerm">
-                    <p class="search-hints-title">Búsquedas populares:</p>
-                    <div class="search-hints-tags">
-                        <button class="search-hint-tag" @click="searchTerm = 'sauvage'; onSearchInput();">Sauvage</button>
-                        <button class="search-hint-tag" @click="searchTerm = 'aventus'; onSearchInput();">Aventus</button>
-                        <button class="search-hint-tag" @click="searchTerm = 'yara'; onSearchInput();">Yara</button>
-                        <button class="search-hint-tag" @click="searchTerm = 'chanel'; onSearchInput();">Chanel</button>
-                        <button class="search-hint-tag" @click="searchTerm = 'dior'; onSearchInput();">Dior</button>
+        <!-- Modal de búsqueda Mejorado -->
+        <div class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 transition-all duration-300"
+             :class="{ 'opacity-100 visible': searchModalOpen, 'opacity-0 invisible': !searchModalOpen }"
+             @click="closeSearchModal">
+        </div>
+        
+        <div class="fixed inset-x-0 top-0 z-50 transition-all duration-500 ease-out"
+             :class="{ 'translate-y-0 opacity-100': searchModalOpen, '-translate-y-full opacity-0': !searchModalOpen }">
+            <div class="bg-gradient-to-b from-gray-900 via-gray-900/95 to-transparent backdrop-blur-xl border-b border-white/10 shadow-2xl"
+                 @click.stop>
+                <!-- Header del modal -->
+                <div class="container mx-auto px-4 py-6">
+                    <div class="flex items-center gap-4">
+                        <!-- Input de búsqueda -->
+                        <div class="flex-1 relative">
+                            <i class="bi bi-search absolute left-5 top-1/2 -translate-y-1/2 text-2xl text-gray-400"></i>
+                            <input 
+                                type="text" 
+                                class="w-full pl-16 pr-14 py-5 bg-white/5 border-2 border-white/20 rounded-2xl text-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:bg-white/10 transition-all"
+                                placeholder="Buscar perfumes, marcas, tipos..."
+                                v-model="searchTerm"
+                                @input="onSearchInput"
+                                ref="searchModalInput"
+                                autocomplete="off">
+                            <button v-if="searchTerm" @click="clearSearch" class="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors">
+                                <i class="bi bi-x-circle-fill text-2xl"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Botón cerrar -->
+                        <button @click="closeSearchModal" class="p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-colors flex-shrink-0">
+                            <i class="bi bi-x-lg text-xl text-white"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Contador de resultados -->
+                    <div v-if="searchTerm" class="mt-4 flex items-center gap-2">
+                        <div class="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
+                            <i class="bi bi-check-circle text-primary"></i>
+                            <span class="text-sm text-white">
+                                <strong>{{ searchResults.length }}</strong> 
+                                {{ searchResults.length === 1 ? 'resultado' : 'resultados' }}
+                            </span>
+                        </div>
+                        <button v-if="searchTerm" @click="clearSearch" class="text-sm text-gray-400 hover:text-primary transition-colors">
+                            Limpiar
+                        </button>
                     </div>
                 </div>
                 
-                <!-- Mensaje de búsqueda activa -->
-                <div class="search-active-message" v-if="searchTerm && searchTerm.length >= 2">
-                    <i class="bi bi-check-circle-fill"></i>
-                    <p>Buscando "{{ searchTerm }}"... Cierra este modal para ver los resultados</p>
+                <!-- Contenido del modal -->
+                <div class="container mx-auto px-4 pb-6 max-h-[70vh] overflow-y-auto">
+                    <!-- Sugerencias cuando no hay búsqueda -->
+                    <div v-if="!searchTerm" class="space-y-6">
+                        <!-- Búsquedas populares -->
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
+                                <i class="bi bi-fire text-orange-500"></i>
+                                Búsquedas populares
+                            </h3>
+                            <div class="flex flex-wrap gap-2">
+                                <button v-for="tag in popularSearches" 
+                                        :key="tag"
+                                        @click="searchTerm = tag; onSearchInput();"
+                                        class="px-4 py-2 bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/50 rounded-full text-sm text-white transition-all">
+                                    {{ tag }}
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Categorías rápidas -->
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
+                                <i class="bi bi-grid text-primary"></i>
+                                Buscar por categoría
+                            </h3>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                <button @click="quickFilterCategory('Árabes')"
+                                        class="px-4 py-3 bg-gradient-to-br from-white/5 to-white/10 hover:from-primary/20 hover:to-primary/10 border border-white/10 hover:border-primary/30 rounded-xl text-sm text-white transition-all text-left">
+                                    <i class="bi bi-star-fill text-primary mr-2"></i>
+                                    Perfumes Árabes
+                                </button>
+                                <button @click="quickFilterCategory('Diseñador')"
+                                        class="px-4 py-3 bg-gradient-to-br from-white/5 to-white/10 hover:from-primary/20 hover:to-primary/10 border border-white/10 hover:border-primary/30 rounded-xl text-sm text-white transition-all text-left">
+                                    <i class="bi bi-gem text-primary mr-2"></i>
+                                    Diseñador
+                                </button>
+                                <button @click="quickFilterPublic('Hombre')"
+                                        class="px-4 py-3 bg-gradient-to-br from-white/5 to-white/10 hover:from-primary/20 hover:to-primary/10 border border-white/10 hover:border-primary/30 rounded-xl text-sm text-white transition-all text-left">
+                                    <i class="bi bi-person text-primary mr-2"></i>
+                                    Para Hombre
+                                </button>
+                                <button @click="quickFilterPublic('Mujer')"
+                                        class="px-4 py-3 bg-gradient-to-br from-white/5 to-white/10 hover:from-primary/20 hover:to-primary/10 border border-white/10 hover:border-primary/30 rounded-xl text-sm text-white transition-all text-left">
+                                    <i class="bi bi-gender-female text-primary mr-2"></i>
+                                    Para Mujer
+                                </button>
+                                <button @click="quickFilterPublic('Unisex')"
+                                        class="px-4 py-3 bg-gradient-to-br from-white/5 to-white/10 hover:from-primary/20 hover:to-primary/10 border border-white/10 hover:border-primary/30 rounded-xl text-sm text-white transition-all text-left">
+                                    <i class="bi bi-people text-primary mr-2"></i>
+                                    Unisex
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Resultados de búsqueda -->
+                    <div v-else-if="searchResults.length > 0" class="space-y-2">
+                        <button 
+                            v-for="perfume in searchResults" 
+                            :key="perfume.id"
+                            @click="selectSearchResult(perfume)"
+                            class="w-full p-4 flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-primary/30 rounded-xl transition-all group">
+                            <!-- Imagen -->
+                            <div class="w-16 h-16 rounded-lg bg-black/50 flex-shrink-0 overflow-hidden ring-2 ring-white/10 group-hover:ring-primary/50 transition-all">
+                                <img :src="getImageUrl(perfume.imagen_url)" 
+                                     :alt="perfume.nombre"
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                     @error="handleImageError">
+                            </div>
+                            
+                            <!-- Info -->
+                            <div class="flex-1 text-left min-w-0">
+                                <p class="text-base font-medium text-white group-hover:text-primary transition-colors truncate" 
+                                   v-html="highlightMatch(perfume.nombre)"></p>
+                                <p class="text-sm text-gray-400 truncate" v-html="highlightMatch(perfume.marca)"></p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                                        {{ perfume.tipo || 'Perfume' }}
+                                    </span>
+                                    <span class="text-xs text-gray-500">{{ perfume.publico }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Precio -->
+                            <div class="text-right flex-shrink-0">
+                                <p class="text-lg font-bold text-primary">${{ perfume.precio_menudeo }}</p>
+                                <p v-if="perfume.descuento > 0" class="text-xs text-gray-500 line-through">${{ perfume.precio_menudeo }}</p>
+                            </div>
+                            
+                            <i class="bi bi-arrow-right text-gray-500 group-hover:text-primary group-hover:translate-x-2 transition-all flex-shrink-0"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Sin resultados -->
+                    <div v-else class="py-12 text-center">
+                        <i class="bi bi-search text-6xl text-gray-700 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-white mb-2">No se encontraron resultados</h3>
+                        <p class="text-gray-400 mb-4">No hay perfumes que coincidan con "<span class="text-white">{{ searchTerm }}</span>"</p>
+                        <button @click="clearSearch" class="px-6 py-2 bg-primary hover:bg-accent text-black font-semibold rounded-lg transition-colors">
+                            Limpiar búsqueda
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -771,7 +947,7 @@
                             <i class="bi bi-heartbreak empty-icon"></i>
                             <h3 class="empty-title">No tienes favoritos</h3>
                             <p class="empty-message">Haz clic en el corazón de un producto para guardarlo aquí.</p>
-                            <button class="btn btn-warning" @click="showFavoritesView = false">Explorar Colección</button>
+                            <button class="px-8 py-3 bg-primary hover:bg-accent text-black font-semibold rounded-lg transition-all duration-300 hover:shadow-xl hover:shadow-primary/30" @click="showFavoritesView = false">Explorar Colección</button>
                         </div>
                     </section>
                 </div>
@@ -810,8 +986,8 @@
                                                       'bg-pink-500/30 text-pink-300 border border-pink-400/50': selectedPerfume.publico === 'Mujer',
                                                       'bg-purple-500/30 text-purple-300 border border-purple-400/50': selectedPerfume.publico === 'Unisex'
                                                   }">
-                                                {{ selectedPerfume.publico }}
-                                            </span>
+                                            {{ selectedPerfume.publico }}
+                                        </span>
                                         </div>
 
                                         <!-- Botón favorito flotante -->
@@ -827,9 +1003,9 @@
                                         <!-- Imagen del perfume -->
                                         <div class="relative aspect-square bg-gradient-to-br from-black via-gray-900 to-black p-8 md:p-12">
                                             <img :src="selectedPerfume.imagen_url" 
-                                                 :alt="`${selectedPerfume.nombre} - ${selectedPerfume.marca}`"
+                                         :alt="`${selectedPerfume.nombre} - ${selectedPerfume.marca}`"
                                                  class="w-full h-full object-contain transition-all duration-500 group-hover:scale-110 drop-shadow-2xl"
-                                                 @error="handleImageError">
+                                         @error="handleImageError">
                                         </div>
                                         
                                         <!-- Decoración inferior con marca -->
@@ -837,12 +1013,12 @@
                                             <div class="flex items-center justify-between">
                                                 <span class="text-xs text-gray-400 uppercase tracking-wider">{{ selectedPerfume.marca }}</span>
                                                 <span class="text-xs text-primary font-medium">{{ selectedPerfume.mililitros }}ml</span>
-                                            </div>
-                                        </div>
+                                </div>
+                            </div>
 
                                         <!-- Efecto de brillo en hover -->
                                         <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-                                    </div>
+                                </div>
 
                                     <!-- Info rápida debajo de la imagen -->
                                     <div class="mt-4 flex items-center justify-center gap-4 text-xs text-gray-400">
@@ -857,7 +1033,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                                </div>
 
                             <!-- Columna Derecha: Información -->
                             <div class="space-y-6">
@@ -872,7 +1048,7 @@
                                     <p class="text-lg text-gray-300 leading-relaxed">
                                         {{ selectedPerfume.descripcion }}
                                     </p>
-                                </div>
+                                    </div>
 
                                 <!-- Info Cards - Diseño Minimalista -->
                                 <div class="flex gap-6 py-6 border-y border-white/10 animate-slide-up" style="animation-delay: 0.1s;">
@@ -884,9 +1060,9 @@
                                         <div>
                                             <div class="text-xs text-gray-400 uppercase tracking-wide">Familia</div>
                                             <div class="text-base font-semibold text-white">{{ selectedPerfume.tipo }}</div>
-                                        </div>
                                     </div>
-                                    
+                                </div>
+
                                     <!-- Separador -->
                                     <div class="w-px bg-white/10"></div>
                                     
@@ -894,13 +1070,13 @@
                                     <div class="flex items-center gap-3">
                                         <div class="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                                             <i class="bi bi-droplet-fill text-primary text-lg"></i>
-                                        </div>
+                                            </div>
                                         <div>
                                             <div class="text-xs text-gray-400 uppercase tracking-wide">Volumen</div>
                                             <div class="text-base font-semibold text-white">{{ selectedPerfume.mililitros }} ml</div>
                                         </div>
-                                    </div>
-                                </div>
+                                            </div>
+                                        </div>
 
                                 <!-- Pirámide Olfativa - Diseño Discreto -->
                                 <div v-if="selectedPerfume.notas" 
@@ -917,7 +1093,7 @@
                                                 <div class="flex-1">
                                                     <h4 class="text-xs font-medium text-primary mb-1 uppercase tracking-wide">Salida</h4>
                                                     <p class="text-sm text-gray-300 leading-relaxed">{{ getNotasSalida(selectedPerfume.notas) }}</p>
-                                                </div>
+                                            </div>
                                             </div>
                                         </div>
                                         
@@ -928,10 +1104,10 @@
                                                 <div class="flex-1">
                                                     <h4 class="text-xs font-medium text-primary/80 mb-1 uppercase tracking-wide">Corazón</h4>
                                                     <p class="text-sm text-gray-300 leading-relaxed">{{ getNotasCorazon(selectedPerfume.notas) }}</p>
-                                                </div>
-                                            </div>
                                         </div>
-                                        
+                                    </div>
+                                </div>
+
                                         <!-- Notas de Fondo -->
                                         <div class="group">
                                             <div class="flex items-start gap-3">
@@ -947,7 +1123,7 @@
 
                                 <!-- Precio y Acciones - Diseño Integrado -->
                                 <div class="bg-black/95 backdrop-blur-lg border border-white/10 rounded-2xl p-6 shadow-2xl animate-slide-up" style="animation-delay: 0.4s;">
-                                    <!-- Precio -->
+                                <!-- Precio -->
                                     <div class="flex items-baseline justify-between mb-4 pb-4 border-b border-white/10">
                                         <div>
                                             <div class="text-xs text-gray-400 uppercase tracking-wider mb-1">Precio</div>
@@ -957,9 +1133,9 @@
                                                 </span>
                                                 <span v-if="selectedPerfume.descuento_porcentaje > 0" 
                                                       class="text-base text-gray-500 line-through">
-                                                    {{ formatPrice(getPrecioBase(selectedPerfume)) }}
+                                            {{ formatPrice(getPrecioBase(selectedPerfume)) }}
                                                 </span>
-                                            </div>
+                                        </div>
                                             <div class="text-xs text-gray-400 mt-1">MXN</div>
                                         </div>
                                         
@@ -969,17 +1145,17 @@
                                             <div class="text-xs text-green-400 font-medium">Ahorras</div>
                                             <div class="text-lg font-bold text-green-400">
                                                 {{ formatPrice(getPrecioBase(selectedPerfume) - getPrecioFinal(selectedPerfume)) }}
-                                            </div>
-                                        </div>
                                     </div>
-                                    
+                                    </div>
+                                </div>
+
                                     <!-- Botones de Acción -->
                                     <div class="flex gap-3">
                                         <button @click="addToCart(selectedPerfume, 1, $event)"
                                                 class="flex-1 px-6 py-4 bg-primary hover:bg-accent text-black font-bold text-sm uppercase tracking-wider transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 flex items-center justify-center gap-2 group">
                                             <i class="bi bi-cart-plus-fill text-lg group-hover:scale-110 transition-transform"></i>
                                             <span>Agregar</span>
-                                        </button>
+                                    </button>
                                         
                                         <button @click.stop="toggleFavorite(selectedPerfume)"
                                                 class="px-5 py-4 transition-all duration-300 hover:scale-105 flex items-center justify-center"
@@ -987,7 +1163,7 @@
                                                     ? 'bg-red-500 text-white' 
                                                     : 'bg-white/5 border border-white/20 hover:bg-red-500/20 hover:border-red-500 text-white'">
                                             <i class="text-xl" :class="isFavorite(selectedPerfume.id_perfume) ? 'bi-heart-fill' : 'bi-heart'"></i>
-                                        </button>
+                                    </button>
                                     </div>
                                 </div>
                             </div>
@@ -1025,9 +1201,9 @@
                                         <div class="flex items-center gap-2">
                                             <div class="flex gap-1">
                                                 <button v-for="star in 5" 
-                                                        :key="star"
+                                               :key="star"
                                                         type="button"
-                                                        @click="newReview.calificacion = star"
+                                               @click="newReview.calificacion = star"
                                                         class="text-2xl transition-all duration-200 hover:scale-110"
                                                         :class="star <= newReview.calificacion ? 'text-primary' : 'text-gray-600'">
                                                     <i class="bi" :class="star <= newReview.calificacion ? 'bi-star-fill' : 'bi-star'"></i>
@@ -1075,10 +1251,10 @@
                                                 <div>
                                                     <h5 class="font-semibold text-white">{{ review.usuario }}</h5>
                                                     <div class="flex text-primary text-sm">
-                                                        <i class="bi bi-star-fill" v-for="n in review.calificacion" :key="n"></i>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <i class="bi bi-star-fill" v-for="n in review.calificacion" :key="n"></i>
+                                    </div>
+                                </div>
+                            </div>
                                         </div>
                                         <span class="text-xs text-gray-500">{{ formatDate(review.fecha) }}</span>
                                     </div>
@@ -1318,7 +1494,8 @@
         </div>
 
         <!-- BOTÓN FLOTANTE DE WHATSAPP -->
-        <a href="https://wa.me/5212311877967" 
+        <a v-show="!cartOpen"
+           href="https://wa.me/5212311877967" 
            target="_blank" 
            rel="noopener noreferrer"
            class="whatsapp-float-btn"

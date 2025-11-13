@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = `${AppConfig.getApiUrl()}/api`;
 let adminToken = null;
 let adminUser = null;
 

@@ -30,15 +30,19 @@ const defaultDevOrigins = [
     'http://localhost:8080'
 ];
 
+const defaultProdOrigins = [
+    'https://premiumperfumeria.onrender.com'
+];
+
 const allowedOrigins = process.env.CORS_ORIGIN 
     ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
-    : defaultDevOrigins;
+    : (NODE_ENV === 'production' ? defaultProdOrigins : defaultDevOrigins);
 
 console.log('🌐 Orígenes CORS permitidos:', allowedOrigins);
 
-if (NODE_ENV === 'production' && allowedOrigins.length === defaultDevOrigins.length) {
-    console.warn('⚠️  ADVERTENCIA: Usando orígenes CORS por defecto en producción');
-    console.warn('📝 Configura CORS_ORIGIN en las variables de entorno');
+if (NODE_ENV === 'production' && !process.env.CORS_ORIGIN) {
+    console.log('📝 Usando orígenes CORS por defecto para producción');
+    console.log('💡 Puedes configurar CORS_ORIGIN en las variables de entorno para personalizar');
 }
 
 app.use(cors({

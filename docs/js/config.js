@@ -6,6 +6,8 @@ const AppConfig = {
     // Detectar automáticamente el entorno
     isDevelopment: window.location.hostname === 'localhost' || 
                    window.location.hostname === '127.0.0.1' ||
+                   window.location.port === '5500' ||
+                   window.location.port === '5501' ||
                    window.location.hostname === '',
     
     // URLs del API
@@ -20,19 +22,33 @@ const AppConfig = {
     
     // Obtener la URL del API según el entorno
     getApiUrl() {
-        return this.isDevelopment ? this.development.apiUrl : this.production.apiUrl;
+        const apiUrl = this.isDevelopment ? this.development.apiUrl : this.production.apiUrl;
+        console.log(`🌐 Entorno: ${this.isDevelopment ? 'Desarrollo' : 'Producción'}`);
+        console.log(`🔗 API URL: ${apiUrl}`);
+        return apiUrl;
     },
     
     // Información de contacto
     whatsapp: {
+        // Número sin espacios ni guiones para enlaces
         number: '5212311877967',
-        formattedNumber: '231-187-7967'
+        // Número formateado para mostrar
+        formattedNumber: '231-187-7967',
+        displayNumber: '+52 231 187 7967'
     },
     
     // Redes sociales
     social: {
-        facebook: 'https://www.facebook.com/',
+        facebook: 'https://www.facebook.com/people/Premium-Perfumer%C3%ADa/61578055706575/',
+        instagram: 'https://www.instagram.com',
         whatsapp: 'https://wa.me/5212311877967'
+    },
+    
+    // Configuración de la aplicación
+    app: {
+        name: 'Perfumería Premium',
+        description: 'Réplicas premium de las mejores fragancias del mundo',
+        version: '1.0.0'
     }
 };
 

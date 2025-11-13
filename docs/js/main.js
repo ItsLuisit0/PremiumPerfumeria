@@ -172,12 +172,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Manejar respuesta con paginación o array directo (retrocompatibilidad)
                     const perfumesData = responseData.data || responseData;
                     
-                    // Las imágenes se sirven desde el backend de Railway
-                    const imageBaseUrl = `${API_BASE_URL}/`;
+                    // Las imágenes están en GitHub Pages, no en el backend
+                    const imageBaseUrl = AppConfig.isDevelopment 
+                        ? './' 
+                        : 'https://itsluisit0.github.io/Perfumeria/';
                     
                     this.perfumes = perfumesData.map(p => ({
                         ...p,
-                        imagen_url: p.imagen_url ? `${imageBaseUrl}${p.imagen_url}` : null
+                        imagen_url: `${imageBaseUrl}${p.imagen_url}`
                     }));
                     this.showToast('success', 'Catálogo cargado correctamente');
                 } catch (error) {

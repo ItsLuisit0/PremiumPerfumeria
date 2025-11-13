@@ -1,16 +1,4 @@
-// Detectar entorno y usar la API correcta
-const isDevelopment = window.location.hostname === 'localhost' || 
-                     window.location.hostname === '127.0.0.1' ||
-                     window.location.port === '5500' ||
-                     window.location.port === '5501';
-
-const API_URL = isDevelopment 
-    ? 'http://localhost:3000/api'
-    : 'https://perfumeriapremium-production.up.railway.app/api';
-
-console.log('🌐 Dashboard - Entorno:', isDevelopment ? 'Desarrollo' : 'Producción');
-console.log('🔗 API URL:', API_URL);
-
+const API_URL = 'http://localhost:3000/api';
 let adminToken = null;
 let adminUser = null;
 
@@ -62,34 +50,8 @@ function setupEventListeners() {
     document.getElementById('logoutBtn').addEventListener('click', logout);
 
     // Sidebar toggle
-    const sidebar = document.getElementById('sidebar');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-    
     document.getElementById('sidebarCollapse').addEventListener('click', function() {
-        sidebar.classList.toggle('active');
-        sidebarOverlay.classList.toggle('active');
-    });
-    
-    // Cerrar sidebar con botón X (móviles)
-    document.getElementById('sidebarClose').addEventListener('click', function() {
-        sidebar.classList.remove('active');
-        sidebarOverlay.classList.remove('active');
-    });
-    
-    // Cerrar sidebar al hacer clic en el overlay
-    sidebarOverlay.addEventListener('click', function() {
-        sidebar.classList.remove('active');
-        sidebarOverlay.classList.remove('active');
-    });
-    
-    // Cerrar sidebar al cambiar de página (móviles)
-    document.querySelectorAll('.sidebar .nav-link').forEach(link => {
-        link.addEventListener('click', function() {
-            if (window.innerWidth <= 768) {
-                sidebar.classList.remove('active');
-                sidebarOverlay.classList.remove('active');
-            }
-        });
+        document.getElementById('sidebar').classList.toggle('active');
     });
 
     // Búsqueda de perfumes

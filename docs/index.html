@@ -488,7 +488,6 @@
                                                     <small>MXN</small>
                                                 </span>
                                             </div>
-                                            <p class="price-wholesale-new">Mayoreo (6+ pzs): {{ formatPrice((perfume.descuento_porcentaje > 0 ? perfume.precio_con_descuento : perfume.precio_minimo) * 0.8) }}</p>
                                         </div>
                                         
                                         <!-- Botón agregar al carrito -->
@@ -678,45 +677,37 @@
                                     </div>
                                 </div>
 
-                                <!-- Selector de tipo de compra -->
-                                <div class="purchase-type-selector">
-                                    <button class="purchase-type-btn" 
-                                            :class="{ 'active': !isMayoreo }"
-                                            @click="selectMenudeo">
-                                        <div class="purchase-type-label">Menudeo</div>
-                                    </button>
-                                    <button class="purchase-type-btn"
-                                            :class="{ 'active': isMayoreo }"
-                                            @click="selectMayoreo(selectedPerfume)">
-                                        <div class="purchase-type-label">Mayoreo</div>
-                                        <div class="purchase-type-note">(6+ piezas)</div>
-                                    </button>
+                                <!-- Mensaje de mayoreo -->
+                                <div class="wholesale-info-message">
+                                    <i class="bi bi-box-seam"></i>
+                                    <p>¿Interesado en compras por mayoreo? Contáctenos directamente a nuestro número para brindarle todos los detalles.</p>
+                                    <a :href="`https://wa.me/${AppConfig.whatsapp.number}?text=${encodeURIComponent('Hola, me interesa información sobre compras por mayoreo')}`" 
+                                       class="btn-whatsapp-mayoreo"
+                                       target="_blank">
+                                        <i class="bi bi-whatsapp"></i>
+                                        Contactar por WhatsApp
+                                    </a>
                                 </div>
 
                                 <!-- Precio -->
                                 <div class="perfume-price-display">
                                     <div class="price-main-display">
-                                        <div v-if="selectedPerfume.descuento_porcentaje > 0 || isMayoreo" class="price-original-display">
+                                        <div v-if="selectedPerfume.descuento_porcentaje > 0" class="price-original-display">
                                             {{ formatPrice(getPrecioBase(selectedPerfume)) }}
                                         </div>
-                                        <div class="price-current-display" :class="{ 'has-discount': selectedPerfume.descuento_porcentaje > 0 || isMayoreo }">
+                                        <div class="price-current-display" :class="{ 'has-discount': selectedPerfume.descuento_porcentaje > 0 }">
                                             {{ formatPrice(getPrecioFinal(selectedPerfume)) }}
                                         </div>
                                     </div>
                                     <div class="price-unit">MXN por unidad</div>
-                                    <div v-if="isMayoreo" class="price-savings">
-                                        <i class="bi bi-tag-fill"></i>
-                                        Ahorras {{ formatPrice(getPrecioBase(selectedPerfume) - getPrecioFinal(selectedPerfume)) }} por unidad
-                                    </div>
                                 </div>
 
                                 <!-- Botones de acción -->
                                 <div class="perfume-detail-actions-modern">
                                     <button class="btn-add-cart-detail-modern" 
-                                            @click="addToCart(selectedPerfume, isMayoreo ? 6 : 1, $event, isMayoreo)">
+                                            @click="addToCart(selectedPerfume, 1, $event)">
                                         <i class="bi bi-cart-plus-fill"></i>
-                                        <span v-if="!isMayoreo">Agregar al Carrito</span>
-                                        <span v-else>Agregar 6 Unidades (Mayoreo)</span>
+                                        <span>Agregar al Carrito</span>
                                     </button>
                                     <button class="btn-favorite-detail-modern" 
                                             @click.stop="toggleFavorite(selectedPerfume)"
@@ -856,7 +847,7 @@
                 <div v-if="cart.length > 0" class="cart-content">
                     <div class="cart-items">
                         <div v-for="(item, index) in cart" 
-                             :key="`${item.id_perfume}-${item.es_mayoreo ? 'mayoreo' : 'menudeo'}`" 
+                             :key="`${item.id_perfume}`" 
                              class="cart-item"
                              role="listitem">
                             <div class="cart-item-image">
@@ -868,7 +859,6 @@
                             <div class="cart-item-details">
                                 <h6 class="cart-item-title">
                                     {{ item.nombre }}
-                                    <span v-if="item.es_mayoreo" class="cart-mayoreo-badge">MAYOREO</span>
                                 </h6>
                                 <p class="cart-item-meta">{{ item.marca }} - {{ item.mililitros }}ml</p>
                                 <div class="cart-item-quantity">

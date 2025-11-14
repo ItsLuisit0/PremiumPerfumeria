@@ -31,17 +31,17 @@ const AppConfig = {
     // Información de contacto
     whatsapp: {
         // Número sin espacios ni guiones para enlaces
-        number: '5212311877967',
+        number: '5212311508956',
         // Número formateado para mostrar
-        formattedNumber: '231-187-7967',
-        displayNumber: '+52 231 187 7967'
+        formattedNumber: '231-150-8956',
+        displayNumber: '+52 231 150 8956'
     },
     
     // Redes sociales
     social: {
         facebook: 'https://www.facebook.com/people/Premium-Perfumer%C3%ADa/61578055706575/',
         instagram: 'https://www.instagram.com',
-        whatsapp: 'https://wa.me/5212311877967'
+        whatsapp: 'https://wa.me/5212311508956'
     },
     
     // Configuración de la aplicación

@@ -1,6 +1,20 @@
+// =====================================================
+// ADMIN DASHBOARD - Premium Perfumería
+// =====================================================
+
 const API_URL = `${AppConfig.getApiUrl()}/api`;
 let adminToken = null;
 let adminUser = null;
+
+// Pagination state
+let currentPage = 1;
+let totalPages = 1;
+let itemsPerPage = 12;
+let currentFilters = {};
+
+// Image upload state
+let selectedImage = null;
+let selectedImageFile = null;
 
 // =====================================================
 // INICIALIZACIÓN
@@ -22,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cargar página inicial
     loadEstadisticas();
     
-    // Cargar gráficas esenciales automáticamente
+    // Cargar gráficas
     setTimeout(() => {
         loadChartStockDistribucion();
         loadChartPerfumesPorCategoria();
@@ -55,7 +69,27 @@ function setupEventListeners() {
     });
 
     // Búsqueda de perfumes
-    document.getElementById('btnBuscar')?.addEventListener('click', loadPerfumes);
+    document.getElementById('btnBuscar')?.addEventListener('click', function() {
+        currentPage = 1;
+        loadPerfumes();
+    });
+
+    // Clear filters
+    document.getElementById('btnClearFilters')?.addEventListener('click', clearFilters);
+
+    // Enter key en search
+    document.getElementById('searchPerfume')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            currentPage = 1;
+            loadPerfumes();
+        }
+    });
+
+    // Sorting change
+    document.getElementById('sortPerfumes')?.addEventListener('change', function() {
+        currentPage = 1;
+        loadPerfumes();
+    });
 
     // Guardar stock
     document.getElementById('saveStockBtn')?.addEventListener('click', saveStock);
@@ -66,14 +100,14 @@ function setupEventListeners() {
     // Actualizar preview de precio al cambiar descuento
     document.getElementById('editDescuentoValue')?.addEventListener('input', updatePrecioPreview);
 
-    // Botón de actualizar gráficas
-    document.getElementById('refreshChartsBtn')?.addEventListener('click', loadAnaliticas);
-
     // Botón de agregar perfume
     document.getElementById('addPerfumeBtn')?.addEventListener('click', openAddPerfumeModal);
     
     // Guardar nuevo perfume
     document.getElementById('savePerfumeBtn')?.addEventListener('click', savePerfume);
+
+    // Image upload events
+    setupImageUpload();
 }
 
 // =====================================================
@@ -105,13 +139,14 @@ function navigateTo(page) {
             loadChartPerfumesPorCategoria();
             break;
         case 'perfumes':
+            currentPage = 1;
             loadPerfumes();
             break;
         case 'reviews':
             loadReviews();
             break;
         case 'stock':
-            loadStockBajoFull();
+            loadStockBajo();
             break;
     }
 }
@@ -134,7 +169,6 @@ async function apiCall(endpoint, options = {}) {
         const data = await response.json();
 
         if (response.status === 401) {
-            // Token expirado
             localStorage.removeItem('adminToken');
             localStorage.removeItem('adminUser');
             window.location.href = 'login.html';
@@ -169,66 +203,447 @@ async function loadEstadisticas() {
     }
 }
 
-
 // =====================================================
-// PERFUMES
+// PERFUMES con PAGINACIÓN y ORDENAMIENTO
 // =====================================================
 
 async function loadPerfumes() {
     const search = document.getElementById('searchPerfume')?.value || '';
     const activo = document.getElementById('filterActivo')?.value || '';
+    const sort = document.getElementById('sortPerfumes')?.value || 'nombre_asc';
+    
+    currentFilters = { search, activo, sort };
     
     const query = new URLSearchParams();
     if (search) query.append('search', search);
     if (activo) query.append('activo', activo);
+    query.append('page', currentPage);
+    query.append('limit', itemsPerPage);
+    
+    // Parsing de sort
+    const [sortField, sortOrder] = sort.split('_');
+    query.append('sortField', sortField === 'precio' ? 'precio_minimo' : sortField);
+    query.append('sortOrder', sortOrder);
     
     const data = await apiCall(`/admin/perfumes?${query.toString()}`);
     
     if (data && data.success) {
-        const tbody = document.getElementById('perfumesTable');
-        
-        if (data.data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No se encontraron perfumes</td></tr>';
-            return;
-        }
+        renderPerfumesGrid(data.data);
+        renderPagination(data.total || 0);
+    }
+}
 
-        tbody.innerHTML = data.data.map(perfume => `
-            <tr>
-                <td>${perfume.id_perfume}</td>
-                <td><strong>${perfume.nombre}</strong></td>
-                <td>${perfume.marca}</td>
-                <td>
-                    <div>$${parseFloat(perfume.precio_minimo).toFixed(2)}</div>
-                    ${perfume.descuento_porcentaje > 0 ? 
-                        `<small class="text-success"><strong>$${parseFloat(perfume.precio_con_descuento).toFixed(2)}</strong></small>` 
-                        : ''}
-                </td>
-                <td><span class="badge bg-${getStockBadgeColor(perfume.stock)}">${perfume.stock}</span></td>
-                <td>
-                    ${perfume.descuento_porcentaje > 0 ? 
-                        `<span class="badge bg-success">${perfume.descuento_porcentaje}%</span>` 
-                        : '<span class="badge bg-secondary">0%</span>'}
-                </td>
-                <td>
-                    <span class="badge ${perfume.activo ? 'bg-success' : 'bg-secondary'}">
-                        ${perfume.activo ? 'Activo' : 'Inactivo'}
-                    </span>
-                </td>
-                <td>
-                    <button class="btn btn-sm btn-primary" onclick="openEditStock(${perfume.id_perfume}, '${perfume.nombre.replace(/'/g, "\\'")}', ${perfume.stock})" title="Actualizar Stock">
-                        <i class="fas fa-box"></i>
+function renderPerfumesGrid(perfumes) {
+    const grid = document.getElementById('perfumesGrid');
+    
+    if (perfumes.length === 0) {
+        grid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+                <i class="bi bi-search" style="font-size: 64px; color: var(--text-muted); margin-bottom: 16px;"></i>
+                <p style="color: var(--text-muted); font-size: 18px;">No se encontraron perfumes</p>
+            </div>
+        `;
+        return;
+    }
+
+    grid.innerHTML = perfumes.map(p => `
+        <div class="perfume-card">
+            <div class="perfume-image">
+                <img src="../${p.imagen_url || 'ImagenesPerfumes/placeholder.png'}" 
+                     alt="${p.nombre}" 
+                     onerror="this.src='../ImagenesPerfumes/placeholder.png'">
+            </div>
+            <div class="perfume-info">
+                <div class="perfume-brand">${p.marca}</div>
+                <div class="perfume-name">${p.nombre}</div>
+                <div class="perfume-details">
+                    <div class="perfume-price">$${parseFloat(p.precio_minimo).toFixed(2)}</div>
+                    <div class="perfume-stock ${p.stock < 10 ? 'low' : ''}">
+                        <i class="bi bi-box-seam"></i> ${p.stock}
+                    </div>
+                </div>
+                ${p.descuento_porcentaje > 0 ? `
+                    <div style="background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 8px; text-align: center; margin-bottom: 12px;">
+                        <small style="color: #ef4444; font-weight: 600;">
+                            <i class="bi bi-percent"></i> ${p.descuento_porcentaje}% OFF
+                        </small>
+                    </div>
+                ` : ''}
+                <div class="perfume-actions">
+                    <button class="btn-action edit" onclick="editPerfume(${p.id_perfume})">
+                        <i class="bi bi-pencil"></i> Editar
                     </button>
-                    <button class="btn btn-sm btn-warning" onclick="openEditDescuento(${perfume.id_perfume}, '${perfume.nombre.replace(/'/g, "\\'")}', ${parseFloat(perfume.precio_minimo)}, ${perfume.descuento_porcentaje})" title="Actualizar Descuento">
-                        <i class="fas fa-percent"></i>
+                    <button class="btn-action" style="background: rgba(212, 175, 55, 0.1); color: var(--primary-gold); border: 1px solid var(--border-gold);" 
+                            onclick="openStockModal(${p.id_perfume}, '${p.nombre}', ${p.stock})">
+                        <i class="bi bi-box"></i> Stock
                     </button>
-                </td>
-            </tr>
-        `).join('');
+                    <button class="btn-action" style="background: rgba(251, 146, 60, 0.1); color: #fb923c; border: 1px solid rgba(251, 146, 60, 0.3);" 
+                            onclick="openDescuentoModal(${p.id_perfume}, '${p.nombre}', ${p.precio_minimo}, ${p.descuento_porcentaje || 0})">
+                        <i class="bi bi-percent"></i>
+                    </button>
+                    <button class="btn-action delete" onclick="deletePerfume(${p.id_perfume}, '${p.nombre}')">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderPagination(total) {
+    totalPages = Math.ceil(total / itemsPerPage);
+    const container = document.getElementById('paginationContainer');
+    
+    if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+
+    const startItem = ((currentPage - 1) * itemsPerPage) + 1;
+    const endItem = Math.min(currentPage * itemsPerPage, total);
+
+    let pagesHTML = '';
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        pagesHTML += `
+            <button class="btn-page ${i === currentPage ? 'active' : ''}" 
+                    onclick="goToPage(${i})">
+                ${i}
+            </button>
+        `;
+    }
+
+    container.innerHTML = `
+        <div class="pagination-info">
+            Mostrando ${startItem} - ${endItem} de ${total}
+        </div>
+        <div class="pagination-buttons">
+            <button class="btn-page" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            ${pagesHTML}
+            <button class="btn-page" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    `;
+}
+
+function goToPage(page) {
+    if (page < 1 || page > totalPages || page === currentPage) return;
+    currentPage = page;
+    loadPerfumes();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function clearFilters() {
+    document.getElementById('searchPerfume').value = '';
+    document.getElementById('filterActivo').value = '';
+    document.getElementById('sortPerfumes').value = 'nombre_asc';
+    currentPage = 1;
+    loadPerfumes();
+}
+
+// =====================================================
+// CRUD PERFUMES
+// =====================================================
+
+function openAddPerfumeModal() {
+    // Reset form
+    document.getElementById('addPerfumeForm').reset();
+    document.getElementById('editPerfumeId').value = '';
+    document.getElementById('modalTitle').textContent = 'Agregar Nuevo Perfume';
+    document.getElementById('addActivo').checked = true;
+    resetImageUpload();
+    
+    const modal = new bootstrap.Modal(document.getElementById('addPerfumeModal'));
+    modal.show();
+}
+
+async function editPerfume(id) {
+    const data = await apiCall(`/perfumes/${id}`);
+    
+    if (data) {
+        document.getElementById('editPerfumeId').value = id;
+        document.getElementById('addMarca').value = data.marca;
+        document.getElementById('addNombre').value = data.nombre;
+        document.getElementById('addTipo').value = data.tipo;
+        document.getElementById('addPublico').value = data.publico;
+        document.getElementById('addDescripcion').value = data.descripcion || '';
+        document.getElementById('addNotas').value = data.notas || '';
+        document.getElementById('addPrecio').value = data.precio_minimo;
+        document.getElementById('addMililitros').value = data.mililitros;
+        document.getElementById('addStock').value = data.stock;
+        document.getElementById('addActivo').checked = data.activo;
+        document.getElementById('addImagenUrl').value = data.imagen_url || '';
+        
+        // Set imagen preview
+        if (data.imagen_url) {
+            const preview = document.getElementById('uploadPreview');
+            const placeholder = document.getElementById('uploadPlaceholder');
+            const previewImage = document.getElementById('previewImage');
+            
+            previewImage.src = `../${data.imagen_url}`;
+            placeholder.style.display = 'none';
+            preview.style.display = 'block';
+        }
+        
+        document.getElementById('modalTitle').textContent = 'Editar Perfume';
+        
+        const modal = new bootstrap.Modal(document.getElementById('addPerfumeModal'));
+        modal.show();
+    }
+}
+
+async function savePerfume() {
+    const id = document.getElementById('editPerfumeId').value;
+    const perfumeData = {
+        marca: document.getElementById('addMarca').value.trim(),
+        nombre: document.getElementById('addNombre').value.trim(),
+        tipo: document.getElementById('addTipo').value,
+        publico: document.getElementById('addPublico').value,
+        descripcion: document.getElementById('addDescripcion').value.trim(),
+        notas: document.getElementById('addNotas').value.trim(),
+        precio_minimo: parseFloat(document.getElementById('addPrecio').value),
+        mililitros: parseInt(document.getElementById('addMililitros').value),
+        stock: parseInt(document.getElementById('addStock').value),
+        activo: document.getElementById('addActivo').checked,
+        imagen_url: document.getElementById('addImagenUrl').value.trim()
+    };
+
+    // Validación
+    if (!perfumeData.marca || !perfumeData.nombre || !perfumeData.tipo || !perfumeData.publico) {
+        showToast('Por favor completa todos los campos requeridos', 'danger');
+        return;
+    }
+
+    const btn = document.getElementById('savePerfumeBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+
+    const endpoint = id ? `/admin/perfumes/${id}` : '/admin/perfumes';
+    const method = id ? 'PUT' : 'POST';
+
+    const data = await apiCall(endpoint, {
+        method: method,
+        body: JSON.stringify(perfumeData)
+    });
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-check-lg"></i> Guardar Perfume';
+
+    if (data && data.success) {
+        showToast(id ? 'Perfume actualizado correctamente' : 'Perfume creado correctamente', 'success');
+        bootstrap.Modal.getInstance(document.getElementById('addPerfumeModal')).hide();
+        loadPerfumes();
+        loadEstadisticas();
+    }
+}
+
+async function deletePerfume(id, nombre) {
+    if (!confirm(`¿Estás seguro de eliminar el perfume "${nombre}"?`)) return;
+
+    const data = await apiCall(`/admin/perfumes/${id}`, {
+        method: 'DELETE'
+    });
+
+    if (data && data.success) {
+        showToast('Perfume eliminado correctamente', 'success');
+        loadPerfumes();
+        loadEstadisticas();
     }
 }
 
 // =====================================================
-// RESEÑAS
+// STOCK & DESCUENTO
+// =====================================================
+
+function openStockModal(id, nombre, stock) {
+    document.getElementById('editStockId').value = id;
+    document.getElementById('editStockNombre').value = nombre;
+    document.getElementById('editStockValue').value = stock;
+    
+    const modal = new bootstrap.Modal(document.getElementById('editStockModal'));
+    modal.show();
+}
+
+async function saveStock() {
+    const id = document.getElementById('editStockId').value;
+    const stock = parseInt(document.getElementById('editStockValue').value);
+
+    if (stock < 0) {
+        showToast('El stock no puede ser negativo', 'danger');
+        return;
+    }
+
+    const data = await apiCall(`/admin/perfumes/${id}/stock`, {
+        method: 'PATCH',
+        body: JSON.stringify({ stock })
+    });
+
+    if (data && data.success) {
+        showToast('Stock actualizado correctamente', 'success');
+        bootstrap.Modal.getInstance(document.getElementById('editStockModal')).hide();
+        loadPerfumes();
+        loadEstadisticas();
+    }
+}
+
+function openDescuentoModal(id, nombre, precio, descuento) {
+    document.getElementById('editDescuentoId').value = id;
+    document.getElementById('editDescuentoNombre').value = nombre;
+    document.getElementById('editDescuentoPrecioBase').value = parseFloat(precio).toFixed(2);
+    document.getElementById('editDescuentoValue').value = descuento;
+    updatePrecioPreview();
+    
+    const modal = new bootstrap.Modal(document.getElementById('editDescuentoModal'));
+    modal.show();
+}
+
+function updatePrecioPreview() {
+    const precio = parseFloat(document.getElementById('editDescuentoPrecioBase').value) || 0;
+    const descuento = parseFloat(document.getElementById('editDescuentoValue').value) || 0;
+    const precioFinal = precio * (1 - descuento / 100);
+    document.getElementById('precioFinalPreview').textContent = `$${precioFinal.toFixed(2)}`;
+}
+
+async function saveDescuento() {
+    const id = document.getElementById('editDescuentoId').value;
+    const descuento = parseFloat(document.getElementById('editDescuentoValue').value) || 0;
+
+    if (descuento < 0 || descuento > 100) {
+        showToast('El descuento debe estar entre 0 y 100', 'danger');
+        return;
+    }
+
+    const data = await apiCall(`/admin/perfumes/${id}/descuento`, {
+        method: 'PATCH',
+        body: JSON.stringify({ descuento_porcentaje: descuento })
+    });
+
+    if (data && data.success) {
+        showToast('Descuento actualizado correctamente', 'success');
+        bootstrap.Modal.getInstance(document.getElementById('editDescuentoModal')).hide();
+        loadPerfumes();
+    }
+}
+
+// =====================================================
+// IMAGE UPLOAD con DRAG & DROP
+// =====================================================
+
+function setupImageUpload() {
+    const uploadArea = document.getElementById('imageUploadArea');
+    const imageInput = document.getElementById('imageInput');
+    const removeBtn = document.getElementById('removeImageBtn');
+
+    // Click to upload
+    uploadArea.addEventListener('click', function(e) {
+        if (e.target !== removeBtn && !removeBtn.contains(e.target)) {
+            imageInput.click();
+        }
+    });
+
+    // File input change
+    imageInput.addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            handleImageFile(e.target.files[0]);
+        }
+    });
+
+    // Drag & Drop
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files && files[0]) {
+            handleImageFile(files[0]);
+        }
+    });
+
+    // Remove image
+    removeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        resetImageUpload();
+    });
+}
+
+function handleImageFile(file) {
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+        showToast('Por favor selecciona un archivo de imagen válido', 'danger');
+        return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('La imagen no debe exceder 5MB', 'danger');
+        return;
+    }
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.getElementById('uploadPreview');
+        const placeholder = document.getElementById('uploadPlaceholder');
+        const previewImage = document.getElementById('previewImage');
+        
+        previewImage.src = e.target.result;
+        placeholder.style.display = 'none';
+        preview.style.display = 'block';
+        
+        // Store file data
+        selectedImageFile = file;
+        selectedImage = e.target.result;
+        
+        // Set image URL (you would upload this to a server in production)
+        // For now, we'll generate a filename based on marca and nombre
+        const marca = document.getElementById('addMarca').value.trim().replace(/\s+/g, '_');
+        const nombre = document.getElementById('addNombre').value.trim().replace(/\s+/g, '_');
+        const ext = file.name.split('.').pop();
+        const imageName = `ImagenesPerfumes/${marca}_${nombre}.${ext}`;
+        document.getElementById('addImagenUrl').value = imageName;
+    };
+    
+    reader.readAsDataURL(file);
+}
+
+function resetImageUpload() {
+    const preview = document.getElementById('uploadPreview');
+    const placeholder = document.getElementById('uploadPlaceholder');
+    const previewImage = document.getElementById('previewImage');
+    const imageInput = document.getElementById('imageInput');
+    
+    previewImage.src = '';
+    placeholder.style.display = 'block';
+    preview.style.display = 'none';
+    imageInput.value = '';
+    document.getElementById('addImagenUrl').value = '';
+    
+    selectedImage = null;
+    selectedImageFile = null;
+}
+
+// =====================================================
+// REVIEWS
 // =====================================================
 
 async function loadReviews() {
@@ -242,54 +657,44 @@ async function loadReviews() {
             return;
         }
 
-        tbody.innerHTML = data.data.map(review => `
+        tbody.innerHTML = data.data.map(r => `
             <tr>
-                <td>${review.usuario}</td>
-                <td>${review.nombre_perfume} <small class="text-muted">(${review.marca})</small></td>
-                <td>${getStarRating(review.calificacion)}</td>
-                <td>${review.comentario.substring(0, 50)}${review.comentario.length > 50 ? '...' : ''}</td>
+                <td>${r.nombre_usuario}</td>
+                <td>${r.nombre_perfume}</td>
+                <td>${'⭐'.repeat(r.calificacion)}</td>
+                <td>${r.comentario || '-'}</td>
                 <td>
-                    <span class="badge ${review.aprobada ? 'bg-success' : 'bg-warning'}">
-                        ${review.aprobada ? 'Aprobada' : 'Pendiente'}
+                    <span class="badge ${r.aprobado ? 'bg-success' : 'bg-warning'}">
+                        ${r.aprobado ? 'Aprobado' : 'Pendiente'}
                     </span>
                 </td>
                 <td>
-                    ${!review.aprobada ? `
-                        <button class="btn btn-sm btn-success" onclick="moderarReview(${review.id_reseña}, true)">
-                            <i class="fas fa-check"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger" onclick="moderarReview(${review.id_reseña}, false)">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    ` : ''}
-                    <button class="btn btn-sm btn-danger" onclick="deleteReview(${review.id_reseña})">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    ${!r.aprobado ? `<button class="btn btn-sm btn-success" onclick="approveReview(${r.id_review})">Aprobar</button>` : ''}
+                    <button class="btn btn-sm btn-danger" onclick="deleteReview(${r.id_review})">Eliminar</button>
                 </td>
             </tr>
         `).join('');
     }
 }
 
-async function moderarReview(id, aprobada) {
-    const data = await apiCall(`/admin/reviews/${id}/moderar`, {
-        method: 'PATCH',
-        body: JSON.stringify({ aprobada })
+async function approveReview(id) {
+    const data = await apiCall(`/admin/reviews/${id}/approve`, {
+        method: 'PATCH'
     });
-    
+
     if (data && data.success) {
-        showToast(data.message, 'success');
+        showToast('Reseña aprobada', 'success');
         loadReviews();
     }
 }
 
 async function deleteReview(id) {
-    if (!confirm('¿Estás seguro de eliminar esta reseña?')) return;
-    
+    if (!confirm('¿Eliminar esta reseña?')) return;
+
     const data = await apiCall(`/admin/reviews/${id}`, {
         method: 'DELETE'
     });
-    
+
     if (data && data.success) {
         showToast('Reseña eliminada', 'success');
         loadReviews();
@@ -297,10 +702,10 @@ async function deleteReview(id) {
 }
 
 // =====================================================
-// STOCK
+// STOCK BAJO
 // =====================================================
 
-async function loadStockBajoFull() {
+async function loadStockBajo() {
     const data = await apiCall('/admin/stock-bajo');
     
     if (data && data.success) {
@@ -311,17 +716,22 @@ async function loadStockBajoFull() {
             return;
         }
 
-        tbody.innerHTML = data.data.map(producto => `
+        tbody.innerHTML = data.data.map(p => `
             <tr>
-                <td>${producto.id_perfume}</td>
-                <td><strong>${producto.nombre}</strong></td>
-                <td>${producto.marca}</td>
-                <td><span class="badge bg-${getStockBadgeColor(producto.stock)}">${producto.stock}</span></td>
-                <td>$${parseFloat(producto.precio_minimo).toFixed(2)}</td>
-                <td><span class="badge bg-${getEstadoBadgeColor(producto.estado_stock)}">${producto.estado_stock}</span></td>
+                <td>${p.id_perfume}</td>
+                <td><strong>${p.nombre}</strong></td>
+                <td>${p.marca}</td>
+                <td><span class="text-danger fw-bold">${p.stock}</span></td>
+                <td>$${parseFloat(p.precio_minimo).toFixed(2)}</td>
                 <td>
-                    <button class="btn btn-sm btn-primary" onclick="openEditStock(${producto.id_perfume}, '${producto.nombre.replace(/'/g, "\\'")}', ${producto.stock})">
-                        <i class="fas fa-edit"></i> Actualizar
+                    <span class="badge ${p.activo ? 'bg-success' : 'bg-secondary'}">
+                        ${p.activo ? 'Activo' : 'Inactivo'}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-primary" 
+                            onclick="openStockModal(${p.id_perfume}, '${p.nombre}', ${p.stock})">
+                        Actualizar Stock
                     </button>
                 </td>
             </tr>
@@ -329,221 +739,124 @@ async function loadStockBajoFull() {
     }
 }
 
-function openEditStock(id, nombre, stockActual) {
-    document.getElementById('editStockId').value = id;
-    document.getElementById('editStockNombre').value = nombre;
-    document.getElementById('editStockValue').value = stockActual;
-    
-    const modal = new bootstrap.Modal(document.getElementById('editStockModal'));
-    modal.show();
-}
-
-async function saveStock() {
-    const id = document.getElementById('editStockId').value;
-    const stock = document.getElementById('editStockValue').value;
-    
-    const data = await apiCall(`/admin/perfumes/${id}/stock`, {
-        method: 'PATCH',
-        body: JSON.stringify({ stock: parseInt(stock) })
-    });
-    
-    if (data && data.success) {
-        showToast('Stock actualizado', 'success');
-        bootstrap.Modal.getInstance(document.getElementById('editStockModal')).hide();
-        
-        // Recargar datos
-        loadEstadisticas();
-        if (document.getElementById('page-perfumes').classList.contains('active')) {
-            loadPerfumes();
-        }
-        if (document.getElementById('page-stock').classList.contains('active')) {
-            loadStockBajoFull();
-        }
-    }
-}
-
-// Abrir modal de descuento
-function openEditDescuento(id, nombre, precioBase, descuentoActual) {
-    document.getElementById('editDescuentoId').value = id;
-    document.getElementById('editDescuentoNombre').value = nombre;
-    document.getElementById('editDescuentoPrecioBase').value = precioBase.toFixed(2);
-    document.getElementById('editDescuentoValue').value = descuentoActual;
-    
-    // Calcular precio final
-    updatePrecioPreview();
-    
-    const modal = new bootstrap.Modal(document.getElementById('editDescuentoModal'));
-    modal.show();
-}
-
-// Actualizar preview del precio final
-function updatePrecioPreview() {
-    const precioBase = parseFloat(document.getElementById('editDescuentoPrecioBase').value);
-    const descuento = parseFloat(document.getElementById('editDescuentoValue').value) || 0;
-    
-    const precioFinal = precioBase * (1 - descuento / 100);
-    document.getElementById('precioFinalPreview').textContent = `$${precioFinal.toFixed(2)}`;
-    
-    // Cambiar color según el descuento
-    const preview = document.getElementById('precioFinalPreview');
-    if (descuento === 0) {
-        preview.className = 'fs-5 text-secondary ms-2';
-    } else if (descuento < 20) {
-        preview.className = 'fs-5 text-info ms-2';
-    } else if (descuento < 50) {
-        preview.className = 'fs-5 text-success ms-2';
-    } else {
-        preview.className = 'fs-5 text-danger ms-2';
-    }
-}
-
-// Establecer descuento rápido
-function setDescuentoRapido(descuento) {
-    document.getElementById('editDescuentoValue').value = descuento;
-    updatePrecioPreview();
-}
-
-// Guardar descuento
-async function saveDescuento() {
-    const id = document.getElementById('editDescuentoId').value;
-    const descuento = parseFloat(document.getElementById('editDescuentoValue').value);
-    
-    if (isNaN(descuento) || descuento < 0 || descuento > 100) {
-        showToast('El descuento debe estar entre 0 y 100', 'danger');
-        return;
-    }
-    
-    const data = await apiCall(`/admin/perfumes/${id}/descuento`, {
-        method: 'PATCH',
-        body: JSON.stringify({ descuento_porcentaje: descuento })
-    });
-    
-    if (data && data.success) {
-        showToast('¡Descuento actualizado correctamente!', 'success');
-        bootstrap.Modal.getInstance(document.getElementById('editDescuentoModal')).hide();
-        
-        // Recargar datos
-        loadEstadisticas();
-        if (document.getElementById('page-perfumes').classList.contains('active')) {
-            loadPerfumes();
-        }
-    }
-}
-
-// Abrir modal de agregar perfume
-function openAddPerfumeModal() {
-    // Limpiar el formulario
-    document.getElementById('addPerfumeForm').reset();
-    
-    // Asegurar que "Activo" esté marcado por defecto
-    document.getElementById('addActivo').checked = true;
-    document.getElementById('addDestacado').checked = false;
-    
-    // Abrir el modal
-    const modal = new bootstrap.Modal(document.getElementById('addPerfumeModal'));
-    modal.show();
-}
-
-// Guardar nuevo perfume
-async function savePerfume() {
-    // Validar formulario
-    const form = document.getElementById('addPerfumeForm');
-    if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-    }
-    
-    // Recopilar datos del formulario
-    const perfumeData = {
-        marca: document.getElementById('addMarca').value.trim(),
-        nombre: document.getElementById('addNombre').value.trim(),
-        tipo: document.getElementById('addTipo').value,
-        publico: document.getElementById('addPublico').value,
-        descripcion: document.getElementById('addDescripcion').value.trim() || null,
-        notas: document.getElementById('addNotas').value.trim() || null,
-        precio_minimo: parseFloat(document.getElementById('addPrecio').value),
-        mililitros: parseInt(document.getElementById('addMililitros').value),
-        stock: parseInt(document.getElementById('addStock').value),
-        imagen_url: document.getElementById('addImagenUrl').value.trim() || null,
-        activo: document.getElementById('addActivo').checked,
-        destacado: document.getElementById('addDestacado').checked
-    };
-    
-    // Validaciones adicionales
-    if (perfumeData.precio_minimo <= 0) {
-        showToast('El precio debe ser mayor a 0', 'danger');
-        return;
-    }
-    
-    if (perfumeData.mililitros <= 0) {
-        showToast('Los mililitros deben ser mayores a 0', 'danger');
-        return;
-    }
-    
-    // Enviar al servidor
-    const data = await apiCall('/admin/perfumes', {
-        method: 'POST',
-        body: JSON.stringify(perfumeData)
-    });
-    
-    if (data && data.success) {
-        showToast('✅ Perfume agregado exitosamente!', 'success');
-        bootstrap.Modal.getInstance(document.getElementById('addPerfumeModal')).hide();
-        
-        // Recargar datos
-        loadEstadisticas();
-        if (document.getElementById('page-perfumes').classList.contains('active')) {
-            loadPerfumes();
-        }
-    }
-}
-
 // =====================================================
-// LOGOUT
+// GRÁFICAS
 // =====================================================
 
-async function logout() {
-    await apiCall('/admin/logout', { method: 'POST' });
+async function loadChartStockDistribucion() {
+    const data = await apiCall('/admin/estadisticas');
     
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    window.location.href = 'login.html';
+    if (data && data.success) {
+        const stats = data.data;
+        
+        Highcharts.chart('chartStockDistribucion', {
+            chart: {
+                type: 'pie',
+                backgroundColor: 'transparent',
+                style: {
+                    fontFamily: 'Montserrat, sans-serif'
+                }
+            },
+            title: {
+                text: null
+            },
+            credits: {
+                enabled: false
+            },
+            plotOptions: {
+                pie: {
+                    innerSize: '60%',
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.name}: {point.y}',
+                        style: {
+                            color: '#f5f5f5',
+                            fontSize: '13px'
+                        }
+                    }
+                }
+            },
+            series: [{
+                name: 'Cantidad',
+                data: [
+                    { name: 'Stock Normal', y: (stats.total_perfumes - stats.productos_stock_bajo) || 0, color: '#10b981' },
+                    { name: 'Stock Bajo', y: stats.productos_stock_bajo || 0, color: '#ef4444' }
+                ]
+            }]
+        });
+    }
+}
+
+async function loadChartPerfumesPorCategoria() {
+    const data = await apiCall('/admin/perfumes-por-categoria');
+    
+    if (data && data.success) {
+        const categorias = data.data;
+        
+        Highcharts.chart('chartPerfumesPorCategoria', {
+            chart: {
+                type: 'column',
+                backgroundColor: 'transparent',
+                style: {
+                    fontFamily: 'Montserrat, sans-serif'
+                }
+            },
+            title: {
+                text: null
+            },
+            credits: {
+                enabled: false
+            },
+            xAxis: {
+                categories: categorias.map(c => c.categoria),
+                labels: {
+                    style: {
+                        color: '#f5f5f5'
+                    }
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Cantidad',
+                    style: {
+                        color: '#f5f5f5'
+                    }
+                },
+                labels: {
+                    style: {
+                        color: '#f5f5f5'
+                    }
+                },
+                gridLineColor: 'rgba(212, 175, 55, 0.1)'
+            },
+            legend: {
+                enabled: false
+            },
+            series: [{
+                name: 'Perfumes',
+                data: categorias.map(c => ({
+                    y: c.total,
+                    color: c.categoria === 'Hombre' ? '#3b82f6' : 
+                           c.categoria === 'Mujer' ? '#ec4899' : '#D4AF37'
+                }))
+            }]
+        });
+    }
 }
 
 // =====================================================
 // UTILIDADES
 // =====================================================
 
-function getStockBadgeColor(stock) {
-    if (stock === 0) return 'danger';
-    if (stock <= 5) return 'danger';
-    if (stock <= 10) return 'warning';
-    return 'success';
-}
-
-function getEstadoBadgeColor(estado) {
-    switch(estado) {
-        case 'SIN STOCK': return 'danger';
-        case 'CRÍTICO': return 'danger';
-        case 'BAJO': return 'warning';
-        default: return 'success';
-    }
-}
-
-function getStarRating(rating) {
-    let stars = '';
-    for (let i = 1; i <= 5; i++) {
-        stars += i <= rating ? '⭐' : '☆';
-    }
-    return stars;
-}
-
 function showToast(message, type = 'info') {
-    // Simple toast notification
+    // Simple toast notification (you can use a library like Toastify for better UX)
     const toast = document.createElement('div');
     toast.className = `alert alert-${type} position-fixed top-0 end-0 m-3`;
     toast.style.zIndex = '9999';
-    toast.textContent = message;
+    toast.innerHTML = `
+        <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+        ${message}
+    `;
     document.body.appendChild(toast);
     
     setTimeout(() => {
@@ -551,347 +864,22 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
+function logout() {
+    if (confirm('¿Cerrar sesión?')) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        window.location.href = 'login.html';
+    }
+}
+
 // =====================================================
-// ANALÍTICAS - HIGHCHARTS
+// GLOBAL FUNCTIONS (for onclick handlers)
 // =====================================================
-
-async function loadAnaliticas() {
-    // Recargar gráficas esenciales del dashboard
-    await Promise.all([
-        loadChartStockDistribucion(),
-        loadChartPerfumesPorCategoria()
-    ]);
-    
-    showToast('Gráficas actualizadas', 'success');
-}
-
-// 1. Perfumes por Categoría (Pie Chart)
-async function loadChartPerfumesPorCategoria() {
-    const data = await apiCall('/admin/estadisticas/categoria');
-    
-    if (data && data.success) {
-        const chartData = data.data.map(item => ({
-            name: item.categoria,
-            y: parseInt(item.total_productos),
-            drilldown: item.categoria
-        }));
-        
-        Highcharts.chart('chartPerfumesPorCategoria', {
-            chart: {
-                type: 'pie'
-            },
-            title: {
-                text: null
-            },
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        format: '<b>{point.name}</b>: {point.percentage:.1f}%'
-                    },
-                    showInLegend: true
-                }
-            },
-            series: [{
-                name: 'Perfumes',
-                colorByPoint: true,
-                data: chartData
-            }],
-            colors: ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b']
-        });
-    }
-}
-
-// 2. Perfumes por Marca (Bar Chart - Top 10)
-async function loadChartPerfumesPorMarca() {
-    const data = await apiCall('/admin/estadisticas/marca');
-    
-    if (data && data.success) {
-        // Tomar solo las primeras 10 marcas
-        const top10 = data.data.slice(0, 10);
-        const categories = top10.map(item => item.marca);
-        const seriesData = top10.map(item => parseInt(item.total_productos));
-        
-        Highcharts.chart('chartPerfumesPorMarca', {
-            chart: {
-                type: 'column'
-            },
-            title: {
-                text: null
-            },
-            xAxis: {
-                categories: categories,
-                title: {
-                    text: 'Marcas'
-                }
-            },
-            yAxis: {
-                min: 0,
-                title: {
-                    text: 'Cantidad de Perfumes'
-                }
-            },
-            plotOptions: {
-                column: {
-                    dataLabels: {
-                        enabled: true
-                    },
-                    colorByPoint: true
-                }
-            },
-            series: [{
-                name: 'Perfumes',
-                data: seriesData,
-                showInLegend: false
-            }],
-            colors: ['#10b981', '#059669', '#047857', '#065f46', '#064e3b', '#6366f1', '#4f46e5', '#4338ca', '#3730a3', '#312e81']
-        });
-    }
-}
-
-// 3. Distribución de Stock (Pie Chart)
-async function loadChartStockDistribucion() {
-    const data = await apiCall('/admin/perfumes?activo=true');
-    
-    if (data && data.success) {
-        const perfumes = data.data;
-        
-        // Clasificar por stock
-        const sinStock = perfumes.filter(p => p.stock === 0).length;
-        const stockCritico = perfumes.filter(p => p.stock > 0 && p.stock <= 5).length;
-        const stockBajo = perfumes.filter(p => p.stock > 5 && p.stock <= 10).length;
-        const stockNormal = perfumes.filter(p => p.stock > 10 && p.stock <= 20).length;
-        const stockAlto = perfumes.filter(p => p.stock > 20).length;
-        
-        Highcharts.chart('chartStockDistribucion', {
-            chart: {
-                type: 'pie'
-            },
-            title: {
-                text: null
-            },
-            plotOptions: {
-                pie: {
-                    allowPointSelect: true,
-                    cursor: 'pointer',
-                    dataLabels: {
-                        enabled: true,
-                        format: '<b>{point.name}</b>: {point.y} ({point.percentage:.1f}%)'
-                    }
-                }
-            },
-            series: [{
-                name: 'Perfumes',
-                colorByPoint: true,
-                data: [
-                    { name: 'Sin Stock', y: sinStock, color: '#ef4444' },
-                    { name: 'Stock Crítico (1-5)', y: stockCritico, color: '#f59e0b' },
-                    { name: 'Stock Bajo (6-10)', y: stockBajo, color: '#fbbf24' },
-                    { name: 'Stock Normal (11-20)', y: stockNormal, color: '#10b981' },
-                    { name: 'Stock Alto (20+)', y: stockAlto, color: '#059669' }
-                ]
-            }]
-        });
-    }
-}
-
-// 4. Reseñas por Calificación (Column Chart)
-async function loadChartReseñasPorCalificacion() {
-    const data = await apiCall('/admin/reviews?aprobada=true');
-    
-    if (data && data.success) {
-        const reviews = data.data;
-        
-        // Contar por calificación
-        const calificaciones = [1, 2, 3, 4, 5];
-        const counts = calificaciones.map(cal => 
-            reviews.filter(r => r.calificacion === cal).length
-        );
-        
-        Highcharts.chart('chartReseñasPorCalificacion', {
-            chart: {
-                type: 'column'
-            },
-            title: {
-                text: null
-            },
-            xAxis: {
-                categories: ['⭐ 1 Estrella', '⭐⭐ 2 Estrellas', '⭐⭐⭐ 3 Estrellas', '⭐⭐⭐⭐ 4 Estrellas', '⭐⭐⭐⭐⭐ 5 Estrellas'],
-                title: {
-                    text: 'Calificación'
-                }
-            },
-            yAxis: {
-                min: 0,
-                title: {
-                    text: 'Cantidad de Reseñas'
-                }
-            },
-            plotOptions: {
-                column: {
-                    dataLabels: {
-                        enabled: true
-                    },
-                    colorByPoint: true
-                }
-            },
-            series: [{
-                name: 'Reseñas',
-                data: counts,
-                showInLegend: false
-            }],
-            colors: ['#ef4444', '#f59e0b', '#fbbf24', '#84cc16', '#10b981']
-        });
-    }
-}
-
-// 5. Distribución de Precios (Area Chart)
-async function loadChartRangoPrecios() {
-    const data = await apiCall('/admin/perfumes?activo=true');
-    
-    if (data && data.success) {
-        const perfumes = data.data;
-        
-        // Clasificar por rangos de precio
-        const rangos = [
-            { name: '$0-300', min: 0, max: 300 },
-            { name: '$301-450', min: 301, max: 450 },
-            { name: '$451-550', min: 451, max: 550 },
-            { name: '$551-700', min: 551, max: 700 },
-            { name: '$701+', min: 701, max: Infinity }
-        ];
-        
-        const counts = rangos.map(rango => 
-            perfumes.filter(p => parseFloat(p.precio_minimo) >= rango.min && parseFloat(p.precio_minimo) <= rango.max).length
-        );
-        
-        Highcharts.chart('chartRangoPrecios', {
-            chart: {
-                type: 'areaspline'
-            },
-            title: {
-                text: null
-            },
-            xAxis: {
-                categories: rangos.map(r => r.name)
-            },
-            yAxis: {
-                title: {
-                    text: 'Cantidad de Perfumes'
-                }
-            },
-            plotOptions: {
-                areaspline: {
-                    fillOpacity: 0.5
-                }
-            },
-            series: [{
-                name: 'Perfumes',
-                data: counts,
-                color: '#667eea',
-                fillColor: {
-                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                    stops: [
-                        [0, 'rgba(102, 126, 234, 0.5)'],
-                        [1, 'rgba(102, 126, 234, 0.1)']
-                    ]
-                }
-            }]
-        });
-    }
-}
-
-// 6. Perfumes Destacados vs Regulares (Donut Chart)
-async function loadChartDestacados() {
-    const data = await apiCall('/admin/perfumes?activo=true');
-    
-    if (data && data.success) {
-        const perfumes = data.data;
-        const destacados = perfumes.filter(p => p.destacado).length;
-        const regulares = perfumes.filter(p => !p.destacado).length;
-        
-        Highcharts.chart('chartDestacados', {
-            chart: {
-                type: 'pie'
-            },
-            title: {
-                text: null
-            },
-            plotOptions: {
-                pie: {
-                    innerSize: '50%',
-                    depth: 45,
-                    dataLabels: {
-                        enabled: true,
-                        format: '<b>{point.name}</b><br>{point.y} ({point.percentage:.1f}%)'
-                    }
-                }
-            },
-            series: [{
-                name: 'Perfumes',
-                data: [
-                    { name: 'Destacados', y: destacados, color: '#ef4444' },
-                    { name: 'Regulares', y: regulares, color: '#6b7280' }
-                ]
-            }]
-        });
-    }
-}
-
-// 7. Stock por Perfume (Bar Chart Horizontal - Top 20 con menos stock)
-async function loadChartStockPorPerfume() {
-    const data = await apiCall('/admin/perfumes?activo=true');
-    
-    if (data && data.success) {
-        // Ordenar por stock ascendente y tomar los primeros 20
-        const perfumes = data.data
-            .sort((a, b) => a.stock - b.stock)
-            .slice(0, 20);
-        
-        const nombres = perfumes.map(p => `${p.nombre} (${p.marca})`);
-        const stocks = perfumes.map(p => p.stock);
-        
-        Highcharts.chart('chartStockPorPerfume', {
-            chart: {
-                type: 'bar'
-            },
-            title: {
-                text: null
-            },
-            xAxis: {
-                categories: nombres,
-                title: {
-                    text: 'Perfumes'
-                }
-            },
-            yAxis: {
-                min: 0,
-                title: {
-                    text: 'Stock Disponible'
-                }
-            },
-            plotOptions: {
-                bar: {
-                    dataLabels: {
-                        enabled: true
-                    },
-                    zones: [
-                        { value: 5, color: '#ef4444' },  // Rojo para stock crítico
-                        { value: 10, color: '#f59e0b' }, // Naranja para stock bajo
-                        { color: '#10b981' }             // Verde para stock normal
-                    ]
-                }
-            },
-            legend: {
-                enabled: false
-            },
-            series: [{
-                name: 'Stock',
-                data: stocks
-            }]
-        });
-    }
-}
+window.goToPage = goToPage;
+window.editPerfume = editPerfume;
+window.deletePerfume = deletePerfume;
+window.openStockModal = openStockModal;
+window.openDescuentoModal = openDescuentoModal;
+window.approveReview = approveReview;
+window.deleteReview = deleteReview;
 

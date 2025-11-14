@@ -65,7 +65,33 @@ function setupEventListeners() {
 
     // Sidebar toggle
     document.getElementById('sidebarCollapse').addEventListener('click', function() {
-        document.getElementById('sidebar').classList.toggle('active');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    });
+
+    // Close sidebar when clicking overlay (mobile)
+    document.getElementById('sidebarOverlay')?.addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+    });
+
+    // Close sidebar when clicking a nav link on mobile
+    document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth <= 992) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+        });
     });
 
     // Búsqueda de perfumes

@@ -198,7 +198,7 @@
             padding-left: 52px;
             padding-right: 52px;
             font-size: 15px;
-            color: var(--text-light);
+            color: var(--text-light) !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -213,6 +213,18 @@
             box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1),
                         0 8px 24px rgba(212, 175, 55, 0.15);
             outline: none;
+            color: var(--text-light) !important;
+        }
+
+        /* Asegurar que el texto autocompletado sea visible */
+        .form-control:-webkit-autofill,
+        .form-control:-webkit-autofill:hover,
+        .form-control:-webkit-autofill:focus,
+        .form-control:-webkit-autofill:active {
+            -webkit-text-fill-color: var(--text-light) !important;
+            -webkit-box-shadow: 0 0 0 30px rgba(26, 26, 26, 0.9) inset !important;
+            box-shadow: 0 0 0 30px rgba(26, 26, 26, 0.9) inset !important;
+            transition: background-color 5000s ease-in-out 0s;
         }
 
         .password-toggle {

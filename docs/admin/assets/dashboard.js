@@ -36,10 +36,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cargar página inicial
     loadEstadisticas();
     
-    // Cargar gráficas
+    // Cargar gráfica
     setTimeout(() => {
         loadChartStockDistribucion();
-        loadChartPerfumesPorCategoria();
     }, 500);
 
     // Event listeners
@@ -162,7 +161,6 @@ function navigateTo(page) {
         case 'estadisticas':
             loadEstadisticas();
             loadChartStockDistribucion();
-            loadChartPerfumesPorCategoria();
             break;
         case 'perfumes':
             currentPage = 1;

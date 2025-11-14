@@ -7,11 +7,31 @@ const { pool } = require('../db/db');
 // Obtener estadísticas generales
 exports.getEstadisticas = async (req, res) => {
     try {
-        const [stats] = await pool.query('SELECT * FROM vista_estadisticas_dashboard');
+        // Calcular estadísticas directamente
+        const [totalPerfumes] = await pool.query(
+            'SELECT COUNT(*) as total FROM perfumes WHERE activo = TRUE'
+        );
+        
+        const [totalReviews] = await pool.query(
+            'SELECT COUNT(*) as total FROM reseñas'
+        );
+        
+        const [stockTotal] = await pool.query(
+            'SELECT SUM(stock) as total FROM perfumes WHERE activo = TRUE'
+        );
+        
+        const [stockBajo] = await pool.query(
+            'SELECT COUNT(*) as total FROM perfumes WHERE activo = TRUE AND stock < 10'
+        );
         
         res.json({
             success: true,
-            data: stats[0]
+            data: {
+                total_perfumes: totalPerfumes[0].total || 0,
+                total_reviews: totalReviews[0].total || 0,
+                stock_total: stockTotal[0].total || 0,
+                productos_stock_bajo: stockBajo[0].total || 0
+            }
         });
     } catch (error) {
         console.error('Error al obtener estadísticas:', error);
@@ -25,11 +45,18 @@ exports.getEstadisticas = async (req, res) => {
 // Obtener estadísticas por categoría
 exports.getEstadisticasPorCategoria = async (req, res) => {
     try {
-        const [stats] = await pool.query('CALL sp_estadisticas_por_categoria()');
+        const [stats] = await pool.query(`
+            SELECT 
+                publico as categoria, 
+                COUNT(*) as total 
+            FROM perfumes 
+            WHERE activo = TRUE 
+            GROUP BY publico
+        `);
         
         res.json({
             success: true,
-            data: stats[0]
+            data: stats
         });
     } catch (error) {
         console.error('Error al obtener estadísticas por categoría:', error);
@@ -566,7 +593,18 @@ exports.getLogs = async (req, res) => {
 // Obtener stock bajo
 exports.getStockBajo = async (req, res) => {
     try {
-        const [productos] = await pool.query('SELECT * FROM vista_stock_bajo');
+        const [productos] = await pool.query(`
+            SELECT 
+                id_perfume,
+                nombre,
+                marca,
+                stock,
+                precio_minimo,
+                activo
+            FROM perfumes 
+            WHERE activo = TRUE AND stock < 10
+            ORDER BY stock ASC
+        `);
         
         res.json({
             success: true,

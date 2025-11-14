@@ -229,7 +229,7 @@ async function loadPerfumes() {
     
     if (data && data.success) {
         renderPerfumesGrid(data.data);
-        renderPagination(data.total || 0);
+        renderPagination(data.total || data.pagination?.total || 0);
     }
 }
 
@@ -368,29 +368,31 @@ function openAddPerfumeModal() {
 }
 
 async function editPerfume(id) {
-    const data = await apiCall(`/perfumes/${id}`);
+    const data = await apiCall(`/admin/perfumes/${id}`);
     
-    if (data) {
+    if (data && data.success) {
+        const perfume = data.data;
+        
         document.getElementById('editPerfumeId').value = id;
-        document.getElementById('addMarca').value = data.marca;
-        document.getElementById('addNombre').value = data.nombre;
-        document.getElementById('addTipo').value = data.tipo;
-        document.getElementById('addPublico').value = data.publico;
-        document.getElementById('addDescripcion').value = data.descripcion || '';
-        document.getElementById('addNotas').value = data.notas || '';
-        document.getElementById('addPrecio').value = data.precio_minimo;
-        document.getElementById('addMililitros').value = data.mililitros;
-        document.getElementById('addStock').value = data.stock;
-        document.getElementById('addActivo').checked = data.activo;
-        document.getElementById('addImagenUrl').value = data.imagen_url || '';
+        document.getElementById('addMarca').value = perfume.marca;
+        document.getElementById('addNombre').value = perfume.nombre;
+        document.getElementById('addTipo').value = perfume.tipo;
+        document.getElementById('addPublico').value = perfume.publico;
+        document.getElementById('addDescripcion').value = perfume.descripcion || '';
+        document.getElementById('addNotas').value = perfume.notas || '';
+        document.getElementById('addPrecio').value = perfume.precio_minimo;
+        document.getElementById('addMililitros').value = perfume.mililitros;
+        document.getElementById('addStock').value = perfume.stock;
+        document.getElementById('addActivo').checked = perfume.activo;
+        document.getElementById('addImagenUrl').value = perfume.imagen_url || '';
         
         // Set imagen preview
-        if (data.imagen_url) {
+        if (perfume.imagen_url) {
             const preview = document.getElementById('uploadPreview');
             const placeholder = document.getElementById('uploadPlaceholder');
             const previewImage = document.getElementById('previewImage');
             
-            previewImage.src = `../${data.imagen_url}`;
+            previewImage.src = `../${perfume.imagen_url}`;
             placeholder.style.display = 'none';
             preview.style.display = 'block';
         }
@@ -788,7 +790,7 @@ async function loadChartStockDistribucion() {
 }
 
 async function loadChartPerfumesPorCategoria() {
-    const data = await apiCall('/admin/perfumes-por-categoria');
+    const data = await apiCall('/admin/estadisticas/categoria');
     
     if (data && data.success) {
         const categorias = data.data;

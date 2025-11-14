@@ -65,7 +65,7 @@ exports.getEstadisticasPorMarca = async (req, res) => {
 // Obtener todos los perfumes (con filtros)
 exports.getAllPerfumesAdmin = async (req, res) => {
     try {
-        const { activo, destacado, publico, marca, search, page = 1, limit = 20 } = req.query;
+        const { activo, destacado, publico, marca, search, page = 1, limit = 20, sortField = 'fecha_creacion', sortOrder = 'desc' } = req.query;
         
         let query = 'SELECT * FROM perfumes WHERE 1=1';
         const params = [];
@@ -96,7 +96,14 @@ exports.getAllPerfumesAdmin = async (req, res) => {
             params.push(searchParam, searchParam, searchParam);
         }
         
-        query += ' ORDER BY fecha_creacion DESC';
+        // Ordenamiento dinámico
+        const validSortFields = ['nombre', 'precio_minimo', 'stock', 'fecha_creacion', 'marca'];
+        const validSortOrders = ['asc', 'desc'];
+        
+        const orderField = validSortFields.includes(sortField) ? sortField : 'fecha_creacion';
+        const orderDirection = validSortOrders.includes(sortOrder.toLowerCase()) ? sortOrder.toUpperCase() : 'DESC';
+        
+        query += ` ORDER BY ${orderField} ${orderDirection}`;
         
         // Paginación
         const offset = (page - 1) * limit;
@@ -107,12 +114,40 @@ exports.getAllPerfumesAdmin = async (req, res) => {
         
         // Obtener total para paginación
         let countQuery = 'SELECT COUNT(*) as total FROM perfumes WHERE 1=1';
-        const countParams = params.slice(0, -2); // Remover limit y offset
+        const countParams = [];
+        
+        if (activo !== undefined) {
+            countQuery += ' AND activo = ?';
+            countParams.push(activo === 'true' ? 1 : 0);
+        }
+        
+        if (destacado !== undefined) {
+            countQuery += ' AND destacado = ?';
+            countParams.push(destacado === 'true' ? 1 : 0);
+        }
+        
+        if (publico) {
+            countQuery += ' AND publico = ?';
+            countParams.push(publico);
+        }
+        
+        if (marca) {
+            countQuery += ' AND marca = ?';
+            countParams.push(marca);
+        }
+        
+        if (search) {
+            countQuery += ' AND (nombre LIKE ? OR marca LIKE ? OR descripcion LIKE ?)';
+            const searchParam = `%${search}%`;
+            countParams.push(searchParam, searchParam, searchParam);
+        }
+        
         const [countResult] = await pool.query(countQuery, countParams);
         
         res.json({
             success: true,
             data: perfumes,
+            total: countResult[0].total,
             pagination: {
                 page: parseInt(page),
                 limit: parseInt(limit),

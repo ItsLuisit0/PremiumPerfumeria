@@ -281,9 +281,9 @@ function renderPerfumesGrid(perfumes) {
     grid.innerHTML = perfumes.map(p => `
         <div class="perfume-card">
             <div class="perfume-image">
-                <img src="../${p.imagen_url || 'ImagenesPerfumes/placeholder.png'}" 
+                <img src="${p.imagen_url ? (p.imagen_url.startsWith('http') ? p.imagen_url : `../${p.imagen_url}`) : '../ImagenesPerfumes/placeholder.svg'}" 
                      alt="${p.nombre}" 
-                     onerror="this.src='../ImagenesPerfumes/placeholder.png'">
+                     onerror="this.src='../ImagenesPerfumes/placeholder.svg'">
             </div>
             <div class="perfume-info">
                 <div class="perfume-brand">${p.marca}</div>

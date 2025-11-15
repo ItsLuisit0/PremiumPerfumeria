@@ -2,13 +2,46 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Configurar almacenamiento de multer
-const storage = multer.diskStorage({
+// Configuración para Cloudinary (opcional)
+let cloudinary, cloudinaryStorage;
+let useCloudinary = false;
+
+try {
+    // Intentar cargar Cloudinary si está disponible
+    cloudinary = require('cloudinary').v2;
+    const { CloudinaryStorage } = require('multer-storage-cloudinary');
+    
+    // Verificar si hay credenciales de Cloudinary
+    if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
+        cloudinary.config({
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET
+        });
+        
+        cloudinaryStorage = new CloudinaryStorage({
+            cloudinary: cloudinary,
+            params: {
+                folder: 'perfumeria',
+                allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+                transformation: [{ width: 800, height: 800, crop: 'limit' }]
+            }
+        });
+        
+        useCloudinary = true;
+        console.log('✅ Cloudinary configurado correctamente');
+    } else {
+        console.log('⚠️ Cloudinary no configurado - usando almacenamiento local');
+    }
+} catch (error) {
+    console.log('ℹ️ Cloudinary no disponible - usando almacenamiento local');
+}
+
+// Configurar almacenamiento local como fallback
+const localStorage = multer.diskStorage({
     destination: function (req, file, cb) {
-        // Guardar en la carpeta de imágenes del frontend
         const uploadPath = path.join(__dirname, '../../..', 'docs', 'ImagenesPerfumes');
         
-        // Crear directorio si no existe
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath, { recursive: true });
         }
@@ -16,12 +49,10 @@ const storage = multer.diskStorage({
         cb(null, uploadPath);
     },
     filename: function (req, file, cb) {
-        // Sanitizar nombre del archivo
         const marca = req.body.marca || 'perfume';
         const nombre = req.body.nombre || 'imagen';
         const ext = path.extname(file.originalname);
         
-        // Crear nombre único con timestamp
         const nombreArchivo = `${marca}_${nombre}_${Date.now()}${ext}`
             .replace(/\s+/g, '_')
             .replace(/[^a-zA-Z0-9_.-]/g, '');
@@ -43,9 +74,9 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-// Configurar multer
+// Configurar multer (usa Cloudinary si está disponible, sino local)
 const upload = multer({
-    storage: storage,
+    storage: useCloudinary ? cloudinaryStorage : localStorage,
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB máximo
     fileFilter: fileFilter
 });
@@ -60,20 +91,30 @@ exports.uploadImage = async (req, res) => {
             });
         }
         
-        // Ruta relativa de la imagen
-        const imagenUrl = `ImagenesPerfumes/${req.file.filename}`;
+        let imagenUrl;
+        
+        if (useCloudinary && req.file.path) {
+            // Cloudinary devuelve la URL completa
+            imagenUrl = req.file.path; // URL de Cloudinary
+            console.log('✅ Imagen subida a Cloudinary:', imagenUrl);
+        } else {
+            // Almacenamiento local - ruta relativa
+            imagenUrl = `ImagenesPerfumes/${req.file.filename}`;
+            console.log('✅ Imagen guardada localmente:', imagenUrl);
+        }
         
         res.json({
             success: true,
             message: 'Imagen subida correctamente',
             data: {
                 imagen_url: imagenUrl,
-                filename: req.file.filename,
-                size: req.file.size
+                filename: req.file.filename || req.file.public_id,
+                size: req.file.size || 0,
+                storage: useCloudinary ? 'cloudinary' : 'local'
             }
         });
     } catch (error) {
-        console.error('Error al subir imagen:', error);
+        console.error('❌ Error al subir imagen:', error);
         res.status(500).json({
             success: false,
             message: 'Error al subir la imagen',

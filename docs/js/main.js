@@ -206,14 +206,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Manejar respuesta con paginación o array directo (retrocompatibilidad)
                     const perfumesData = responseData.data || responseData;
                     
-                    // Las imágenes están en el mismo servidor (Render - carpeta docs/)
-                    // Siempre usar rutas relativas
-                    const imageBaseUrl = './';
+                    // Procesar URLs de imágenes
+                    this.perfumes = perfumesData.map(p => {
+                        let imagenUrl = p.imagen_url;
+                        
+                        // Si la URL ya es completa (Cloudinary), usar tal cual
+                        if (imagenUrl && imagenUrl.startsWith('http')) {
+                            return { ...p, imagen_url: imagenUrl };
+                        }
+                        
+                        // Si es ruta local, agregar el prefijo
+                        if (imagenUrl) {
+                            return { ...p, imagen_url: `./${imagenUrl}` };
+                        }
+                        
+                        // Sin imagen, usar placeholder
+                        return { ...p, imagen_url: './ImagenesPerfumes/placeholder.svg' };
+                    });
                     
-                    this.perfumes = perfumesData.map(p => ({
-                        ...p,
-                        imagen_url: `${imageBaseUrl}${p.imagen_url}`
-                    }));
+                    console.log('✅ Perfumes cargados:', this.perfumes.length);
                     // this.showToast('success', 'Catálogo cargado correctamente');
                 } catch (error) {
                     console.error("Error al obtener perfumes:", error);

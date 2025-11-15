@@ -84,6 +84,10 @@ exports.getAllPerfumes = async (req, res) => {
         
         console.log('📦 Perfumes activos encontrados para catálogo:', rows.length);
         
+        // Verificar cuántos perfumes hay en total (activos e inactivos)
+        const [allPerfumes] = await pool.query('SELECT COUNT(*) as total, SUM(activo = 1) as activos, SUM(activo = 0) as inactivos FROM perfumes');
+        console.log('📊 Total en BD:', allPerfumes[0].total, '| Activos:', allPerfumes[0].activos, '| Inactivos:', allPerfumes[0].inactivos);
+        
         // Construir URLs de imágenes para perfumes que no tienen imagen_url
         const perfumesConImagenes = rows.map(perfume => {
             if (!perfume.imagen_url) {

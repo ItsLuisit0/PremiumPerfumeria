@@ -58,8 +58,8 @@ function encontrarImagenPerfume(nombrePerfume) {
 
 exports.getAllPerfumes = async (req, res) => {
     try {
-        // Paginación opcional
-        const limit = parseInt(req.query.limit) || 50;
+        // Paginación opcional - límite por defecto aumentado para catálogo
+        const limit = parseInt(req.query.limit) || 100;
         const offset = parseInt(req.query.offset) || 0;
         
         // Validar parámetros

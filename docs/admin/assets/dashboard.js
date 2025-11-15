@@ -430,22 +430,11 @@ async function editPerfume(id) {
 
 async function savePerfume() {
     const id = document.getElementById('editPerfumeId').value;
-    const perfumeData = {
-        marca: document.getElementById('addMarca').value.trim(),
-        nombre: document.getElementById('addNombre').value.trim(),
-        tipo: document.getElementById('addTipo').value,
-        publico: document.getElementById('addPublico').value,
-        descripcion: document.getElementById('addDescripcion').value.trim(),
-        notas: document.getElementById('addNotas').value.trim(),
-        precio_minimo: parseFloat(document.getElementById('addPrecio').value),
-        mililitros: parseInt(document.getElementById('addMililitros').value),
-        stock: parseInt(document.getElementById('addStock').value),
-        activo: document.getElementById('addActivo').checked,
-        imagen_url: document.getElementById('addImagenUrl').value.trim()
-    };
-
+    const marca = document.getElementById('addMarca').value.trim();
+    const nombre = document.getElementById('addNombre').value.trim();
+    
     // Validación
-    if (!perfumeData.marca || !perfumeData.nombre || !perfumeData.tipo || !perfumeData.publico) {
+    if (!marca || !nombre || !document.getElementById('addTipo').value || !document.getElementById('addPublico').value) {
         showToast('Por favor completa todos los campos requeridos', 'danger');
         return;
     }
@@ -454,22 +443,72 @@ async function savePerfume() {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
 
-    const endpoint = id ? `/admin/perfumes/${id}` : '/admin/perfumes';
-    const method = id ? 'PUT' : 'POST';
+    try {
+        let imagenUrl = document.getElementById('addImagenUrl').value.trim();
+        
+        // Si hay una imagen nueva seleccionada, subirla primero
+        if (selectedImageFile) {
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Subiendo imagen...';
+            
+            const formData = new FormData();
+            formData.append('imagen', selectedImageFile);
+            formData.append('marca', marca);
+            formData.append('nombre', nombre);
+            
+            const uploadResponse = await fetch(`${API_URL}/admin/upload/imagen`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${adminToken}`
+                },
+                body: formData
+            });
+            
+            const uploadData = await uploadResponse.json();
+            
+            if (!uploadResponse.ok) {
+                throw new Error(uploadData.message || 'Error al subir la imagen');
+            }
+            
+            imagenUrl = uploadData.data.imagen_url;
+        }
+        
+        // Ahora guardar el perfume con la URL de la imagen
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando perfume...';
+        
+        const perfumeData = {
+            marca: marca,
+            nombre: nombre,
+            tipo: document.getElementById('addTipo').value,
+            publico: document.getElementById('addPublico').value,
+            descripcion: document.getElementById('addDescripcion').value.trim(),
+            notas: document.getElementById('addNotas').value.trim(),
+            precio_minimo: parseFloat(document.getElementById('addPrecio').value),
+            mililitros: parseInt(document.getElementById('addMililitros').value),
+            stock: parseInt(document.getElementById('addStock').value),
+            activo: document.getElementById('addActivo').checked,
+            imagen_url: imagenUrl
+        };
 
-    const data = await apiCall(endpoint, {
-        method: method,
-        body: JSON.stringify(perfumeData)
-    });
+        const endpoint = id ? `/admin/perfumes/${id}` : '/admin/perfumes';
+        const method = id ? 'PUT' : 'POST';
 
-    btn.disabled = false;
-    btn.innerHTML = '<i class="bi bi-check-lg"></i> Guardar Perfume';
+        const data = await apiCall(endpoint, {
+            method: method,
+            body: JSON.stringify(perfumeData)
+        });
 
-    if (data && data.success) {
-        showToast(id ? 'Perfume actualizado correctamente' : 'Perfume creado correctamente', 'success');
-        bootstrap.Modal.getInstance(document.getElementById('addPerfumeModal')).hide();
-        loadPerfumes();
-        loadEstadisticas();
+        if (data && data.success) {
+            showToast(id ? 'Perfume actualizado correctamente' : 'Perfume creado correctamente', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('addPerfumeModal')).hide();
+            loadPerfumes();
+            loadEstadisticas();
+        }
+    } catch (error) {
+        console.error('Error al guardar perfume:', error);
+        showToast(error.message || 'Error al guardar el perfume', 'danger');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check-lg"></i> Guardar Perfume';
     }
 }
 
@@ -685,18 +724,18 @@ async function loadReviews() {
 
         tbody.innerHTML = data.data.map(r => `
             <tr>
-                <td>${r.nombre_usuario}</td>
+                <td>${r.usuario}</td>
                 <td>${r.nombre_perfume}</td>
                 <td>${'⭐'.repeat(r.calificacion)}</td>
                 <td>${r.comentario || '-'}</td>
                 <td>
-                    <span class="badge ${r.aprobado ? 'bg-success' : 'bg-warning'}">
-                        ${r.aprobado ? 'Aprobado' : 'Pendiente'}
+                    <span class="badge ${r.aprobada ? 'bg-success' : 'bg-warning'}">
+                        ${r.aprobada ? 'Aprobado' : 'Pendiente'}
                     </span>
                 </td>
                 <td>
-                    ${!r.aprobado ? `<button class="btn btn-sm btn-success" onclick="approveReview(${r.id_review})">Aprobar</button>` : ''}
-                    <button class="btn btn-sm btn-danger" onclick="deleteReview(${r.id_review})">Eliminar</button>
+                    ${!r.aprobada ? `<button class="btn btn-sm btn-success" onclick="approveReview(${r.id_reseña})">Aprobar</button>` : ''}
+                    <button class="btn btn-sm btn-danger" onclick="deleteReview(${r.id_reseña})">Eliminar</button>
                 </td>
             </tr>
         `).join('');
@@ -704,8 +743,9 @@ async function loadReviews() {
 }
 
 async function approveReview(id) {
-    const data = await apiCall(`/admin/reviews/${id}/approve`, {
-        method: 'PATCH'
+    const data = await apiCall(`/admin/reviews/${id}/moderar`, {
+        method: 'PATCH',
+        body: JSON.stringify({ aprobada: true })
     });
 
     if (data && data.success) {

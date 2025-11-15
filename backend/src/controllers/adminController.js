@@ -449,7 +449,20 @@ exports.getAllReviews = async (req, res) => {
         const { aprobada, id_perfume, page = 1, limit = 20 } = req.query;
         
         let query = `
-            SELECT r.*, p.nombre as nombre_perfume, p.marca
+            SELECT 
+                r.id_reseña,
+                r.id_perfume,
+                r.usuario,
+                r.comentario,
+                r.calificacion,
+                r.fecha,
+                r.aprobada,
+                r.moderada,
+                r.moderada_por,
+                r.fecha_moderacion,
+                r.razon_rechazo,
+                p.nombre as nombre_perfume, 
+                p.marca
             FROM reseñas r
             INNER JOIN perfumes p ON r.id_perfume = p.id_perfume
             WHERE 1=1
@@ -496,6 +509,16 @@ exports.moderarReview = async (req, res) => {
         
         const id_admin = req.admin.id_admin;
         
+        // Verificar que la reseña existe
+        const [review] = await pool.query('SELECT * FROM reseñas WHERE id_reseña = ?', [id]);
+        
+        if (review.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Reseña no encontrada'
+            });
+        }
+        
         await pool.query(
             `UPDATE reseñas SET 
                 aprobada = ?, 
@@ -504,12 +527,12 @@ exports.moderarReview = async (req, res) => {
                 fecha_moderacion = NOW(),
                 razon_rechazo = ?
             WHERE id_reseña = ?`,
-            [aprobada, id_admin, razon_rechazo || null, id]
+            [aprobada !== false, id_admin, razon_rechazo || null, id]
         );
         
         res.json({
             success: true,
-            message: aprobada ? 'Reseña aprobada' : 'Reseña rechazada'
+            message: aprobada !== false ? 'Reseña aprobada' : 'Reseña rechazada'
         });
     } catch (error) {
         console.error('Error al moderar reseña:', error);

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
 const authController = require('../controllers/authController');
+const uploadController = require('../controllers/uploadController');
 const { verifyToken, verifyRole } = require('../middleware/auth');
 
 // Alias para mantener compatibilidad
@@ -41,7 +42,14 @@ router.patch('/perfumes/:id/descuento', protect, authorize('superadmin', 'admin'
 // =====================================================
 router.get('/reviews', protect, adminController.getAllReviews);
 router.patch('/reviews/:id/moderar', protect, authorize('superadmin', 'admin', 'moderador'), adminController.moderarReview);
+router.patch('/reviews/:id/approve', protect, authorize('superadmin', 'admin', 'moderador'), adminController.moderarReview); // Alias
 router.delete('/reviews/:id', protect, authorize('superadmin', 'admin'), adminController.deleteReview);
+
+// =====================================================
+// RUTAS DE UPLOAD (Admin y superadmin)
+// =====================================================
+router.post('/upload/imagen', protect, authorize('superadmin', 'admin'), uploadController.uploadMiddleware, uploadController.uploadImage);
+router.delete('/upload/imagen/:filename', protect, authorize('superadmin', 'admin'), uploadController.deleteImage);
 
 module.exports = router;
 

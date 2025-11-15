@@ -91,11 +91,26 @@ exports.uploadImage = async (req, res) => {
             });
         }
         
+        console.log('📤 Archivo recibido:', {
+            fieldname: req.file.fieldname,
+            originalname: req.file.originalname,
+            filename: req.file.filename,
+            path: req.file.path,
+            size: req.file.size
+        });
+        
         let imagenUrl;
         
-        if (useCloudinary && req.file.path) {
-            // Cloudinary devuelve la URL completa
-            imagenUrl = req.file.path; // URL de Cloudinary
+        if (useCloudinary) {
+            // Cloudinary devuelve la URL completa en req.file.path
+            imagenUrl = req.file.path || req.file.url;
+            
+            // Si por alguna razón no está la URL completa, construirla
+            if (!imagenUrl || !imagenUrl.startsWith('http')) {
+                const publicId = req.file.filename || req.file.public_id;
+                imagenUrl = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${publicId}`;
+            }
+            
             console.log('✅ Imagen subida a Cloudinary:', imagenUrl);
         } else {
             // Almacenamiento local - ruta relativa
@@ -108,7 +123,7 @@ exports.uploadImage = async (req, res) => {
             message: 'Imagen subida correctamente',
             data: {
                 imagen_url: imagenUrl,
-                filename: req.file.filename || req.file.public_id,
+                filename: req.file.filename || req.file.public_id || req.file.originalname,
                 size: req.file.size || 0,
                 storage: useCloudinary ? 'cloudinary' : 'local'
             }

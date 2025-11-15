@@ -229,6 +229,12 @@ exports.createPerfume = async (req, res) => {
         
         const id_admin = req.admin.id_admin;
         
+        // Convertir activo a número explícitamente para MySQL (1 o 0)
+        const activoValue = (activo === true || activo === 1 || activo === '1' || activo === 'true') ? 1 : 0;
+        const destacadoValue = (destacado === true || destacado === 1 || destacado === '1' || destacado === 'true') ? 1 : 0;
+        
+        console.log('📝 Creando perfume:', { nombre, marca, activo: activoValue, activoOriginal: activo });
+        
         const [result] = await pool.query(
             `INSERT INTO perfumes (
                 marca, nombre, tipo, publico, descripcion, notas,
@@ -238,29 +244,35 @@ exports.createPerfume = async (req, res) => {
             [
                 marca, nombre, tipo, publico, descripcion, notas,
                 precio_minimo, mililitros, imagen_url || null, stock || 0,
-                descuento_porcentaje || 0, activo !== false, destacado === true, id_admin
+                descuento_porcentaje || 0, activoValue, destacadoValue, id_admin
             ]
         );
         
-        // Registrar actividad
-        await pool.query(
-            `CALL sp_registrar_actividad(?, 'CREATE', 'perfumes', ?, NULL, ?, ?, ?)`,
-            [
-                id_admin,
-                result.insertId,
-                JSON.stringify({ id_perfume: result.insertId, nombre, marca }),
-                req.ip,
-                req.headers['user-agent']
-            ]
-        );
+        console.log('✅ Perfume creado con ID:', result.insertId, 'activo:', activoValue);
+        
+        // Registrar actividad (opcional - no falla si el SP no existe)
+        try {
+            await pool.query(
+                `CALL sp_registrar_actividad(?, 'CREATE', 'perfumes', ?, NULL, ?, ?, ?)`,
+                [
+                    id_admin,
+                    result.insertId,
+                    JSON.stringify({ id_perfume: result.insertId, nombre, marca, activo: activoValue }),
+                    req.ip,
+                    req.headers['user-agent']
+                ]
+            );
+        } catch (spError) {
+            console.warn('⚠️ No se pudo registrar actividad (SP no disponible):', spError.message);
+        }
         
         res.status(201).json({
             success: true,
             message: 'Perfume creado exitosamente',
-            data: { id_perfume: result.insertId }
+            data: { id_perfume: result.insertId, activo: activoValue }
         });
     } catch (error) {
-        console.error('Error al crear perfume:', error);
+        console.error('❌ Error al crear perfume:', error);
         res.status(500).json({
             success: false,
             message: 'Error al crear perfume',
@@ -291,6 +303,12 @@ exports.updatePerfume = async (req, res) => {
             });
         }
         
+        // Convertir activo a número explícitamente para MySQL (1 o 0)
+        const activoValue = (activo === true || activo === 1 || activo === '1' || activo === 'true') ? 1 : 0;
+        const destacadoValue = (destacado === true || destacado === 1 || destacado === '1' || destacado === 'true') ? 1 : 0;
+        
+        console.log('📝 Actualizando perfume:', { id, nombre, activo: activoValue });
+        
         // Actualizar
         await pool.query(
             `UPDATE perfumes SET
@@ -301,30 +319,36 @@ exports.updatePerfume = async (req, res) => {
             [
                 marca, nombre, tipo, publico, descripcion, notas,
                 precio_minimo, mililitros, imagen_url || null, stock,
-                descuento_porcentaje || 0, activo !== false, destacado === true,
+                descuento_porcentaje || 0, activoValue, destacadoValue,
                 id_admin, id
             ]
         );
         
-        // Registrar actividad
-        await pool.query(
-            `CALL sp_registrar_actividad(?, 'UPDATE', 'perfumes', ?, ?, ?, ?, ?)`,
-            [
-                id_admin,
-                id,
-                JSON.stringify(oldData[0]),
-                JSON.stringify(req.body),
-                req.ip,
-                req.headers['user-agent']
-            ]
-        );
+        console.log('✅ Perfume actualizado:', id, 'activo:', activoValue);
+        
+        // Registrar actividad (opcional - no falla si el SP no existe)
+        try {
+            await pool.query(
+                `CALL sp_registrar_actividad(?, 'UPDATE', 'perfumes', ?, ?, ?, ?, ?)`,
+                [
+                    id_admin,
+                    id,
+                    JSON.stringify(oldData[0]),
+                    JSON.stringify(req.body),
+                    req.ip,
+                    req.headers['user-agent']
+                ]
+            );
+        } catch (spError) {
+            console.warn('⚠️ No se pudo registrar actividad (SP no disponible):', spError.message);
+        }
         
         res.json({
             success: true,
             message: 'Perfume actualizado exitosamente'
         });
     } catch (error) {
-        console.error('Error al actualizar perfume:', error);
+        console.error('❌ Error al actualizar perfume:', error);
         res.status(500).json({
             success: false,
             message: 'Error al actualizar perfume',
@@ -339,40 +363,56 @@ exports.deletePerfume = async (req, res) => {
         const { id } = req.params;
         const id_admin = req.admin.id_admin;
         
+        console.log('🗑️ Intentando eliminar perfume ID:', id);
+        
         // Obtener datos antes de eliminar
         const [perfume] = await pool.query('SELECT * FROM perfumes WHERE id_perfume = ?', [id]);
         
         if (perfume.length === 0) {
+            console.log('❌ Perfume no encontrado:', id);
             return res.status(404).json({
                 success: false,
                 message: 'Perfume no encontrado'
             });
         }
         
-        // Soft delete
-        await pool.query('UPDATE perfumes SET activo = FALSE WHERE id_perfume = ?', [id]);
+        console.log('📝 Perfume encontrado:', perfume[0].nombre, 'activo antes:', perfume[0].activo);
         
-        // Registrar actividad
-        await pool.query(
-            `CALL sp_registrar_actividad(?, 'DELETE', 'perfumes', ?, ?, NULL, ?, ?)`,
-            [
-                id_admin,
-                id,
-                JSON.stringify(perfume[0]),
-                req.ip,
-                req.headers['user-agent']
-            ]
-        );
+        // Soft delete - usar 0 en lugar de FALSE para asegurar compatibilidad con MySQL
+        const [result] = await pool.query('UPDATE perfumes SET activo = 0 WHERE id_perfume = ?', [id]);
+        
+        console.log('✅ Perfume desactivado. Filas afectadas:', result.affectedRows);
+        
+        // Verificar que se actualizó
+        const [verificar] = await pool.query('SELECT activo FROM perfumes WHERE id_perfume = ?', [id]);
+        console.log('🔍 Verificación - activo después:', verificar[0]?.activo);
+        
+        // Registrar actividad (opcional - no falla si el SP no existe)
+        try {
+            await pool.query(
+                `CALL sp_registrar_actividad(?, 'DELETE', 'perfumes', ?, ?, NULL, ?, ?)`,
+                [
+                    id_admin,
+                    id,
+                    JSON.stringify(perfume[0]),
+                    req.ip,
+                    req.headers['user-agent']
+                ]
+            );
+        } catch (spError) {
+            console.warn('⚠️ No se pudo registrar actividad (SP no disponible):', spError.message);
+        }
         
         res.json({
             success: true,
             message: 'Perfume desactivado exitosamente'
         });
     } catch (error) {
-        console.error('Error al eliminar perfume:', error);
+        console.error('❌ Error al eliminar perfume:', error);
         res.status(500).json({
             success: false,
-            message: 'Error al eliminar perfume'
+            message: 'Error al eliminar perfume',
+            error: error.message
         });
     }
 };

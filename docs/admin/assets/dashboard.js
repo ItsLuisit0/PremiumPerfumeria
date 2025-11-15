@@ -233,14 +233,22 @@ async function loadEstadisticas() {
 
 async function loadPerfumes() {
     const search = document.getElementById('searchPerfume')?.value || '';
-    const activo = document.getElementById('filterActivo')?.value || '';
+    const activoFilter = document.getElementById('filterActivo')?.value || '';
     const sort = document.getElementById('sortPerfumes')?.value || 'nombre_asc';
     
-    currentFilters = { search, activo, sort };
+    currentFilters = { search, activo: activoFilter, sort };
     
     const query = new URLSearchParams();
     if (search) query.append('search', search);
-    if (activo) query.append('activo', activo);
+    
+    // Por defecto mostrar solo perfumes activos, a menos que se seleccione explícitamente "Inactivos"
+    if (activoFilter) {
+        query.append('activo', activoFilter);
+    } else {
+        // Si no hay filtro, mostrar solo activos por defecto
+        query.append('activo', 'true');
+    }
+    
     query.append('page', currentPage);
     query.append('limit', itemsPerPage);
     
@@ -485,9 +493,12 @@ async function savePerfume() {
             precio_minimo: parseFloat(document.getElementById('addPrecio').value),
             mililitros: parseInt(document.getElementById('addMililitros').value),
             stock: parseInt(document.getElementById('addStock').value),
-            activo: document.getElementById('addActivo').checked,
+            activo: document.getElementById('addActivo').checked === true, // Asegurar boolean true
+            destacado: false, // Por defecto no destacado
             imagen_url: imagenUrl
         };
+        
+        console.log('📦 Datos del perfume a guardar:', perfumeData);
 
         const endpoint = id ? `/admin/perfumes/${id}` : '/admin/perfumes';
         const method = id ? 'PUT' : 'POST';

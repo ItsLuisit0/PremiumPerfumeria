@@ -78,9 +78,11 @@ exports.getAllPerfumes = async (req, res) => {
         }
         
         const [rows] = await pool.query(
-            'SELECT id_perfume, marca, nombre, tipo, publico, descripcion, notas, precio_minimo, mililitros, imagen_url, descuento_porcentaje, precio_con_descuento, activo FROM perfumes WHERE activo = TRUE LIMIT ? OFFSET ?',
+            'SELECT id_perfume, marca, nombre, tipo, publico, descripcion, notas, precio_minimo, mililitros, imagen_url, descuento_porcentaje, precio_con_descuento, activo FROM perfumes WHERE activo = 1 LIMIT ? OFFSET ?',
             [limit, offset]
         );
+        
+        console.log('📦 Perfumes activos encontrados para catálogo:', rows.length);
         
         // Construir URLs de imágenes para perfumes que no tienen imagen_url
         const perfumesConImagenes = rows.map(perfume => {
@@ -92,7 +94,7 @@ exports.getAllPerfumes = async (req, res) => {
         });
         
         // Obtener total de perfumes para paginación
-        const [total] = await pool.query('SELECT COUNT(*) as total FROM perfumes WHERE activo = TRUE');
+        const [total] = await pool.query('SELECT COUNT(*) as total FROM perfumes WHERE activo = 1');
         
         res.json({
             success: true,

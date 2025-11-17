@@ -497,6 +497,54 @@ document.addEventListener('DOMContentLoaded', () => {
                         color: 'from-amber-400 via-yellow-500 to-amber-400',
                         border: 'border-amber-500/20'
                     },
+                    'Lattafa': { 
+                        titulo: 'COLECCIÓN LATTAFA',
+                        subtitulo: 'Fragancias árabes de lujo',
+                        imagen: './ImagenesPerfumes/SEPARADOR_ARABESH.jpg',
+                        gradiente: 'from-amber-950 via-black to-amber-950',
+                        color: 'from-amber-400 via-yellow-500 to-amber-400',
+                        border: 'border-amber-500/20'
+                    },
+                    'Rasasi': {
+                        titulo: 'COLECCIÓN RASASI',
+                        subtitulo: 'El arte de la perfumería oriental',
+                        imagen: './ImagenesPerfumes/SEPARADOR_ARABESH.jpg',
+                        gradiente: 'from-orange-950 via-black to-orange-950',
+                        color: 'from-orange-400 via-amber-500 to-orange-400',
+                        border: 'border-orange-500/20'
+                    },
+                    'Armaf': {
+                        titulo: 'COLECCIÓN ARMAF',
+                        subtitulo: 'Elegancia y sofisticación árabe',
+                        imagen: './ImagenesPerfumes/SEPARADOR_ARABESH.jpg',
+                        gradiente: 'from-red-950 via-black to-red-950',
+                        color: 'from-red-400 via-rose-500 to-red-400',
+                        border: 'border-red-500/20'
+                    },
+                    'Arabesque': {
+                        titulo: 'COLECCIÓN ARABESQUE',
+                        subtitulo: 'Esencias milenarias del oriente',
+                        imagen: './ImagenesPerfumes/SEPARADOR_ARABESH.jpg',
+                        gradiente: 'from-yellow-950 via-black to-yellow-950',
+                        color: 'from-yellow-400 via-orange-500 to-yellow-400',
+                        border: 'border-yellow-500/20'
+                    },
+                    'Diseñador': { 
+                        titulo: 'PERFUMES DE DISEÑADOR',
+                        subtitulo: 'Elegancia y sofisticación',
+                        imagen: './ImagenesPerfumes/SEPARADOR_DISEÑADOR.jpg',
+                        gradiente: 'from-blue-950 via-black to-blue-950',
+                        color: 'from-blue-400 via-indigo-400 to-blue-400',
+                        border: 'border-blue-500/20'
+                    },
+                    'Nicho': { 
+                        titulo: 'PERFUMES DE NICHO',
+                        subtitulo: 'Exclusividad y lujo en cada gota',
+                        imagen: './ImagenesPerfumes/SEPARADOR_NICHO.jpg',
+                        gradiente: 'from-purple-950 via-black to-purple-950',
+                        color: 'from-purple-400 via-pink-500 to-purple-400',
+                        border: 'border-purple-500/20'
+                    },
                     'disenador_destacados': { 
                         titulo: 'PERFUMES DE DISEÑADOR',
                         subtitulo: 'Las fragancias más icónicas del mundo',
@@ -540,6 +588,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const currentPerfume = this.filteredPerfumes[index];
                 
                 if (!currentPerfume.coleccion) {
+                    return false;
+                }
+                
+                const collectionTitle = this.getCollectionTitle(currentPerfume.coleccion);
+                if (!collectionTitle) {
                     return false;
                 }
                 

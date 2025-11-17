@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Obtener la URL del API desde la configuración
     const API_BASE_URL = AppConfig.getApiUrl();
 
     new Vue({
@@ -17,8 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
             reviews: [],
             searchTerm: '',
             selectedPublico: null,
-            selectedTipo: null, // Tipo de perfume (Diseñador, Nicho, Árabes, etc.)
-            selectedCategory: null, // Nueva propiedad para categorías
+            selectedTipo: null,
+            selectedCategory: null,
+            selectedColeccion: null,
             errorApi: null,
             isLoading: false,
             isSubmittingReview: false,
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentRating: 0,
             hoverRating: 0,
             mobileMenuOpen: false,
-            cartOpen: false, // Carrito Tailwind slide-over
+            cartOpen: false,
             lastFocusedElement: null,
             toast: {
                 show: false,
@@ -34,9 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 type: 'info'
             },
             showFavoritesView: false,
-            showDesignerFilter: false, // Para filtro por diseñador
-            showComingSoonView: false, // Vista de próximamente
-            comingSoonSection: '', // Nombre de la sección próximamente
+            showDesignerFilter: false,
+            showComingSoonView: false,
+            comingSoonSection: '',
             observer: null,
             favoriteIds: [],
             sidebarOpen: false,
@@ -65,24 +65,25 @@ document.addEventListener('DOMContentLoaded', () => {
             filteredPerfumes() {
                 let filtered = this.perfumes;
                 
-                // Filtrar por público (Hombre, Mujer, Unisex)
+                if (this.selectedColeccion) {
+                    filtered = filtered.filter(perfume => perfume.coleccion === this.selectedColeccion);
+                    return filtered;
+                }
+                
                 if (this.selectedPublico) {
                     filtered = filtered.filter(perfume => perfume.publico === this.selectedPublico);
                 }
                 
-                // Filtrar por tipo (Diseñador, Nicho, Árabes, etc.)
                 if (this.selectedTipo) {
                     const tipoLower = this.selectedTipo.toLowerCase();
                     filtered = filtered.filter(perfume => {
                         const marcaLower = perfume.marca ? perfume.marca.toLowerCase() : '';
                         
-                        // FILTRO: Árabes
                         if (tipoLower.includes('arab') || tipoLower.includes('árabe')) {
                             const marcasArabes = ['lattafa', 'armaf', 'rasasi', 'afnan'];
                             return marcasArabes.some(marca => marcaLower.includes(marca));
                         }
                         
-                        // FILTRO: Diseñador
                         if (tipoLower.includes('diseñ') || tipoLower.includes('disen')) {
                             const marcasDisenador = [
                                 'versace', 'dior', 'carolina herrera', 'chanel', 'montblanc',
@@ -92,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             return marcasDisenador.some(marca => marcaLower.includes(marca));
                         }
                         
-                        // FILTRO: Nicho
                         if (tipoLower.includes('nicho')) {
                             const marcasNicho = ['creed', 'maison francis kurkdjian', 'baccarat'];
                             return marcasNicho.some(marca => marcaLower.includes(marca));
@@ -102,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
                 
-                // Filtrar por búsqueda
                 if (this.searchTerm) {
                     const searchLower = this.searchTerm.toLowerCase();
                     filtered = filtered.filter(perfume =>
@@ -111,9 +110,31 @@ document.addEventListener('DOMContentLoaded', () => {
                         (perfume.tipo && perfume.tipo.toLowerCase().includes(searchLower))
                     );
                 }
-                
-                // ORDENAR: Si es categoría Diseñador, ordenar primero Hombre, luego Mujer
-                if (this.selectedCategory === 'Disenador') {
+                if (!this.selectedPublico && !this.selectedTipo && !this.searchTerm && !this.selectedCategory) {
+                    const ordenColecciones = {
+                        'arabes_destacados': 1,
+                        'disenador_destacados': 2,
+                        'nicho_destacados': 3,
+                        'arabes_mujer_destacados': 4,
+                        'disenador_mujer_destacados': 5,
+                        'null': 999
+                    };
+                    
+                    filtered.sort((a, b) => {
+                        const coleccionA = a.coleccion || 'null';
+                        const coleccionB = b.coleccion || 'null';
+                        
+                        const ordenA = ordenColecciones[coleccionA] || 999;
+                        const ordenB = ordenColecciones[coleccionB] || 999;
+                        
+                        if (ordenA !== ordenB) {
+                            return ordenA - ordenB;
+                        }
+                        
+                        return a.nombre.localeCompare(b.nombre);
+                    });
+                }
+                else if (this.selectedCategory === 'Disenador') {
                     filtered.sort((a, b) => {
                         const ordenPublico = { 'Hombre': 1, 'Unisex': 2, 'Mujer': 3 };
                         return (ordenPublico[a.publico] || 99) - (ordenPublico[b.publico] || 99);
@@ -158,7 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             },
             getImageUrl(imageUrl) {
-                // Las imágenes ya vienen con la URL completa desde fetchPerfumes
                 return imageUrl || this.getPlaceholderImage();
             },
             getPlaceholderImage() {
@@ -206,28 +226,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Manejar respuesta con paginación o array directo (retrocompatibilidad)
                     const perfumesData = responseData.data || responseData;
                     
-                    // Procesar URLs de imágenes
                     this.perfumes = perfumesData.map(p => {
                         let imagenUrl = p.imagen_url;
                         
-                        // Si la URL ya es completa (Cloudinary), usar tal cual
                         if (imagenUrl && imagenUrl.startsWith('http')) {
                             return { ...p, imagen_url: imagenUrl };
                         }
                         
-                        // Si es ruta local, agregar el prefijo
                         if (imagenUrl) {
                             return { ...p, imagen_url: `./${imagenUrl}` };
                         }
                         
-                        // Sin imagen, usar placeholder
                         return { ...p, imagen_url: './ImagenesPerfumes/placeholder.svg' };
                     });
-                    
-                    console.log('✅ Perfumes cargados:', this.perfumes.length);
-                    // this.showToast('success', 'Catálogo cargado correctamente');
                 } catch (error) {
-                    console.error("Error al obtener perfumes:", error);
                     this.errorApi = "No se pudieron cargar los perfumes. Intente nuevamente más tarde.";
                     this.showToast('danger', 'Error al cargar el catálogo');
                 } finally {
@@ -241,14 +253,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         throw new Error(`Error ${response.status} al cargar reseñas`);
                     }
                     const responseData = await response.json();
-                    
-                    // Manejar respuesta con paginación o array directo (retrocompatibilidad)
                     const reviewsData = responseData.data || responseData;
                     
                     this.reviews = reviewsData;
                     this.perfumeReviews = reviewsData;
                 } catch (error) {
-                    console.error("Error al obtener reseñas:", error);
                     this.reviews = [];
                     this.perfumeReviews = [];
                 }
@@ -257,7 +266,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     localStorage.setItem('perfumeriaCart', JSON.stringify(this.cart));
                 } catch (error) {
-                    console.error('Error al guardar carrito:', error);
                     this.showToast('warning', 'No se pudo guardar el carrito en este dispositivo');
                 }
             },
@@ -268,7 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         this.cart = JSON.parse(savedCart);
                     }
                 } catch (error) {
-                    console.error('Error al cargar carrito:', error);
                     this.cart = [];
                 }
             },
@@ -305,16 +312,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 this.isMayoreo = false;
                 
-                // Limpiar todos los filtros para volver al catálogo completo
                 this.searchTerm = '';
                 this.selectedCategory = null;
                 this.selectedPublico = null;
                 this.selectedTipo = null;
+                this.selectedColeccion = null;
                 this.showFavoritesView = false;
                 
                 this.$nextTick(() => {
                     this.initObserver();
-                    // Volver al inicio siempre
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
             },
@@ -349,26 +355,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             setTimeout(() => {
                                 flyingImage.remove();
-                            }, 1000); // Match transition duration
+                            }, 1000);
                         }
                     }
                 }
 
-                // Crear una copia del perfume para modificar el precio si es mayoreo
                 let perfumeParaCarrito = { ...perfume };
                 
-                // Calcular el precio correcto según el modo
                 if (esMayoreo) {
-                    // Precio base (con descuento si lo tiene)
                     let precioBase = perfume.descuento_porcentaje > 0 ? perfume.precio_con_descuento : perfume.precio_minimo;
-                    // Aplicar descuento de mayoreo (20%)
                     let precioMayoreo = precioBase * 0.8;
                     
-                    // Actualizar los precios en la copia
                     perfumeParaCarrito.precio_minimo = precioMayoreo;
                     perfumeParaCarrito.precio_con_descuento = precioMayoreo;
                     perfumeParaCarrito.es_mayoreo = true;
-                    perfumeParaCarrito.descuento_mayoreo = 20; // Guardamos el porcentaje de descuento de mayoreo
+                    perfumeParaCarrito.descuento_mayoreo = 20;
                 }
 
                 const existingItem = this.cart.find(item => 
@@ -382,7 +383,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 const tipoCompra = esMayoreo ? 'mayoreo' : 'menudeo';
-                // Solo mostrar toast para mayoreo
                 if (esMayoreo) {
                     this.showToast('success', `${perfume.nombre} (${tipoCompra}) añadido al carrito`);
                 }
@@ -394,8 +394,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         cartButton.classList.remove('jiggle');
                     }, 500);
                 }
-
-                // Abrir el carrito automáticamente
                 const cartOffcanvas = document.getElementById('cartOffcanvas');
                 if (cartOffcanvas) {
                     const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(cartOffcanvas);
@@ -436,13 +434,27 @@ document.addEventListener('DOMContentLoaded', () => {
             filterByCategory(category) {
                 this.selectedCategory = category;
                 this.selectedPublico = category;
-                this.selectedTipo = null; // Resetear tipo cuando se filtra por categoría simple
+                this.selectedTipo = null;
+                this.selectedColeccion = null;
                 this.searchTerm = '';
                 this.selectedPerfume = null;
                 this.showFavoritesView = false;
                 this.showComingSoonView = false;
                 
-                // Siempre volver al inicio cuando se cambia de categoría
+                this.$nextTick(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            },
+            filterByCollection(coleccion, categoryName) {
+                this.selectedColeccion = coleccion;
+                this.selectedCategory = categoryName;
+                this.selectedPublico = null;
+                this.selectedTipo = null;
+                this.searchTerm = '';
+                this.selectedPerfume = null;
+                this.showFavoritesView = false;
+                this.showComingSoonView = false;
+                
                 this.$nextTick(() => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
@@ -466,14 +478,96 @@ document.addEventListener('DOMContentLoaded', () => {
                     'ArabesHombre': 'PERFUMES ÁRABES PARA HOMBRE',
                     'ArabesMujer': 'PERFUMES ÁRABES PARA MUJER',
                     'Disenador': 'PERFUMES DE DISEÑADOR',
-                    'Nicho': 'PERFUMES DE NICHO'
+                    'Nicho': 'PERFUMES DE NICHO',
+                    'arabes_destacados': 'PERFUMES ÁRABES DESTACADOS',
+                    'disenador_destacados': 'PERFUMES DE DISEÑADOR DESTACADOS',
+                    'nicho_destacados': 'PERFUMES DE NICHO DESTACADOS',
+                    'arabes_mujer_destacados': 'PERFUMES ÁRABES PARA MUJER DESTACADOS',
+                    'disenador_mujer_destacados': 'PERFUMES DE DISEÑADOR PARA MUJER DESTACADOS'
                 };
-                return titles[category] || 'LO MÁS NUEVO';
+                return titles[category] || 'NUESTRO CATÁLOGO';
+            },
+            getCollectionTitle(coleccion) {
+                const titles = {
+                    'arabes_destacados': { 
+                        titulo: 'PERFUMES ÁRABES',
+                        subtitulo: 'Los más exclusivos del Medio Oriente',
+                        imagen: './ImagenesPerfumes/SEPARADOR_ARABESH.jpg',
+                        gradiente: 'from-amber-950 via-black to-amber-950',
+                        color: 'from-amber-400 via-yellow-500 to-amber-400',
+                        border: 'border-amber-500/20'
+                    },
+                    'disenador_destacados': { 
+                        titulo: 'PERFUMES DE DISEÑADOR',
+                        subtitulo: 'Las fragancias más icónicas del mundo',
+                        imagen: './ImagenesPerfumes/SEPARADOR_DISEÑADOR.jpg',
+                        gradiente: 'from-blue-950 via-black to-blue-950',
+                        color: 'from-blue-400 via-cyan-500 to-blue-400',
+                        border: 'border-blue-500/20'
+                    },
+                    'nicho_destacados': { 
+                        titulo: 'PERFUMES DE NICHO',
+                        subtitulo: 'Exclusividad y lujo en cada gota',
+                        imagen: './ImagenesPerfumes/SEPARADOR_NICHO.jpg',
+                        gradiente: 'from-purple-950 via-black to-purple-950',
+                        color: 'from-purple-400 via-pink-500 to-purple-400',
+                        border: 'border-purple-500/20'
+                    },
+                    'arabes_mujer_destacados': { 
+                        titulo: 'PERFUMES ÁRABES PARA MUJER',
+                        subtitulo: 'Fragancias orientales femeninas',
+                        imagen: './ImagenesPerfumes/SEPARADOR_ARABESM.jpg',
+                        gradiente: 'from-rose-950 via-black to-rose-950',
+                        color: 'from-rose-400 via-pink-400 to-rose-400',
+                        border: 'border-rose-500/20'
+                    },
+                    'disenador_mujer_destacados': { 
+                        titulo: 'PERFUMES DE DISEÑADOR PARA MUJER',
+                        subtitulo: 'Elegancia y sofisticación',
+                        imagen: './ImagenesPerfumes/SEPARADOR_MUJER.jpg',
+                        gradiente: 'from-pink-950 via-black to-pink-950',
+                        color: 'from-pink-400 via-rose-400 to-pink-400',
+                        border: 'border-pink-500/20'
+                    }
+                };
+                return titles[coleccion] || null;
+            },
+            shouldShowCollectionDivider(index) {
+                if (this.selectedPublico || this.selectedTipo || this.searchTerm || this.selectedCategory) {
+                    return false;
+                }
+                
+                const currentPerfume = this.filteredPerfumes[index];
+                
+                if (!currentPerfume.coleccion) {
+                    return false;
+                }
+                
+                if (index === 0) {
+                    return true;
+                }
+                
+                const previousPerfume = this.filteredPerfumes[index - 1];
+                
+                return currentPerfume.coleccion !== previousPerfume.coleccion;
+            },
+            shouldShowGenderDivider(index) {
+                if (this.selectedCategory !== 'Disenador') {
+                    return false;
+                }
+                
+                if (index === 0) {
+                    return false;
+                }
+                
+                const currentPerfume = this.filteredPerfumes[index];
+                const previousPerfume = this.filteredPerfumes[index - 1];
+                
+                return currentPerfume.publico === 'Mujer' && previousPerfume.publico !== 'Mujer';
             },
             onSearchInput() {
                 clearTimeout(this.searchTimeout);
                 this.searchTimeout = setTimeout(() => {
-                    // Solo hacer scroll a productos si hay búsqueda
                     if (this.searchTerm && this.searchTerm.length >= 2) {
                         this.scrollToProducts();
                     }
@@ -483,7 +577,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.searchFocused = true;
             },
             onSearchBlur() {
-                // Delay para permitir clicks en el dropdown
                 setTimeout(() => {
                     this.searchFocused = false;
                 }, 200);
@@ -497,7 +590,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.showPerfumeDetail(perfume);
                 this.searchFocused = false;
                 this.closeSearchModal();
-                // Limpiar búsqueda automáticamente al seleccionar un perfume
                 this.searchTerm = '';
             },
             viewAllResults() {
@@ -532,41 +624,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.selectedPublico = null;
                 this.selectedTipo = null;
                 this.selectedCategory = null;
-                // Cerrar modal si está abierto
+                this.selectedColeccion = null;
                 if (this.searchModalOpen) {
                     this.searchModalOpen = false;
                     document.body.style.overflow = '';
                 }
-                // Scroll al inicio
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             },
             async submitReview() {
                 if (!this.selectedPerfume) {
-                    console.error('No hay perfume seleccionado');
                     this.showToast('danger', 'No hay perfume seleccionado');
                     return;
                 }
 
-                // Validaciones
                 if (!this.newReview.usuario || this.newReview.usuario.trim().length < 2) {
                     this.showToast('warning', 'El nombre debe tener al menos 2 caracteres');
                     return;
                 }
 
-                // Validación mejorada de comentario con contador
                 const comentarioLength = this.newReview.comentario ? this.newReview.comentario.trim().length : 0;
-                const minLength = 20; // Aumentado a 20 caracteres para comentarios más útiles
+                const minLength = 20;
                 const maxLength = 500;
                 
                 if (!this.newReview.comentario || comentarioLength < minLength) {
                     const faltantes = minLength - comentarioLength;
-                    this.showToast('warning', `⚠️ Tu comentario es muy corto. Necesitas ${faltantes} caracteres más para enviarlo (mínimo ${minLength} caracteres)`);
+                    this.showToast('warning', `Tu comentario es muy corto. Necesitas ${faltantes} caracteres más para enviarlo (mínimo ${minLength} caracteres)`);
                     return;
                 }
 
                 if (comentarioLength > maxLength) {
                     const excedentes = comentarioLength - maxLength;
-                    this.showToast('warning', `⚠️ Tu comentario es muy largo. Reduce ${excedentes} caracteres (máximo ${maxLength} caracteres)`);
+                    this.showToast('warning', `Tu comentario es muy largo. Reduce ${excedentes} caracteres (máximo ${maxLength} caracteres)`);
                     return;
                 }
 
@@ -577,7 +665,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 this.isSubmittingReview = true;
 
-                // NO incluir id_perfume en el body, va en la URL
                 const reviewData = {
                     usuario: this.newReview.usuario.trim(),
                     comentario: this.newReview.comentario.trim(),
@@ -585,7 +672,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
 
                 try {
-                    console.log('📤 Enviando reseña...', reviewData);
                     const response = await fetch(`${API_BASE_URL}/api/perfumes/${this.selectedPerfume.id_perfume}/reviews`, {
                         method: 'POST',
                         headers: {
@@ -594,26 +680,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify(reviewData)
                     });
 
-                    console.log('📥 Respuesta del servidor:', response.status);
                     const responseData = await response.json();
-                    console.log('📦 Datos de respuesta:', responseData);
 
                     if (!response.ok) {
-                        // Mostrar errores específicos del servidor
                         if (responseData.errors && Array.isArray(responseData.errors)) {
                             const errorMsg = responseData.errors.join(', ');
                             this.showToast('warning', errorMsg);
-                            console.error('❌ Errores de validación:', responseData.errors);
                         } else if (responseData.message) {
                             this.showToast('danger', responseData.message);
-                            console.error('❌ Error del servidor:', responseData.message);
                         } else {
                             throw new Error(`Error ${response.status}: ${response.statusText}`);
                         }
                         return;
                     }
 
-                    console.log('✅ Reseña enviada exitosamente');
                     this.showToast('success', '¡Gracias por tu reseña!');
                     this.newReview = {
                         usuario: '',
@@ -623,7 +703,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.currentRating = 0;
                     await this.fetchReviews(this.selectedPerfume.id_perfume);
                 } catch (error) {
-                    console.error("❌ Error al enviar reseña:", error);
                     this.showToast('danger', `Error: ${error.message || 'No se pudo enviar la reseña'}`);
                 } finally {
                     this.isSubmittingReview = false;
@@ -639,12 +718,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const index = this.favoriteIds.indexOf(perfume.id_perfume);
                 if (index !== -1) {
                     this.favoriteIds.splice(index, 1);
-                    // this.showToast('info', `${perfume.nombre} eliminado de favoritos`);
                 } else {
                     this.favoriteIds.push(perfume.id_perfume);
-                    // this.showToast('success', `${perfume.nombre} añadido a favoritos`);
                     
-                    // Abrir automáticamente la colección de favoritos
                     this.$nextTick(() => {
                         this.showFavoritesView = true;
                         this.selectedCategory = null;
@@ -654,7 +730,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         this.selectedPerfume = null;
                         this.showComingSoonView = false;
                         
-                        // Scroll al inicio
                         setTimeout(() => {
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                         }, 100);
@@ -666,10 +741,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const favorites = localStorage.getItem('perfumeriaFavorites');
                     if (favorites) {
                         this.favoriteIds = JSON.parse(favorites);
-                        console.log('✅ Favoritos cargados:', this.favoriteIds.length);
                     }
                 } catch (error) {
-                    console.error('Error al cargar favoritos:', error);
                     this.favoriteIds = [];
                 }
             },
@@ -677,7 +750,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     localStorage.setItem('perfumeriaFavorites', JSON.stringify(this.favoriteIds));
                 } catch (error) {
-                    console.error('Error al guardar favoritos:', error);
                 }
             },
             checkoutWhatsapp() {
@@ -738,33 +810,27 @@ document.addEventListener('DOMContentLoaded', () => {
             selectMayoreo(perfume) {
                 this.isMayoreo = true;
                 
-                // Mostrar alerta y agregar 6 piezas automáticamente con precio de mayoreo
-                this.showToast('info', '📦 Mayoreo a partir de 6 piezas. Se agregarán automáticamente 6 unidades al carrito con 20% de descuento.');
+                this.showToast('info', 'Mayoreo a partir de 6 piezas. Se agregarán automáticamente 6 unidades al carrito con 20% de descuento.');
                 
-                // Esperar un momento para que se vea la alerta y luego agregar al carrito con precio de mayoreo
                 setTimeout(() => {
-                    this.addToCart(perfume, 6, null, true); // true = es mayoreo
+                    this.addToCart(perfume, 6, null, true);
                 }, 800);
             },
             getPrecioBase(perfume) {
-                // Retorna el precio base sin descuento
                 if (perfume.descuento_porcentaje > 0) {
                     return perfume.precio_minimo;
                 }
                 return perfume.precio_minimo;
             },
             getPrecioFinal(perfume) {
-                // Calcular precio final considerando descuento del perfume y mayoreo
                 let precio = perfume.precio_minimo;
                 
-                // Si el perfume ya tiene descuento, usar ese precio
                 if (perfume.descuento_porcentaje > 0) {
                     precio = perfume.precio_con_descuento;
                 }
                 
-                // Si es mayoreo, aplicar 20% de descuento adicional
                 if (this.isMayoreo) {
-                    precio = precio * 0.8; // 20% de descuento
+                    precio = precio * 0.8;
                 }
                 
                 return precio;
@@ -837,13 +903,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 return texts[rating] || '';
             },
             startCarousel() {
-                // Cambiar cada 3 segundos
                 this.carouselInterval = setInterval(() => {
                     this.currentCarouselIndex = (this.currentCarouselIndex + 1) % 4;
                 }, 3000);
             },
             showComingSoon(sectionName) {
-                console.log('🔍 showComingSoon llamado con:', sectionName);
                 this.comingSoonSection = sectionName;
                 this.showComingSoonView = true;
                 this.selectedPerfume = null;
@@ -851,13 +915,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.searchTerm = '';
                 this.selectedPublico = null;
                 this.selectedCategory = null;
-                console.log('✅ showComingSoonView:', this.showComingSoonView);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             },
             closeComingSoon() {
                 this.showComingSoonView = false;
                 this.comingSoonSection = '';
-                // Volver al inicio y mostrar el hero
                 this.selectedCategory = null;
                 this.selectedPublico = null;
                 this.searchTerm = '';
@@ -874,7 +936,6 @@ document.addEventListener('DOMContentLoaded', () => {
             showFavoritesView: 'initObserver'
         },
         mounted() {
-            // Establecer modo oscuro siempre
             document.documentElement.setAttribute('data-theme', 'dark');
             
             this.fetchPerfumes().then(() => {
@@ -889,7 +950,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (this.lastFocusedElement) this.lastFocusedElement.focus();
                 });
             }
-            this.startCarousel(); // Iniciar carrusel
+            this.startCarousel();
         },
         beforeDestroy() {
             if (this.carouselInterval) {

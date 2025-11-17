@@ -1,10 +1,5 @@
 const { pool } = require('../db/db');
 
-// =====================================================
-// ESTADÍSTICAS DEL DASHBOARD
-// =====================================================
-
-// Obtener estadísticas generales
 exports.getEstadisticas = async (req, res) => {
     try {
         // Calcular estadísticas directamente
@@ -34,7 +29,6 @@ exports.getEstadisticas = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Error al obtener estadísticas:', error);
         res.status(500).json({
             success: false,
             message: 'Error al obtener estadísticas del dashboard'
@@ -42,7 +36,6 @@ exports.getEstadisticas = async (req, res) => {
     }
 };
 
-// Obtener estadísticas por categoría
 exports.getEstadisticasPorCategoria = async (req, res) => {
     try {
         const [stats] = await pool.query(`
@@ -59,7 +52,6 @@ exports.getEstadisticasPorCategoria = async (req, res) => {
             data: stats
         });
     } catch (error) {
-        console.error('Error al obtener estadísticas por categoría:', error);
         res.status(500).json({
             success: false,
             message: 'Error al obtener estadísticas por categoría'
@@ -67,7 +59,6 @@ exports.getEstadisticasPorCategoria = async (req, res) => {
     }
 };
 
-// Obtener estadísticas por marca
 exports.getEstadisticasPorMarca = async (req, res) => {
     try {
         const [stats] = await pool.query('CALL sp_estadisticas_por_marca()');
@@ -77,7 +68,6 @@ exports.getEstadisticasPorMarca = async (req, res) => {
             data: stats[0]
         });
     } catch (error) {
-        console.error('Error al obtener estadísticas por marca:', error);
         res.status(500).json({
             success: false,
             message: 'Error al obtener estadísticas por marca'
@@ -85,11 +75,6 @@ exports.getEstadisticasPorMarca = async (req, res) => {
     }
 };
 
-// =====================================================
-// CRUD DE PERFUMES
-// =====================================================
-
-// Obtener todos los perfumes (con filtros)
 exports.getAllPerfumesAdmin = async (req, res) => {
     try {
         const { activo, destacado, publico, marca, search, page = 1, limit = 20, sortField = 'fecha_creacion', sortOrder = 'desc' } = req.query;
@@ -123,7 +108,6 @@ exports.getAllPerfumesAdmin = async (req, res) => {
             params.push(searchParam, searchParam, searchParam);
         }
         
-        // Ordenamiento dinámico
         const validSortFields = ['nombre', 'precio_minimo', 'stock', 'fecha_creacion', 'marca'];
         const validSortOrders = ['asc', 'desc'];
         
@@ -132,7 +116,6 @@ exports.getAllPerfumesAdmin = async (req, res) => {
         
         query += ` ORDER BY ${orderField} ${orderDirection}`;
         
-        // Paginación
         const offset = (page - 1) * limit;
         query += ' LIMIT ? OFFSET ?';
         params.push(parseInt(limit), parseInt(offset));
@@ -183,7 +166,6 @@ exports.getAllPerfumesAdmin = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Error al obtener perfumes:', error);
         res.status(500).json({
             success: false,
             message: 'Error al obtener perfumes'
@@ -191,7 +173,6 @@ exports.getAllPerfumesAdmin = async (req, res) => {
     }
 };
 
-// Obtener un perfume por ID
 exports.getPerfumeById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -210,7 +191,6 @@ exports.getPerfumeById = async (req, res) => {
             data: perfume[0]
         });
     } catch (error) {
-        console.error('Error al obtener perfume:', error);
         res.status(500).json({
             success: false,
             message: 'Error al obtener perfume'
@@ -218,7 +198,6 @@ exports.getPerfumeById = async (req, res) => {
     }
 };
 
-// Crear nuevo perfume
 exports.createPerfume = async (req, res) => {
     try {
         const {
@@ -229,11 +208,8 @@ exports.createPerfume = async (req, res) => {
         
         const id_admin = req.admin.id_admin;
         
-        // Convertir activo a número explícitamente para MySQL (1 o 0)
         const activoValue = (activo === true || activo === 1 || activo === '1' || activo === 'true') ? 1 : 0;
         const destacadoValue = (destacado === true || destacado === 1 || destacado === '1' || destacado === 'true') ? 1 : 0;
-        
-        console.log('📝 Creando perfume:', { nombre, marca, activo: activoValue, activoOriginal: activo });
         
         const [result] = await pool.query(
             `INSERT INTO perfumes (
@@ -248,9 +224,6 @@ exports.createPerfume = async (req, res) => {
             ]
         );
         
-        console.log('✅ Perfume creado con ID:', result.insertId, 'activo:', activoValue);
-        
-        // Registrar actividad (opcional - no falla si el SP no existe)
         try {
             await pool.query(
                 `CALL sp_registrar_actividad(?, 'CREATE', 'perfumes', ?, NULL, ?, ?, ?)`,
@@ -262,9 +235,7 @@ exports.createPerfume = async (req, res) => {
                     req.headers['user-agent']
                 ]
             );
-        } catch (spError) {
-            console.warn('⚠️ No se pudo registrar actividad (SP no disponible):', spError.message);
-        }
+        } catch (spError) {}
         
         res.status(201).json({
             success: true,
@@ -272,7 +243,6 @@ exports.createPerfume = async (req, res) => {
             data: { id_perfume: result.insertId, activo: activoValue }
         });
     } catch (error) {
-        console.error('❌ Error al crear perfume:', error);
         res.status(500).json({
             success: false,
             message: 'Error al crear perfume',
@@ -281,7 +251,6 @@ exports.createPerfume = async (req, res) => {
     }
 };
 
-// Actualizar perfume
 exports.updatePerfume = async (req, res) => {
     try {
         const { id } = req.params;
@@ -293,7 +262,6 @@ exports.updatePerfume = async (req, res) => {
         
         const id_admin = req.admin.id_admin;
         
-        // Obtener datos antiguos
         const [oldData] = await pool.query('SELECT * FROM perfumes WHERE id_perfume = ?', [id]);
         
         if (oldData.length === 0) {
@@ -303,13 +271,9 @@ exports.updatePerfume = async (req, res) => {
             });
         }
         
-        // Convertir activo a número explícitamente para MySQL (1 o 0)
         const activoValue = (activo === true || activo === 1 || activo === '1' || activo === 'true') ? 1 : 0;
         const destacadoValue = (destacado === true || destacado === 1 || destacado === '1' || destacado === 'true') ? 1 : 0;
         
-        console.log('📝 Actualizando perfume:', { id, nombre, activo: activoValue });
-        
-        // Actualizar
         await pool.query(
             `UPDATE perfumes SET
                 marca = ?, nombre = ?, tipo = ?, publico = ?, descripcion = ?, notas = ?,
@@ -324,9 +288,6 @@ exports.updatePerfume = async (req, res) => {
             ]
         );
         
-        console.log('✅ Perfume actualizado:', id, 'activo:', activoValue);
-        
-        // Registrar actividad (opcional - no falla si el SP no existe)
         try {
             await pool.query(
                 `CALL sp_registrar_actividad(?, 'UPDATE', 'perfumes', ?, ?, ?, ?, ?)`,
@@ -339,16 +300,13 @@ exports.updatePerfume = async (req, res) => {
                     req.headers['user-agent']
                 ]
             );
-        } catch (spError) {
-            console.warn('⚠️ No se pudo registrar actividad (SP no disponible):', spError.message);
-        }
+        } catch (spError) {}
         
         res.json({
             success: true,
             message: 'Perfume actualizado exitosamente'
         });
     } catch (error) {
-        console.error('❌ Error al actualizar perfume:', error);
         res.status(500).json({
             success: false,
             message: 'Error al actualizar perfume',
@@ -357,37 +315,22 @@ exports.updatePerfume = async (req, res) => {
     }
 };
 
-// Eliminar perfume (soft delete)
 exports.deletePerfume = async (req, res) => {
     try {
         const { id } = req.params;
         const id_admin = req.admin.id_admin;
         
-        console.log('🗑️ Intentando eliminar perfume ID:', id);
-        
-        // Obtener datos antes de eliminar
         const [perfume] = await pool.query('SELECT * FROM perfumes WHERE id_perfume = ?', [id]);
         
         if (perfume.length === 0) {
-            console.log('❌ Perfume no encontrado:', id);
             return res.status(404).json({
                 success: false,
                 message: 'Perfume no encontrado'
             });
         }
         
-        console.log('📝 Perfume encontrado:', perfume[0].nombre, 'activo antes:', perfume[0].activo);
-        
-        // Soft delete - usar 0 en lugar de FALSE para asegurar compatibilidad con MySQL
         const [result] = await pool.query('UPDATE perfumes SET activo = 0 WHERE id_perfume = ?', [id]);
         
-        console.log('✅ Perfume desactivado. Filas afectadas:', result.affectedRows);
-        
-        // Verificar que se actualizó
-        const [verificar] = await pool.query('SELECT activo FROM perfumes WHERE id_perfume = ?', [id]);
-        console.log('🔍 Verificación - activo después:', verificar[0]?.activo);
-        
-        // Registrar actividad (opcional - no falla si el SP no existe)
         try {
             await pool.query(
                 `CALL sp_registrar_actividad(?, 'DELETE', 'perfumes', ?, ?, NULL, ?, ?)`,
@@ -399,16 +342,13 @@ exports.deletePerfume = async (req, res) => {
                     req.headers['user-agent']
                 ]
             );
-        } catch (spError) {
-            console.warn('⚠️ No se pudo registrar actividad (SP no disponible):', spError.message);
-        }
+        } catch (spError) {}
         
         res.json({
             success: true,
             message: 'Perfume desactivado exitosamente'
         });
     } catch (error) {
-        console.error('❌ Error al eliminar perfume:', error);
         res.status(500).json({
             success: false,
             message: 'Error al eliminar perfume',
@@ -417,7 +357,6 @@ exports.deletePerfume = async (req, res) => {
     }
 };
 
-// Actualizar stock
 exports.updateStock = async (req, res) => {
     try {
         const { id } = req.params;
@@ -440,7 +379,6 @@ exports.updateStock = async (req, res) => {
             message: 'Stock actualizado exitosamente'
         });
     } catch (error) {
-        console.error('Error al actualizar stock:', error);
         res.status(500).json({
             success: false,
             message: 'Error al actualizar stock'
@@ -448,7 +386,6 @@ exports.updateStock = async (req, res) => {
     }
 };
 
-// Actualizar descuento
 exports.updateDescuento = async (req, res) => {
     try {
         const { id } = req.params;
@@ -471,7 +408,6 @@ exports.updateDescuento = async (req, res) => {
             message: 'Descuento actualizado exitosamente'
         });
     } catch (error) {
-        console.error('Error al actualizar descuento:', error);
         res.status(500).json({
             success: false,
             message: 'Error al actualizar descuento'
@@ -479,11 +415,6 @@ exports.updateDescuento = async (req, res) => {
     }
 };
 
-// =====================================================
-// GESTIÓN DE RESEÑAS
-// =====================================================
-
-// Obtener todas las reseñas
 exports.getAllReviews = async (req, res) => {
     try {
         const { aprobada, id_perfume, page = 1, limit = 20 } = req.query;
@@ -521,7 +452,6 @@ exports.getAllReviews = async (req, res) => {
         
         query += ' ORDER BY r.fecha DESC';
         
-        // Paginación
         const offset = (page - 1) * limit;
         query += ' LIMIT ? OFFSET ?';
         params.push(parseInt(limit), parseInt(offset));
@@ -533,7 +463,6 @@ exports.getAllReviews = async (req, res) => {
             data: reviews
         });
     } catch (error) {
-        console.error('Error al obtener reseñas:', error);
         res.status(500).json({
             success: false,
             message: 'Error al obtener reseñas'
@@ -541,7 +470,6 @@ exports.getAllReviews = async (req, res) => {
     }
 };
 
-// Aprobar/rechazar reseña
 exports.moderarReview = async (req, res) => {
     try {
         const { id } = req.params;
@@ -549,7 +477,6 @@ exports.moderarReview = async (req, res) => {
         
         const id_admin = req.admin.id_admin;
         
-        // Verificar que la reseña existe
         const [review] = await pool.query('SELECT * FROM reseñas WHERE id_reseña = ?', [id]);
         
         if (review.length === 0) {
@@ -575,7 +502,6 @@ exports.moderarReview = async (req, res) => {
             message: aprobada !== false ? 'Reseña aprobada' : 'Reseña rechazada'
         });
     } catch (error) {
-        console.error('Error al moderar reseña:', error);
         res.status(500).json({
             success: false,
             message: 'Error al moderar reseña'
@@ -583,13 +509,11 @@ exports.moderarReview = async (req, res) => {
     }
 };
 
-// Eliminar reseña
 exports.deleteReview = async (req, res) => {
     try {
         const { id } = req.params;
         const id_admin = req.admin.id_admin;
         
-        // Obtener datos antes de eliminar
         const [review] = await pool.query('SELECT * FROM reseñas WHERE id_reseña = ?', [id]);
         
         if (review.length === 0) {
@@ -601,7 +525,6 @@ exports.deleteReview = async (req, res) => {
         
         await pool.query('DELETE FROM reseñas WHERE id_reseña = ?', [id]);
         
-        // Registrar actividad
         await pool.query(
             `CALL sp_registrar_actividad(?, 'DELETE', 'reseñas', ?, ?, NULL, ?, ?)`,
             [
@@ -618,7 +541,6 @@ exports.deleteReview = async (req, res) => {
             message: 'Reseña eliminada exitosamente'
         });
     } catch (error) {
-        console.error('Error al eliminar reseña:', error);
         res.status(500).json({
             success: false,
             message: 'Error al eliminar reseña'
@@ -626,11 +548,6 @@ exports.deleteReview = async (req, res) => {
     }
 };
 
-// =====================================================
-// LOGS Y ACTIVIDAD
-// =====================================================
-
-// Obtener logs de actividad
 exports.getLogs = async (req, res) => {
     try {
         const { limit = 50 } = req.query;
@@ -645,7 +562,6 @@ exports.getLogs = async (req, res) => {
             data: logs
         });
     } catch (error) {
-        console.error('Error al obtener logs:', error);
         res.status(500).json({
             success: false,
             message: 'Error al obtener logs de actividad'
@@ -653,7 +569,6 @@ exports.getLogs = async (req, res) => {
     }
 };
 
-// Obtener stock bajo
 exports.getStockBajo = async (req, res) => {
     try {
         const [productos] = await pool.query(`
@@ -674,7 +589,6 @@ exports.getStockBajo = async (req, res) => {
             data: productos
         });
     } catch (error) {
-        console.error('Error al obtener productos con stock bajo:', error);
         res.status(500).json({
             success: false,
             message: 'Error al obtener productos con stock bajo'

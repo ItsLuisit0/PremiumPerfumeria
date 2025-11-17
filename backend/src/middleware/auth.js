@@ -1,27 +1,17 @@
 const jwt = require('jsonwebtoken');
 const { pool } = require('../db/db');
 
-// Secret key para JWT (OBLIGATORIO en .env)
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 
-// Validar que JWT_SECRET esté configurado
 if (!JWT_SECRET) {
-    console.error('❌ ERROR CRÍTICO: JWT_SECRET no está configurado en las variables de entorno');
-    console.error('📝 Configura JWT_SECRET en tu archivo .env');
-    console.error('💡 Genera un secret seguro con: node -e "console.log(require(\'crypto\').randomBytes(64).toString(\'hex\'))"');
     if (process.env.NODE_ENV === 'production') {
         throw new Error('JWT_SECRET es obligatorio en producción');
     }
-    console.warn('⚠️  Usando secret temporal para desarrollo (NO USAR EN PRODUCCIÓN)');
 }
 
-/**
- * Middleware para verificar el token JWT
- */
 const verifyToken = async (req, res, next) => {
     try {
-        // Obtener token del header Authorization o de las cookies
         const token = req.headers.authorization?.split(' ')[1] || req.cookies?.token;
 
         if (!token) {
@@ -31,10 +21,8 @@ const verifyToken = async (req, res, next) => {
             });
         }
 
-        // Verificar el token
         const decoded = jwt.verify(token, JWT_SECRET);
 
-        // Verificar si el token ha sido revocado (opcional)
         const [revokedTokens] = await pool.query(
             'SELECT * FROM tokens_revocados WHERE token_jti = ?',
             [decoded.jti]
@@ -47,7 +35,6 @@ const verifyToken = async (req, res, next) => {
             });
         }
 
-        // Verificar que el usuario siga activo
         const [users] = await pool.query(
             'SELECT id_admin, username, email, nombre_completo, rol, activo FROM administradores WHERE id_admin = ? AND activo = TRUE',
             [decoded.id_admin]
@@ -60,7 +47,6 @@ const verifyToken = async (req, res, next) => {
             });
         }
 
-        // Agregar información del usuario al request
         req.admin = users[0];
         req.tokenJti = decoded.jti;
 
@@ -81,7 +67,6 @@ const verifyToken = async (req, res, next) => {
             });
         }
 
-        console.error('Error en verificación de token:', error);
         return res.status(500).json({
             success: false,
             message: 'Error al verificar autenticación.'
@@ -89,9 +74,6 @@ const verifyToken = async (req, res, next) => {
     }
 };
 
-/**
- * Middleware para verificar roles específicos
- */
 const verifyRole = (...allowedRoles) => {
     return (req, res, next) => {
         if (!req.admin) {
@@ -114,24 +96,12 @@ const verifyRole = (...allowedRoles) => {
     };
 };
 
-/**
- * Middleware para verificar que sea superadmin
- */
 const verifySuperAdmin = verifyRole('superadmin');
 
-/**
- * Middleware para verificar que sea admin o superadmin
- */
 const verifyAdmin = verifyRole('superadmin', 'admin');
 
-/**
- * Middleware para verificar cualquier rol autenticado (incluyendo moderador)
- */
 const verifyAnyAdmin = verifyRole('superadmin', 'admin', 'moderador');
 
-/**
- * Generar un nuevo token JWT
- */
 const generateToken = (admin) => {
     const payload = {
         id_admin: admin.id_admin,
@@ -146,9 +116,6 @@ const generateToken = (admin) => {
     });
 };
 
-/**
- * Revocar un token (logout)
- */
 const revokeToken = async (tokenJti, adminId, razon = 'Logout manual') => {
     try {
         await pool.query(
@@ -157,23 +124,16 @@ const revokeToken = async (tokenJti, adminId, razon = 'Logout manual') => {
         );
         return true;
     } catch (error) {
-        console.error('Error al revocar token:', error);
         return false;
     }
 };
 
-/**
- * Limpiar tokens revocados expirados (ejecutar periódicamente)
- */
 const cleanExpiredTokens = async () => {
     try {
-        // Eliminar tokens revocados más antiguos de 7 días
         await pool.query(
             'DELETE FROM tokens_revocados WHERE fecha_revocacion < DATE_SUB(NOW(), INTERVAL 7 DAY)'
         );
-    } catch (error) {
-        console.error('Error al limpiar tokens expirados:', error);
-    }
+    } catch (error) {}
 };
 
 module.exports = {

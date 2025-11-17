@@ -54,7 +54,6 @@ exports.getReviewsByPerfumeId = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Error al obtener reseñas:', error.message);
         res.status(500).json({ 
             success: false,
             message: 'Error interno del servidor' 
@@ -67,13 +66,6 @@ exports.addReview = async (req, res) => {
         const { id } = req.params;
         const { usuario, comentario, calificacion } = req.body;
 
-        // Log solo en desarrollo
-        if (process.env.NODE_ENV === 'development') {
-            console.log('📝 Recibiendo reseña para perfume ID:', id);
-            console.log('📦 Datos recibidos:', { usuario, comentario, calificacion });
-        }
-
-        // Validaciones básicas (el middleware ya validó, pero por seguridad)
         if (!usuario || !comentario || !calificacion) {
             return res.status(400).json({ 
                 success: false,
@@ -97,16 +89,10 @@ exports.addReview = async (req, res) => {
             });
         }
 
-        // Insertar la reseña
         const [result] = await pool.query(
             'INSERT INTO reseñas (id_perfume, usuario, comentario, calificacion) VALUES (?, ?, ?, ?)',
             [id, usuario.trim(), comentario.trim(), calificacion]
         );
-
-        // Log solo en desarrollo
-        if (process.env.NODE_ENV === 'development') {
-            console.log('✅ Reseña añadida con ID:', result.insertId);
-        }
 
         res.status(201).json({ 
             success: true,
@@ -114,9 +100,6 @@ exports.addReview = async (req, res) => {
             id_reseña: result.insertId 
         });
     } catch (error) {
-        console.error('Error al añadir reseña:', error.message);
-        
-        // Manejar errores específicos de base de datos
         if (error.code === 'ER_NO_REFERENCED_ROW_2') {
             return res.status(404).json({ 
                 success: false,

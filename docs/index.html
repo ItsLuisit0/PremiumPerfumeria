@@ -14,10 +14,8 @@
     <meta property="og:url" content="https://tu-dominio.com">
     <meta property="og:type" content="website">
     
-    <!-- Vue.js -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -62,21 +60,16 @@
         }
     </script>
     
-    <!-- Fuentes Google -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
-    <!-- CSS Personalizado (solo para Vue.js y transiciones) -->
     <link rel="stylesheet" href="css/style.css">
     
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="./ImagenesPerfumes/logo.png">
 </head>
 <body class="bg-black text-white font-sans antialiased">
     <div id="app" v-cloak>
-        <!-- BANNER PROMOCIONAL SUPERIOR -->
         <div class="bg-gradient-to-r from-primary via-accent to-primary text-black py-2 overflow-hidden relative">
             <div class="flex animate-marquee whitespace-nowrap">
                 <div class="flex items-center space-x-12 px-6">
@@ -101,19 +94,15 @@
             </div>
         </div>
 
-        <!-- HEADER PRINCIPAL -->
         <header class="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/10">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-20">
-                <!-- Logo -->
                     <div class="flex-shrink-0">
                         <a href="./index.html" class="flex items-center space-x-2 group">
                             <img src="./ImagenesPerfumes/logo.png" alt="Premium Perfumería" class="h-12 w-auto transition-transform group-hover:scale-105">
                             <span class="hidden md:block font-display text-xl text-primary"></span>
                     </a>
             </div>
-
-                <!-- Navegación Desktop -->
                     <nav class="hidden lg:flex items-center space-x-8">
                         <a href="#" @click.prevent="filterByCategory(null)" 
                            class="text-sm font-medium transition-colors hover:text-primary"
@@ -125,7 +114,6 @@
                                 <span>POR GÉNERO</span>
                                 <i class="bi bi-chevron-down text-xs"></i>
                             </button>
-                            <!-- Dropdown -->
                             <div class="absolute left-0 mt-2 w-48 bg-gray-900 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-white/10">
                                 <a href="#" @click.prevent="filterByCategory('Hombre')" class="block px-4 py-3 text-sm hover:bg-white/5 transition-colors">
                                     <i class="bi bi-person-fill mr-2"></i>Hombre
@@ -143,10 +131,7 @@
                             POR DISEÑADOR
                         </a>
                 </nav>
-
-                <!-- Acciones Header -->
                     <div class="flex items-center space-x-4">
-                        <!-- Barra de búsqueda Desktop -->
                         <div class="hidden md:flex items-center relative">
                             <i class="bi bi-search absolute left-3 text-gray-400"></i>
                             <input 
@@ -160,40 +145,30 @@
                             <button v-if="searchTerm" @click="clearSearch" class="absolute right-3 text-gray-400 hover:text-white transition-colors">
                                 <i class="bi bi-x-circle-fill"></i>
                             </button>
-                            
-                            <!-- Dropdown de resultados en tiempo real -->
                             <div v-if="searchTerm && searchFocused && searchResults.length > 0" 
                                  class="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl overflow-hidden z-50 max-h-96 overflow-y-auto"
                                  @mousedown.prevent>
-                                <!-- Contador de resultados -->
                                 <div class="px-3 py-2 bg-black/30 border-b border-white/10">
                                     <p class="text-xs text-gray-400">
                                         {{ searchResults.length }} {{ searchResults.length === 1 ? 'resultado' : 'resultados' }}
                                     </p>
                                 </div>
-                                
-                                <!-- Lista de resultados -->
                                 <div class="divide-y divide-white/5">
                                     <button 
                                         v-for="perfume in searchResults.slice(0, 6)" 
                                         :key="perfume.id"
                                         @click="selectSearchResult(perfume)"
                                         class="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-white/5 transition-colors group/item">
-                                        <!-- Imagen del perfume -->
                                         <div class="w-10 h-10 rounded bg-black/50 flex-shrink-0 overflow-hidden">
                                             <img :src="getImageUrl(perfume.imagen_url)" 
                                                  :alt="perfume.nombre"
                                                  class="w-full h-full object-cover"
                                                  @error="handleImageError">
                                         </div>
-                                        
-                                        <!-- Info del perfume -->
                                         <div class="flex-1 text-left min-w-0">
                                             <p class="text-sm font-medium text-white group-hover/item:text-primary transition-colors truncate" v-html="highlightMatch(perfume.nombre)"></p>
                                             <p class="text-xs text-gray-400 truncate" v-html="highlightMatch(perfume.marca)"></p>
                                         </div>
-                                        
-                                        <!-- Precio -->
                                         <div class="text-right flex-shrink-0">
                                             <p class="text-sm font-semibold text-primary">${{ perfume.precio_menudeo }}</p>
                                         </div>
@@ -201,16 +176,12 @@
                                         <i class="bi bi-arrow-right text-gray-500 group-hover/item:text-primary transition-all text-xs"></i>
                                     </button>
                                 </div>
-                                
-                                <!-- Ver todos los resultados -->
                                 <div v-if="searchResults.length > 6" class="px-3 py-2 bg-black/30 border-t border-white/10">
                                     <button @click="viewAllResults" class="w-full text-center text-xs text-primary hover:text-accent transition-colors">
                                         Ver todos ({{ searchResults.length }})
                                     </button>
                                 </div>
                             </div>
-                            
-                            <!-- Mensaje cuando no hay resultados -->
                             <div v-if="searchTerm && searchFocused && searchResults.length === 0" 
                                  class="absolute top-full left-0 right-0 mt-2 bg-gray-900/95 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl p-4 text-center z-50"
                                  @mousedown.prevent>
@@ -221,29 +192,21 @@
                                 </button>
                             </div>
                     </div>
-                    
-                        <!-- Botón búsqueda móvil -->
                         <button @click="toggleSearchModal" class="md:hidden p-2 hover:bg-white/5 rounded-full transition-colors">
                             <i class="bi bi-search text-xl"></i>
                     </button>
-                
-                        <!-- Favoritos -->
                         <button @click="showFavoritesView = !showFavoritesView" class="relative p-2 hover:bg-white/5 rounded-full transition-colors group">
                             <i class="bi bi-heart text-xl group-hover:scale-110 transition-transform"></i>
                             <span v-if="favoriteIds.length > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
                                 {{ favoriteIds.length }}
                             </span>
                     </button>
-
-                        <!-- Carrito -->
                         <button @click="cartOpen = true" class="relative p-2 hover:bg-white/5 rounded-full transition-colors group">
                             <i class="bi bi-bag text-xl group-hover:scale-110 transition-transform"></i>
                             <span v-if="cartItemCount > 0" class="absolute -top-1 -right-1 bg-primary text-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
                                 {{ cartItemCount }}
                             </span>
                     </button>
-
-                <!-- Menú móvil -->
                         <button @click="toggleMobileMenu" class="lg:hidden p-2 hover:bg-white/5 rounded-full transition-colors">
                             <i class="bi bi-list text-2xl"></i>
                 </button>
@@ -251,8 +214,6 @@
                 </div>
             </div>
         </header>
-
-        <!-- Navegación Móvil Sidebar -->
         <div v-if="mobileMenuOpen" @click="toggleMobileMenu" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 lg:hidden transition-opacity"></div>
         <div class="fixed top-0 right-0 h-full w-80 bg-gray-900 z-50 transform transition-transform duration-300 lg:hidden"
              :class="mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'">
@@ -285,8 +246,6 @@
                 </a>
         </nav>
         </div>
-
-        <!-- Modal de búsqueda Mejorado -->
         <div class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 transition-all duration-300"
              :class="{ 'opacity-100 visible': searchModalOpen, 'opacity-0 invisible': !searchModalOpen }"
              @click="closeSearchModal">
@@ -296,10 +255,8 @@
              :class="{ 'translate-y-0 opacity-100': searchModalOpen, '-translate-y-full opacity-0': !searchModalOpen }">
             <div class="bg-gradient-to-b from-gray-900 via-gray-900/95 to-transparent backdrop-blur-xl border-b border-white/10 shadow-2xl"
                  @click.stop>
-                <!-- Header del modal -->
                 <div class="container mx-auto px-4 py-6">
                     <div class="flex items-center gap-4">
-                        <!-- Input de búsqueda -->
                         <div class="flex-1 relative">
                             <i class="bi bi-search absolute left-5 top-1/2 -translate-y-1/2 text-2xl text-gray-400"></i>
                             <input 
@@ -314,14 +271,10 @@
                                 <i class="bi bi-x-circle-fill text-2xl"></i>
                             </button>
                         </div>
-                        
-                        <!-- Botón cerrar -->
                         <button @click="closeSearchModal" class="p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-colors flex-shrink-0">
                             <i class="bi bi-x-lg text-xl text-white"></i>
                         </button>
                     </div>
-                    
-                    <!-- Contador de resultados -->
                     <div v-if="searchTerm" class="mt-4 flex items-center gap-2">
                         <div class="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
                             <i class="bi bi-check-circle text-primary"></i>
@@ -335,12 +288,8 @@
                         </button>
                     </div>
                 </div>
-                
-                <!-- Contenido del modal -->
                 <div class="container mx-auto px-4 pb-6 max-h-[70vh] overflow-y-auto">
-                    <!-- Sugerencias cuando no hay búsqueda -->
                     <div v-if="!searchTerm" class="space-y-6">
-                        <!-- Búsquedas populares -->
                         <div>
                             <h3 class="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
                                 <i class="bi bi-fire text-orange-500"></i>
@@ -355,8 +304,6 @@
                                 </button>
                             </div>
                         </div>
-                        
-                        <!-- Categorías rápidas -->
                         <div>
                             <h3 class="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
                                 <i class="bi bi-grid text-primary"></i>
@@ -391,23 +338,18 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Resultados de búsqueda -->
                     <div v-else-if="searchResults.length > 0" class="space-y-2">
                         <button 
                             v-for="perfume in searchResults" 
                             :key="perfume.id"
                             @click="selectSearchResult(perfume)"
                             class="w-full p-4 flex items-center gap-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-primary/30 rounded-xl transition-all group">
-                            <!-- Imagen -->
                             <div class="w-16 h-16 rounded-lg bg-black/50 flex-shrink-0 overflow-hidden ring-2 ring-white/10 group-hover:ring-primary/50 transition-all">
                                 <img :src="getImageUrl(perfume.imagen_url)" 
                                      :alt="perfume.nombre"
                                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                      @error="handleImageError">
                             </div>
-                            
-                            <!-- Info -->
                             <div class="flex-1 text-left min-w-0">
                                 <p class="text-base font-medium text-white group-hover:text-primary transition-colors truncate" 
                                    v-html="highlightMatch(perfume.nombre)"></p>
@@ -419,8 +361,6 @@
                                     <span class="text-xs text-gray-500">{{ perfume.publico }}</span>
                                 </div>
                             </div>
-                            
-                            <!-- Precio -->
                             <div class="text-right flex-shrink-0">
                                 <p class="text-lg font-bold text-primary">${{ perfume.precio_menudeo }}</p>
                                 <p v-if="perfume.descuento > 0" class="text-xs text-gray-500 line-through">${{ perfume.precio_menudeo }}</p>
@@ -429,8 +369,6 @@
                             <i class="bi bi-arrow-right text-gray-500 group-hover:text-primary group-hover:translate-x-2 transition-all flex-shrink-0"></i>
                         </button>
                     </div>
-                    
-                    <!-- Sin resultados -->
                     <div v-else class="py-12 text-center">
                         <i class="bi bi-search text-6xl text-gray-700 mb-4"></i>
                         <h3 class="text-xl font-semibold text-white mb-2">No se encontraron resultados</h3>
@@ -442,44 +380,31 @@
                 </div>
             </div>
         </div>
-
-        <!-- HERO SECTION - Tailwind Design -->
         <section v-if="!searchTerm && !showFavoritesView && !selectedPerfume && !showComingSoonView && selectedCategory === null && selectedPublico === null"
                  class="relative min-h-[80vh] flex items-center justify-end bg-cover bg-left-center overflow-hidden"
-                 style="background-image: linear-gradient(90deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%), url('./ImagenesPerfumes/Fondo_Definitivo.PNG');">
-            
-            <!-- Partículas decorativas -->
+                 style="background-image: linear-gradient(90deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%), url('./ImagenesPerfumes/Fondo_Definitivo.jpg');">
             <div class="absolute inset-0 pointer-events-none">
                 <div class="absolute top-20 left-10 w-2 h-2 bg-primary rounded-full animate-ping opacity-20"></div>
                 <div class="absolute bottom-32 right-20 w-3 h-3 bg-accent rounded-full animate-pulse opacity-20"></div>
                 <div class="absolute top-1/2 left-1/4 w-1 h-1 bg-white rounded-full animate-bounce opacity-30"></div>
                 </div>
-                
-            <!-- Contenido Hero -->
             <div class="relative z-10 max-w-xl px-6 md:px-12 lg:pr-20 py-12 text-center md:text-left">
-                <!-- Logo -->
                 <div class="mb-8 animate-fade-in">
                     <img src="./ImagenesPerfumes/logo.png" 
                          alt="Premium Perfumería" 
                          class="h-16 md:h-20 mx-auto md:mx-0 brightness-0 invert">
                 </div>
-                
-                    <!-- Título Principal -->
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-normal text-white mb-4 leading-tight tracking-wider animate-slide-up"
                     style="font-family: 'Playfair Display', serif; text-shadow: 2px 2px 12px rgba(0,0,0,0.7); letter-spacing: 0.05em;">
                     RÉPLICAS<br>
                     DE ALTA<br>
                     CALIDAD
                     </h1>
-                    
-                <!-- Subtítulo -->
                 <p class="text-sm md:text-base text-primary mb-8 leading-relaxed tracking-wide animate-slide-up uppercase font-light"
                    style="font-family: 'Poppins', sans-serif; animation-delay: 0.1s; text-shadow: 1px 1px 4px rgba(0,0,0,0.5); letter-spacing: 0.1em;">
                     Experimenta el lujo de las mejores<br class="hidden md:block">
                     fragancias del mundo a precios accesibles
                 </p>
-                
-                <!-- Botón CTA -->
                 <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start animate-slide-up" style="animation-delay: 0.2s;">
                     <button @click="scrollToProducts" 
                             class="inline-flex items-center justify-center gap-2 px-10 py-4 bg-primary hover:bg-accent text-black font-semibold uppercase text-sm tracking-wider transition-all duration-300 hover:shadow-xl hover:shadow-primary/30"
@@ -489,21 +414,16 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Scroll indicator -->
             <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
                 <i class="bi bi-chevron-down text-white text-2xl opacity-50"></i>
             </div>
         </section>
-
-        <!-- SECCIÓN DE CATEGORÍAS -->
         <section class="categories-section" v-show="!searchTerm && !showFavoritesView && !selectedPerfume && !showComingSoonView && selectedCategory === null && selectedPublico === null">
             <div class="container">
                 <h2 style="text-align: center; font-family: 'Inter', system-ui, sans-serif; font-size: 2.5rem; font-weight: 600; margin-bottom: 3rem; color: var(--text-primary);">
                     Explora por <span style="color: #d4af37;">Categoría</span>
                 </h2>
                 <div class="categories-grid">
-                    <!-- Perfumes para Dama -->
                     <div class="category-card" @click="filterByCategory('Mujer')">
                         <div class="category-image">
                             <img src="./ImagenesPerfumes/Perfumes_Dama.png" alt="Perfumes para Dama" loading="lazy">
@@ -512,8 +432,6 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Perfumes para Caballero -->
                     <div class="category-card" @click="filterByCategory('Hombre')">
                         <div class="category-image">
                             <img src="./ImagenesPerfumes/Perfumes_Caballero.png" alt="Perfumes para Caballero" loading="lazy">
@@ -522,8 +440,6 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Árabes (Hombre) -->
                     <div class="category-card" @click="filterByCategoryAdvanced('Hombre', 'Árabes', 'ArabesHombre')">
                         <div class="category-image">
                             <img src="./ImagenesPerfumes/Perfumes_ArabeHombre.png" alt="Perfumes Árabes Hombre" loading="lazy">
@@ -532,8 +448,6 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Diseñador -->
                     <div class="category-card" @click="filterByCategoryAdvanced(null, 'Diseñador', 'Disenador')">
                         <div class="category-image">
                             <img src="./ImagenesPerfumes/DISEÑADORSI.PNG" alt="Perfumes Diseñador" loading="lazy">
@@ -542,8 +456,6 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Nicho -->
                     <div class="category-card" @click="filterByCategoryAdvanced(null, 'Nicho', 'Nicho')">
                         <div class="category-image">
                             <img src="./ImagenesPerfumes/NICHO.PNG" alt="Perfumes Nicho" loading="lazy">
@@ -552,8 +464,6 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Árabes de Mujer -->
                     <div class="category-card" @click="filterByCategoryAdvanced('Mujer', 'Árabes', 'ArabesMujer')">
                         <div class="category-image">
                             <img src="./ImagenesPerfumes/ARABEMUJER.PNG" alt="Perfumes Árabes Mujer" loading="lazy">
@@ -565,8 +475,6 @@
                 </div>
             </div>
         </section>
-
-        <!-- SECCIÓN DE MARCAS -->
         <section class="brands-section" v-show="!searchTerm && !showFavoritesView && !selectedPerfume && !showComingSoonView && selectedCategory === null && selectedPublico === null">
             <div class="container">
                 <h2 class="brands-title">ALGUNAS DE NUESTRAS MARCAS</h2>
@@ -574,7 +482,6 @@
                 
                 <div class="brands-carousel-wrapper">
                     <div class="brands-carousel">
-                        <!-- Primera fila de marcas -->
                         <div class="brands-track brands-track-1">
                             <div class="brand-item">
                                 <div class="brand-logo">CHANEL</div>
@@ -594,7 +501,6 @@
                             <div class="brand-item">
                                 <div class="brand-logo">ARMAF</div>
                             </div>
-                            <!-- Duplicado para loop infinito -->
                             <div class="brand-item">
                                 <div class="brand-logo">CHANEL</div>
                             </div>
@@ -614,8 +520,6 @@
                                 <div class="brand-logo">ARMAF</div>
                             </div>
                         </div>
-                        
-                        <!-- Segunda fila de marcas (dirección inversa) -->
                         <div class="brands-track brands-track-2">
                             <div class="brand-item">
                                 <div class="brand-logo">MONTBLANC</div>
@@ -635,7 +539,6 @@
                             <div class="brand-item">
                                 <div class="brand-logo">AFNAN</div>
                             </div>
-                            <!-- Duplicado para loop infinito -->
                             <div class="brand-item">
                                 <div class="brand-logo">YARA</div>
                             </div>
@@ -682,97 +585,42 @@
 
                 <div v-else-if="!showFavoritesView && !selectedPerfume">
                     <section class="products-section" aria-labelledby="products-title">
+                        <div v-if="selectedCategory || selectedPublico || selectedTipo" class="mb-4 md:mb-6 flex justify-start animate-fade-in">
+                            <button @click="clearSearch" 
+                                    class="group flex items-center gap-2 md:gap-3 px-3 py-2 md:px-6 md:py-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-primary/50 rounded-lg md:rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/20">
+                                <i class="bi bi-arrow-left text-primary group-hover:-translate-x-1 transition-transform text-base md:text-lg"></i>
+                                <span class="text-white text-sm md:text-base font-medium">Volver al catálogo</span>
+                            </button>
+                        </div>
+                        
                         <h2 id="products-title" class="section-title-modern">
-                            {{ selectedCategory ? getCategoryTitle(selectedCategory) : 'LO MÁS NUEVO' }}
+                            {{ selectedCategory ? getCategoryTitle(selectedCategory) : 'NUESTRO CATÁLOGO' }}
                         </h2>
                         <p class="section-subtitle">Conoce nuestro catálogo de productos recién llegados</p>
 
                         <div v-if="filteredPerfumes.length > 0" class="products-grid-modern">
                             <template v-for="(perfume, index) in filteredPerfumes">
-                                <!-- Sección divisoria especial para Diseñador - Tailwind Design -->
-                                <div v-if="index === 13 && selectedCategory === 'Disenador'" :key="'divider-disenador-' + index" class="col-span-full my-8">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-0 bg-gradient-to-r from-pink-950 via-black to-pink-950 rounded-2xl overflow-hidden border border-pink-500/20 shadow-2xl">
-                                        <!-- Imagen -->
-                                        <div class="relative h-64 md:h-64 overflow-hidden">
-                                            <img src="./ImagenesPerfumes/Perfumes_Dama.png" 
-                                                 alt="Perfumes para Mujeres" 
-                                                 class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-500">
-                                            <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div>
-                                        </div>
-                                        
-                                        <!-- Texto -->
-                                        <div class="flex flex-col items-center justify-center p-8 md:p-12 text-center">
-                                            <h2 class="font-display text-3xl md:text-4xl font-normal text-white mb-2 tracking-widest">
-                                                PERFUMES PARA
-                                            </h2>
-                                            <h2 class="font-display text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-400 via-rose-400 to-pink-400 bg-clip-text text-transparent mb-3 tracking-wider">
-                                                MUJERES
-                                            </h2>
-                                            <p class="text-sm text-gray-400 tracking-wide">
-                                                Conoce nuestro catálogo de perfumes para mujer de diseñador
-                                            </p>
-                                        </div>
+                                <div v-if="shouldShowCollectionDivider(index)" :key="'divider-collection-' + perfume.coleccion + '-' + index" class="col-span-full my-8">
+                                    <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl cursor-pointer group transition-all duration-300 hover:shadow-primary/30 hover:scale-[1.02]">
+                                        <img :src="getCollectionTitle(perfume.coleccion).imagen" 
+                                             :alt="getCollectionTitle(perfume.coleccion).titulo" 
+                                             class="w-full h-auto object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-110">
+                                        <!-- Overlay con efecto de brillo -->
+                                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/0 to-transparent group-hover:via-white/20 transition-all duration-700 transform -translate-x-full group-hover:translate-x-full"></div>
                                     </div>
                                 </div>
-                                
-                                <!-- Sección divisoria después de 4 productos (categorías normales) - Tailwind Design -->
-                                <div v-if="index === 4 && selectedCategory !== 'Disenador'" :key="'divider-' + index" class="col-span-full my-8">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-0 bg-gradient-to-r from-gray-900 via-black to-gray-900 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-                                        <!-- Imagen -->
-                                        <div class="relative h-64 md:h-64 overflow-hidden">
-                                            <img src="./ImagenesPerfumes/CATEGORIA.PNG" 
-                                                 alt="Perfumes Destacados" 
-                                                 class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-500">
-                                            <div class="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div>
-                                        </div>
-                                        
-                                        <!-- Texto -->
-                                        <div class="flex flex-col items-center justify-center p-8 md:p-12 text-center">
-                                            <h2 class="font-display text-3xl md:text-4xl font-normal text-white mb-2 tracking-widest">
-                                                LOS MÁS
-                                            </h2>
-                                            <h2 class="font-display text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent mb-3 tracking-wider">
-                                                VENDIDOS
-                                            </h2>
-                                            <p class="text-sm text-gray-400 tracking-wide">
-                                                Conoce nuestro catálogo de perfumes más vendidos
-                                            </p>
-                                        </div>
+                                <div v-if="shouldShowGenderDivider(index)" :key="'divider-disenador-' + index" class="col-span-full my-8">
+                                    <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl cursor-pointer group transition-all duration-300 hover:shadow-pink-500/30 hover:scale-[1.02]">
+                                        <img src="./ImagenesPerfumes/SEPARADOR_MUJER.jpg" 
+                                             alt="Perfumes para Mujeres" 
+                                             class="w-full h-auto object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-110">
+                                        <!-- Overlay con efecto de brillo -->
+                                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/0 to-transparent group-hover:via-white/20 transition-all duration-700 transform -translate-x-full group-hover:translate-x-full"></div>
                                     </div>
                                 </div>
-                                
-                                <!-- Sección divisoria después de 8 productos más (categorías normales) - Tailwind Design -->
-                                <div v-if="index === 12 && selectedCategory !== 'Disenador'" :key="'divider2-' + index" class="col-span-full my-8">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-0 bg-gradient-to-r from-amber-950 via-black to-amber-950 rounded-2xl overflow-hidden border border-amber-500/20 shadow-2xl">
-                                        <!-- Texto -->
-                                        <div class="flex flex-col items-center justify-center p-8 md:p-12 text-center order-2 md:order-1">
-                                            <h2 class="font-display text-3xl md:text-4xl font-normal text-white mb-2 tracking-widest">
-                                                PERFUMES
-                                            </h2>
-                                            <h2 class="font-display text-4xl md:text-5xl font-bold bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-400 bg-clip-text text-transparent mb-3 tracking-wider">
-                                                ÁRABES
-                                            </h2>
-                                            <p class="text-sm text-gray-400 tracking-wide">
-                                                Conoce nuestro catálogo de perfumes árabes
-                                            </p>
-                                        </div>
-                                        
-                                        <!-- Imagen -->
-                                        <div class="relative h-64 md:h-64 overflow-hidden order-1 md:order-2">
-                                            <img src="./ImagenesPerfumes/ARABES.PNG" 
-                                                 alt="Perfumes Árabes" 
-                                                 class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-500">
-                                            <div class="absolute inset-0 bg-gradient-to-l from-black/50 to-transparent"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Product Card - Tailwind Design -->
                                 <article @click="showPerfumeDetail(perfume)"
                                          class="group relative bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1"
                                          :style="{ 'animation-delay': (index * 50) + 'ms' }">
-                                    
-                                    <!-- Badges -->
                                     <div class="absolute top-2 left-2 z-10 flex flex-col gap-2">
                                         <span v-if="perfume.descuento_porcentaje > 0" 
                                               class="px-2 py-1 bg-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center w-12 h-12 animate-pulse">
@@ -783,15 +631,11 @@
                                             NUEVO
                                             </span>
                                         </div>
-                                        
-                                    <!-- Botón Favorito -->
                                     <button @click.stop="toggleFavorite(perfume)"
                                             class="absolute top-2 right-2 z-10 p-2 bg-black/40 backdrop-blur-sm rounded-full transition-all duration-300 hover:bg-black/60 hover:scale-110"
                                             :class="isFavorite(perfume) ? 'text-red-500' : 'text-white'">
                                         <i class="text-xl" :class="isFavorite(perfume) ? 'bi-heart-fill' : 'bi-heart'"></i>
                                         </button>
-                                    
-                                    <!-- Imagen -->
                                     <div class="relative aspect-square bg-white/5 overflow-hidden">
                                         <img :src="perfume.imagen_url" 
                                              :alt="`${perfume.nombre} - ${perfume.marca}`"
@@ -799,20 +643,13 @@
                                              loading="lazy"
                                              @error="handleImageError">
                                     </div>
-                                    
-                                    <!-- Info -->
                                     <div class="p-4 space-y-2">
-                                        <!-- Marca -->
                                         <p class="text-xs font-medium text-primary uppercase tracking-wider">
                                             {{ perfume.marca }}
                                         </p>
-
-                                        <!-- Nombre -->
                                         <h3 class="text-base font-semibold text-white line-clamp-2 min-h-[3rem]">
                                             {{ perfume.nombre }}
                                         </h3>
-
-                                        <!-- Tags -->
                                         <div class="flex items-center gap-2 text-xs">
                                             <span class="px-2 py-1 rounded-full"
                                                   :class="{
@@ -824,8 +661,6 @@
                                             </span>
                                             <span class="text-gray-400">{{ perfume.mililitros }}ml</span>
                                         </div>
-
-                                        <!-- Precio -->
                                         <div class="flex items-center justify-between pt-2">
                                             <div class="flex flex-col">
                                                 <span v-if="perfume.descuento_porcentaje > 0" 
@@ -837,8 +672,6 @@
                                                 </span>
                                                 <span class="text-xs text-gray-400">MXN</span>
                                         </div>
-                                        
-                                            <!-- Botón Carrito -->
                                             <button @click.stop="addToCart(perfume, 1, $event)"
                                                     class="p-2.5 bg-primary hover:bg-accent text-black rounded-full transition-all duration-300 hover:scale-110 hover:rotate-12">
                                                 <i class="bi bi-cart-plus-fill text-base"></i>
@@ -949,8 +782,6 @@
                         </div>
                     </section>
                 </div>
-
-                <!-- Vista Dedicada del Perfume - Tailwind Design -->
                 <div v-else-if="selectedPerfume" class="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black py-8 animate-fade-in">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <!-- Botón Volver -->

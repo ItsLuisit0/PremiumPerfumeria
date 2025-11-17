@@ -2,16 +2,13 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Configuración para Cloudinary (opcional)
 let cloudinary, cloudinaryStorage;
 let useCloudinary = false;
 
 try {
-    // Intentar cargar Cloudinary si está disponible
     cloudinary = require('cloudinary').v2;
     const { CloudinaryStorage } = require('multer-storage-cloudinary');
     
-    // Verificar si hay credenciales de Cloudinary
     if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
         cloudinary.config({
             cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -29,15 +26,9 @@ try {
         });
         
         useCloudinary = true;
-        console.log('✅ Cloudinary configurado correctamente');
-    } else {
-        console.log('⚠️ Cloudinary no configurado - usando almacenamiento local');
-    }
-} catch (error) {
-    console.log('ℹ️ Cloudinary no disponible - usando almacenamiento local');
-}
+    } else {}
+} catch (error) {}
 
-// Configurar almacenamiento local como fallback
 const localStorage = multer.diskStorage({
     destination: function (req, file, cb) {
         const uploadPath = path.join(__dirname, '../../..', 'docs', 'ImagenesPerfumes');
@@ -74,14 +65,12 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-// Configurar multer (usa Cloudinary si está disponible, sino local)
 const upload = multer({
     storage: useCloudinary ? cloudinaryStorage : localStorage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB máximo
+    limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: fileFilter
 });
 
-// Controlador para subir imagen
 exports.uploadImage = async (req, res) => {
     try {
         if (!req.file) {
@@ -91,31 +80,17 @@ exports.uploadImage = async (req, res) => {
             });
         }
         
-        console.log('📤 Archivo recibido:', {
-            fieldname: req.file.fieldname,
-            originalname: req.file.originalname,
-            filename: req.file.filename,
-            path: req.file.path,
-            size: req.file.size
-        });
-        
         let imagenUrl;
         
         if (useCloudinary) {
-            // Cloudinary devuelve la URL completa en req.file.path
             imagenUrl = req.file.path || req.file.url;
             
-            // Si por alguna razón no está la URL completa, construirla
             if (!imagenUrl || !imagenUrl.startsWith('http')) {
                 const publicId = req.file.filename || req.file.public_id;
                 imagenUrl = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${publicId}`;
             }
-            
-            console.log('✅ Imagen subida a Cloudinary:', imagenUrl);
         } else {
-            // Almacenamiento local - ruta relativa
             imagenUrl = `ImagenesPerfumes/${req.file.filename}`;
-            console.log('✅ Imagen guardada localmente:', imagenUrl);
         }
         
         res.json({
@@ -129,7 +104,6 @@ exports.uploadImage = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('❌ Error al subir imagen:', error);
         res.status(500).json({
             success: false,
             message: 'Error al subir la imagen',
@@ -138,10 +112,8 @@ exports.uploadImage = async (req, res) => {
     }
 };
 
-// Middleware de multer para usar en las rutas
 exports.uploadMiddleware = upload.single('imagen');
 
-// Eliminar imagen
 exports.deleteImage = async (req, res) => {
     try {
         const { filename } = req.params;
@@ -155,7 +127,6 @@ exports.deleteImage = async (req, res) => {
         
         const imagePath = path.join(__dirname, '../../..', 'docs', 'ImagenesPerfumes', filename);
         
-        // Verificar si el archivo existe
         if (fs.existsSync(imagePath)) {
             fs.unlinkSync(imagePath);
             res.json({
@@ -169,7 +140,6 @@ exports.deleteImage = async (req, res) => {
             });
         }
     } catch (error) {
-        console.error('Error al eliminar imagen:', error);
         res.status(500).json({
             success: false,
             message: 'Error al eliminar la imagen',

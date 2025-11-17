@@ -16,10 +16,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Confiar en proxies (Railway, Render, etc)
 if (NODE_ENV === 'production') {
-    app.set('trust proxy', 1); // Confiar en el primer proxy
-    console.log('✅ Trust proxy habilitado para producción');
+    app.set('trust proxy', 1);
 }
 
 // Configuración de CORS según el entorno
@@ -38,30 +36,18 @@ const allowedOrigins = process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
     : (NODE_ENV === 'production' ? defaultProdOrigins : defaultDevOrigins);
 
-console.log('🌐 Orígenes CORS permitidos:', allowedOrigins);
-
-if (NODE_ENV === 'production' && !process.env.CORS_ORIGIN) {
-    console.log('📝 Usando orígenes CORS por defecto para producción');
-    console.log('💡 Puedes configurar CORS_ORIGIN en las variables de entorno para personalizar');
-}
-
 app.use(cors({
     origin: function (origin, callback) {
-        // Permitir solicitudes sin origen en desarrollo
         if (!origin && NODE_ENV === 'development') {
             return callback(null, true);
         }
         
-        // En producción, permitir requests sin origen (healthchecks de Railway, etc)
         if (!origin && NODE_ENV === 'production') {
-            console.log('✅ CORS: Request sin origen permitido (healthcheck)');
             return callback(null, true);
         }
         
-        // Verificar si el origen está en la lista permitida
         if (allowedOrigins.indexOf(origin) === -1) {
             const msg = 'La política de CORS para este sitio no permite acceso desde el origen especificado.';
-            console.warn('❌ CORS bloqueado para origen:', origin);
             return callback(new Error(msg), false);
         }
         
@@ -72,7 +58,6 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// ===== CONFIGURACIÓN HELMET PARA RECURSOS CRUZADOS =====
 app.use(helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
@@ -85,7 +70,6 @@ if (NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
 
-// ===== RATE LIMITING =====
 if (NODE_ENV === 'development') {
     app.use(rateLimit({
         windowMs: 1 * 60 * 1000, // 1 minuto
@@ -96,27 +80,24 @@ if (NODE_ENV === 'development') {
         }
     }));
 } else {
-    // Producción: más permisivo para múltiples usuarios
     app.use(rateLimit({
-        windowMs: 15 * 60 * 1000, // 15 minutos
-        max: 1000, // 1000 requests por 15 minutos (aprox 67 req/min)
-        standardHeaders: true, // Retorna info de rate limit en headers `RateLimit-*`
-        legacyHeaders: false, // Deshabilita headers `X-RateLimit-*`
+        windowMs: 15 * 60 * 1000,
+        max: 1000,
+        standardHeaders: true,
+        legacyHeaders: false,
         message: { 
             success: false, 
             message: 'Demasiadas solicitudes. Por favor, intenta más tarde.' 
         },
-        // Excluir healthchecks del rate limit
         skip: (req) => req.path === '/health' || req.path === '/'
     }));
 }
 
-// ===== SERVIR IMÁGENES CON CONFIGURACIÓN CORS =====
 const staticOptions = {
     setHeaders: (res, path) => {
         res.set('Access-Control-Allow-Origin', '*');
         res.set('Cross-Origin-Resource-Policy', 'cross-origin');
-        res.set('Cache-Control', 'public, max-age=86400'); // Cache de 1 día
+        res.set('Cache-Control', 'public, max-age=86400');
     }
 };
 
@@ -125,13 +106,10 @@ app.use('/ImagenesPerfumes', express.static(
     staticOptions
 ));
 
-// ===== RUTAS DE LA API =====
-
-// Ruta raíz
 app.get('/', (req, res) => {
     res.json({
         success: true,
-        message: '🚀 API de Perfumería Elegancia',
+        message: 'API de Perfumeria Elegancia',
         version: '1.0.0',
         endpoints: {
             'GET /api/perfumes': 'Todos los perfumes',
@@ -147,22 +125,20 @@ app.get('/', (req, res) => {
     });
 });
 
-// Health check
 app.get('/health', (req, res) => {
     res.json({
         success: true,
-        message: 'Servidor funcionando correctamente ✅',
+        message: 'Servidor funcionando correctamente',
         database: 'Conectada',
         environment: NODE_ENV
     });
 });
 
-// Info (solo desarrollo)
 if (NODE_ENV === 'development') {
     app.get('/api/info', (req, res) => {
         res.json({
-            name: 'Perfumería Elegancia API',
-            status: '🟢 En línea',
+            name: 'Perfumeria Elegancia API',
+            status: 'En linea',
             cors: {
                 allowedOrigins: ['http://127.0.0.1:5500', 'http://localhost:3000', 'http://localhost:8080'],
                 staticFiles: 'Configurados con CORS'
@@ -171,13 +147,9 @@ if (NODE_ENV === 'development') {
     });
 }
 
-// Rutas principales
 app.use('/api/perfumes', perfumeRoutes);
 app.use('/api/admin', adminRoutes);
 
-// ===== MANEJO DE ERRORES =====
-
-// Rutas no encontradas
 app.use('*', (req, res) => {
     res.status(404).json({
         success: false,
@@ -186,15 +158,11 @@ app.use('*', (req, res) => {
     });
 });
 
-// Error handler global
 app.use((error, req, res, next) => {
-    console.error('Error:', error.message);
-    
-    // Manejar errores CORS específicos
     if (error.message.includes('CORS')) {
         return res.status(403).json({
             success: false,
-            message: 'Error de política de origen cruzado (CORS)'
+            message: 'Error de politica de origen cruzado (CORS)'
         });
     }
     
@@ -204,20 +172,11 @@ app.use((error, req, res, next) => {
     });
 });
 
-// ===== INICIALIZACIÓN =====
 testConnection()
     .then(() => {
-        app.listen(PORT, () => {
-            console.log(`
-🚀 Servidor iniciado en puerto ${PORT}
-📍 http://localhost:${PORT}
-🌍 Ambiente: ${NODE_ENV}
-📁 Serviendo imágenes desde: ${path.join(__dirname, 'ImagenesPerfumes')}
-            `);
-        });
+        app.listen(PORT, () => {});
     })
     .catch(error => {
-        console.error('❌ Error con la base de datos:', error.message);
         process.exit(1);
     });
 

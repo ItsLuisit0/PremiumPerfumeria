@@ -4,7 +4,6 @@ const rateLimit = require('express-rate-limit');
 const perfumeController = require('../controllers/perfumeController');
 const reviewController = require('../controllers/reviewController');
 
-// Middleware de validación básico
 const validateId = (req, res, next) => {
     const { id } = req.params;
     
@@ -22,12 +21,6 @@ const validateReview = (req, res, next) => {
     const { usuario, comentario, calificacion } = req.body;
     const errors = [];
 
-    // Log solo en desarrollo
-    if (process.env.NODE_ENV === 'development') {
-        console.log('🔍 Validando reseña:', { usuario, comentario, calificacion });
-    }
-
-    // Validar usuario
     if (!usuario || typeof usuario !== 'string') {
         errors.push('El nombre es obligatorio');
     } else if (usuario.trim().length < 2) {
@@ -36,7 +29,6 @@ const validateReview = (req, res, next) => {
         errors.push('El nombre no puede exceder 50 caracteres');
     }
 
-    // Validar comentario
     if (!comentario || typeof comentario !== 'string') {
         errors.push('El comentario es obligatorio');
     } else if (comentario.trim().length < 10) {
@@ -45,7 +37,6 @@ const validateReview = (req, res, next) => {
         errors.push('El comentario no puede exceder 500 caracteres');
     }
 
-    // Validar calificación
     const calificacionNum = Number(calificacion);
     if (!calificacion) {
         errors.push('La calificación es obligatoria');
@@ -58,25 +49,18 @@ const validateReview = (req, res, next) => {
     }
 
     if (errors.length > 0) {
-        if (process.env.NODE_ENV === 'development') {
-            console.log('❌ Errores de validación:', errors);
-        }
         return res.status(400).json({
             success: false,
             errors: errors
         });
     }
 
-    if (process.env.NODE_ENV === 'development') {
-        console.log('✅ Validación exitosa');
-    }
     next();
 };
 
-// Rate limiter para la obtención de reseñas
 const getReviewsLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 100, // Límite de 100 solicitudes por ventana por IP
+    windowMs: 15 * 60 * 1000,
+    max: 100,
     message: {
         success: false,
         message: 'Demasiadas solicitudes para ver reseñas. Por favor, intenta más tarde.'
@@ -85,19 +69,12 @@ const getReviewsLimiter = rateLimit({
     legacyHeaders: false, 
 });
 
-// ===== RUTAS DE PERFUMES =====
 router.get('/', perfumeController.getAllPerfumes);
 router.get('/:id', validateId, perfumeController.getPerfumeById);
 
-// ===== RUTAS DE RESEÑAS =====
 router.get('/:id/reviews', validateId, getReviewsLimiter, reviewController.getReviewsByPerfumeId);
 router.post('/:id/reviews', validateId, validateReview, reviewController.addReview);
 
-// ===== RUTAS ADICIONALES (COMENTADAS POR AHORA) =====
-// router.get('/brands/list', perfumeController.getPerfumeBrands);
-// router.get('/stats/overview', perfumeController.getPerfumeStats);
-
-// Manejo de rutas no encontradas en este router
 router.use('*', (req, res) => {
     res.status(404).json({
         success: false,

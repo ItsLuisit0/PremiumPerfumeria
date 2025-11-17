@@ -29,6 +29,7 @@ const defaultDevOrigins = [
 ];
 
 const defaultProdOrigins = [
+    'https://perfumeriapremium-production.up.railway.app',
     'https://premiumperfumeria.onrender.com'
 ];
 
@@ -174,9 +175,22 @@ app.use((error, req, res, next) => {
 
 testConnection()
     .then(() => {
-        app.listen(PORT, () => {});
+        app.listen(PORT, () => {
+            if (NODE_ENV === 'development') {
+                console.log(`Servidor iniciado en puerto ${PORT}`);
+            }
+        });
     })
     .catch(error => {
+        console.error('ERROR CRITICO - No se pudo conectar a la base de datos:', error.message);
+        console.error('Variables de entorno disponibles:', {
+            MYSQL_HOST: process.env.MYSQL_HOST ? 'SET' : 'NOT SET',
+            MYSQL_USER: process.env.MYSQL_USER ? 'SET' : 'NOT SET',
+            MYSQL_PASSWORD: process.env.MYSQL_PASSWORD ? 'SET' : 'NOT SET',
+            MYSQL_DATABASE: process.env.MYSQL_DATABASE ? 'SET' : 'NOT SET',
+            MYSQL_URL: process.env.MYSQL_URL ? 'SET' : 'NOT SET',
+            NODE_ENV: NODE_ENV
+        });
         process.exit(1);
     });
 

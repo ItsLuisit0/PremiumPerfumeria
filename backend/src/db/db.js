@@ -22,9 +22,11 @@ const dbConfig = {
 async function testConnection() {
     try {
         const connection = await pool.getConnection();
+        console.log('Conexion a base de datos exitosa');
         connection.release();
     } catch (error) {
-        process.exit(1);
+        console.error('Error de conexion a base de datos:', error.message);
+        throw error;
     }
 }
 

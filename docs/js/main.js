@@ -110,7 +110,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         (perfume.tipo && perfume.tipo.toLowerCase().includes(searchLower))
                     );
                 }
-                if (!this.selectedPublico && !this.selectedTipo && !this.searchTerm && !this.selectedCategory) {
+                const isHomeView = !this.selectedPublico && !this.selectedTipo && !this.searchTerm && !this.selectedCategory && !this.selectedColeccion;
+
+                if (isHomeView) {
                     const ordenColecciones = {
                         'arabes_destacados': 1,
                         'disenador_destacados': 2,
@@ -139,6 +141,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         const ordenPublico = { 'Hombre': 1, 'Unisex': 2, 'Mujer': 3 };
                         return (ordenPublico[a.publico] || 99) - (ordenPublico[b.publico] || 99);
                     });
+                }
+
+                const isDesignerWomenView =
+                    (this.selectedCategory === 'Disenador' && (!this.selectedPublico || this.selectedPublico === 'Mujer')) ||
+                    (this.selectedPublico === 'Mujer' && this.selectedTipo && this.selectedTipo.toLowerCase().includes('diseñ')) ||
+                    (this.selectedColeccion === 'disenador_mujer_destacados') ||
+                    isHomeView;
+
+                if (isDesignerWomenView) {
+                    this.applyDesignerWomenOrdering(filtered);
                 }
                 
                 return filtered;
@@ -488,6 +500,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 return titles[category] || 'NUESTRO CATÁLOGO';
             },
             getCollectionTitle(coleccion) {
+                if (!coleccion) {
+                    return null;
+                }
+
+                const buildDivider = (options = {}) => ({
+                    titulo: options.titulo || 'COLECCIÓN DESTACADA',
+                    subtitulo: options.subtitulo || 'Descubre nuestra curaduría especial',
+                    imagen: options.imagen || './ImagenesPerfumes/SEPARADOR_ARABESH.jpg',
+                    gradiente: options.gradiente || 'from-gray-900 via-black to-gray-900',
+                    color: options.color || 'from-primary via-amber-500 to-primary',
+                    border: options.border || 'border-white/10'
+                });
+
+                if (coleccion.startsWith('@')) {
+                    const fileName = coleccion.substring(1);
+                    return buildDivider({
+                        imagen: `./ImagenesPerfumes/${fileName}`
+                    });
+                }
+
                 const titles = {
                     'arabes_destacados': { 
                         titulo: 'PERFUMES ÁRABES',
@@ -578,7 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         border: 'border-pink-500/20'
                     }
                 };
-                return titles[coleccion] || null;
+                return titles[coleccion] || buildDivider();
             },
             shouldShowCollectionDivider(index) {
                 if (this.selectedPublico || this.selectedTipo || this.searchTerm || this.selectedCategory) {
@@ -683,6 +715,39 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.body.style.overflow = '';
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+            normalizePerfumeName(name) {
+                if (!name) return '';
+                return name
+                    .toLowerCase()
+                    .replace(/[\u2013\u2014]/g, '-')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            },
+            applyDesignerWomenOrdering(list) {
+                if (!Array.isArray(list)) return;
+
+                const fizzKey = this.normalizePerfumeName('Cheap and Chic - Hippy Fizz');
+                const petalsKey = this.normalizePerfumeName('Cheap and Chic – Chic Petals');
+
+                let fizzIndex = list.findIndex(perfume => this.normalizePerfumeName(perfume.nombre) === fizzKey);
+                let petalsIndex = list.findIndex(perfume => this.normalizePerfumeName(perfume.nombre) === petalsKey);
+
+                if (fizzIndex === -1 || petalsIndex === -1) {
+                    return;
+                }
+
+                if (petalsIndex === fizzIndex + 1) {
+                    return;
+                }
+
+                const [petalsItem] = list.splice(petalsIndex, 1);
+
+                if (petalsIndex < fizzIndex) {
+                    fizzIndex -= 1;
+                }
+
+                list.splice(fizzIndex + 1, 0, petalsItem);
             },
             async submitReview() {
                 if (!this.selectedPerfume) {

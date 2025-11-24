@@ -123,11 +123,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     };
                     
                     filtered.sort((a, b) => {
-                        const coleccionA = a.coleccion || 'null';
-                        const coleccionB = b.coleccion || 'null';
+                        const metaA = this.parseColeccionValue(a.coleccion);
+                        const metaB = this.parseColeccionValue(b.coleccion);
+                        const keyA = this.normalizeColeccionKey(metaA.key || 'null');
+                        const keyB = this.normalizeColeccionKey(metaB.key || 'null');
                         
-                        const ordenA = ordenColecciones[coleccionA] || 999;
-                        const ordenB = ordenColecciones[coleccionB] || 999;
+                        const ordenA = (metaA.order !== null && metaA.order !== undefined)
+                            ? metaA.order
+                            : (ordenColecciones[keyA] || 999);
+                        const ordenB = (metaB.order !== null && metaB.order !== undefined)
+                            ? metaB.order
+                            : (ordenColecciones[keyB] || 999);
                         
                         if (ordenA !== ordenB) {
                             return ordenA - ordenB;
@@ -146,8 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isDesignerWomenView =
                     (this.selectedCategory === 'Disenador' && (!this.selectedPublico || this.selectedPublico === 'Mujer')) ||
                     (this.selectedPublico === 'Mujer' && this.selectedTipo && this.selectedTipo.toLowerCase().includes('diseñ')) ||
-                    (this.selectedColeccion === 'disenador_mujer_destacados') ||
-                    isHomeView;
+                    (this.normalizeColeccionKey(this.selectedColeccion) === 'disenador_mujer_destacados') ||
+                    (isHomeView && filtered.some(perfume => this.normalizeColeccionKey(perfume.coleccion) === 'disenador_mujer_destacados'));
 
                 if (isDesignerWomenView) {
                     this.applyDesignerWomenOrdering(filtered);
@@ -500,25 +506,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return titles[category] || 'NUESTRO CATÁLOGO';
             },
             getCollectionTitle(coleccion) {
-                if (!coleccion) {
-                    return null;
-                }
-
-                const buildDivider = (options = {}) => ({
-                    titulo: options.titulo || 'COLECCIÓN DESTACADA',
-                    subtitulo: options.subtitulo || 'Descubre nuestra curaduría especial',
-                    imagen: options.imagen || './ImagenesPerfumes/SEPARADOR_ARABESH.jpg',
-                    gradiente: options.gradiente || 'from-gray-900 via-black to-gray-900',
-                    color: options.color || 'from-primary via-amber-500 to-primary',
-                    border: options.border || 'border-white/10'
-                });
-
-                if (coleccion.startsWith('@')) {
-                    const fileName = coleccion.substring(1);
-                    return buildDivider({
-                        imagen: `./ImagenesPerfumes/${fileName}`
-                    });
-                }
+                const meta = this.parseColeccionValue(coleccion);
+                const key = this.normalizeColeccionKey(meta.key);
 
                 const titles = {
                     'arabes_destacados': { 
@@ -529,7 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         color: 'from-amber-400 via-yellow-500 to-amber-400',
                         border: 'border-amber-500/20'
                     },
-                    'Lattafa': { 
+                    'lattafa': { 
                         titulo: 'COLECCIÓN LATTAFA',
                         subtitulo: 'Fragancias árabes de lujo',
                         imagen: './ImagenesPerfumes/SEPARADOR_ARABESH.jpg',
@@ -537,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         color: 'from-amber-400 via-yellow-500 to-amber-400',
                         border: 'border-amber-500/20'
                     },
-                    'Rasasi': {
+                    'rasasi': {
                         titulo: 'COLECCIÓN RASASI',
                         subtitulo: 'El arte de la perfumería oriental',
                         imagen: './ImagenesPerfumes/SEPARADOR_ARABESH.jpg',
@@ -545,7 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         color: 'from-orange-400 via-amber-500 to-orange-400',
                         border: 'border-orange-500/20'
                     },
-                    'Armaf': {
+                    'armaf': {
                         titulo: 'COLECCIÓN ARMAF',
                         subtitulo: 'Elegancia y sofisticación árabe',
                         imagen: './ImagenesPerfumes/SEPARADOR_ARABESH.jpg',
@@ -553,7 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         color: 'from-red-400 via-rose-500 to-red-400',
                         border: 'border-red-500/20'
                     },
-                    'Arabesque': {
+                    'arabesque': {
                         titulo: 'COLECCIÓN ARABESQUE',
                         subtitulo: 'Esencias milenarias del oriente',
                         imagen: './ImagenesPerfumes/SEPARADOR_ARABESH.jpg',
@@ -561,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         color: 'from-yellow-400 via-orange-500 to-yellow-400',
                         border: 'border-yellow-500/20'
                     },
-                    'Diseñador': { 
+                    'diseñador': { 
                         titulo: 'PERFUMES DE DISEÑADOR',
                         subtitulo: 'Elegancia y sofisticación',
                         imagen: './ImagenesPerfumes/SEPARADOR_DISEÑADOR.jpg',
@@ -569,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         color: 'from-blue-400 via-indigo-400 to-blue-400',
                         border: 'border-blue-500/20'
                     },
-                    'Nicho': { 
+                    'nicho': { 
                         titulo: 'PERFUMES DE NICHO',
                         subtitulo: 'Exclusividad y lujo en cada gota',
                         imagen: './ImagenesPerfumes/SEPARADOR_NICHO.jpg',
@@ -610,7 +599,29 @@ document.addEventListener('DOMContentLoaded', () => {
                         border: 'border-pink-500/20'
                     }
                 };
-                return titles[coleccion] || buildDivider();
+
+                const buildDivider = () => ({
+                    titulo: meta.title || 'COLECCIÓN DESTACADA',
+                    subtitulo: meta.subtitle || 'Descubre nuestra curaduría especial',
+                    imagen: this.resolveDividerImage(meta.image) || './ImagenesPerfumes/SEPARADOR_ARABESH.jpg',
+                    gradiente: 'from-gray-900 via-black to-gray-900',
+                    color: 'from-primary via-amber-500 to-primary',
+                    border: 'border-white/10'
+                });
+
+                const divider = titles[key] ? { ...titles[key] } : buildDivider();
+
+                if (meta.image) {
+                    divider.imagen = this.resolveDividerImage(meta.image);
+                }
+                if (meta.title) {
+                    divider.titulo = meta.title;
+                }
+                if (meta.subtitle) {
+                    divider.subtitulo = meta.subtitle;
+                }
+
+                return divider;
             },
             shouldShowCollectionDivider(index) {
                 if (this.selectedPublico || this.selectedTipo || this.searchTerm || this.selectedCategory) {
@@ -623,8 +634,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     return false;
                 }
                 
-                const collectionTitle = this.getCollectionTitle(currentPerfume.coleccion);
-                if (!collectionTitle) {
+                const metaCurrent = this.parseColeccionValue(currentPerfume.coleccion);
+                if (!metaCurrent.key) {
                     return false;
                 }
                 
@@ -633,8 +644,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 const previousPerfume = this.filteredPerfumes[index - 1];
+                const metaPrevious = this.parseColeccionValue(previousPerfume?.coleccion);
                 
-                return currentPerfume.coleccion !== previousPerfume.coleccion;
+                return this.normalizeColeccionKey(metaCurrent.key) !== this.normalizeColeccionKey(metaPrevious.key);
             },
             shouldShowGenderDivider(index) {
                 if (this.selectedCategory !== 'Disenador') {
@@ -715,6 +727,61 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.body.style.overflow = '';
                 }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+            normalizeColeccionKey(value) {
+                if (!value) return '';
+                return value.toString().trim().toLowerCase();
+            },
+            parseColeccionValue(value) {
+                const trimmed = (value || '').toString().trim();
+                const meta = {
+                    raw: trimmed,
+                    key: '',
+                    image: null,
+                    title: null,
+                    subtitle: null,
+                    order: null
+                };
+
+                if (!trimmed) {
+                    return false;
+                }
+                
+                const segments = trimmed.split('|').map(segment => segment.trim()).filter(Boolean);
+
+                if (segments.length > 1) {
+                    meta.key = segments[0];
+                    for (let i = 1; i < segments.length; i++) {
+                        const segment = segments[i];
+                        if (segment.startsWith('@')) {
+                            meta.image = segment;
+                        } else if (!meta.title) {
+                            meta.title = segment;
+                        } else if (!meta.subtitle) {
+                            meta.subtitle = segment;
+                        } else if (meta.order === null && !isNaN(Number(segment))) {
+                            meta.order = Number(segment);
+                        }
+                    }
+                } else {
+                    meta.key = trimmed;
+                    if (trimmed.startsWith('@')) {
+                        meta.image = trimmed;
+                        meta.key = 'dynamic';
+                    }
+                }
+
+                return meta;
+            },
+            resolveDividerImage(image) {
+                if (!image) return null;
+                if (image.startsWith('@')) {
+                    return `./ImagenesPerfumes/${image.replace('@', '')}`;
+                }
+                if (image.startsWith('./') || image.startsWith('/') || image.startsWith('http')) {
+                    return image;
+                }
+                return `./ImagenesPerfumes/${image}`;
             },
             normalizePerfumeName(name) {
                 if (!name) return '';

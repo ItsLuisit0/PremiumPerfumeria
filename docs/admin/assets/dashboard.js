@@ -36,9 +36,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cargar página inicial
     loadEstadisticas();
     
-    // Cargar gráfica
+    // Cargar gráficas
     setTimeout(() => {
         loadChartStockDistribucion();
+        loadChartPerfumesPorCategoria();
     }, 500);
 
     // Event listeners
@@ -101,6 +102,11 @@ function setupEventListeners() {
 
     // Clear filters
     document.getElementById('btnClearFilters')?.addEventListener('click', clearFilters);
+    document.getElementById('goToStockSection')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        navigateTo('stock');
+    });
+
 
     // Enter key en search
     document.getElementById('searchPerfume')?.addEventListener('keypress', function(e) {
@@ -161,6 +167,7 @@ function navigateTo(page) {
         case 'estadisticas':
             loadEstadisticas();
             loadChartStockDistribucion();
+            loadChartPerfumesPorCategoria();
             break;
         case 'perfumes':
             currentPage = 1;
@@ -220,10 +227,39 @@ async function loadEstadisticas() {
     
     if (data && data.success) {
         const stats = data.data;
-        document.getElementById('stat-perfumes').textContent = stats.total_perfumes || 0;
-        document.getElementById('stat-reviews').textContent = stats.total_reviews || 0;
-        document.getElementById('stat-stock').textContent = stats.stock_total || 0;
-        document.getElementById('stat-stock-bajo').textContent = stats.productos_stock_bajo || 0;
+        const perfumesEl = document.getElementById('stat-perfumes');
+        const reviewsEl = document.getElementById('stat-reviews');
+        const stockEl = document.getElementById('stat-stock');
+        const stockBajoEl = document.getElementById('stat-stock-bajo');
+
+        if (perfumesEl) perfumesEl.textContent = stats.total_perfumes || 0;
+        if (reviewsEl) reviewsEl.textContent = stats.total_reviews || 0;
+        if (stockEl) stockEl.textContent = stats.stock_total || 0;
+        if (stockBajoEl) stockBajoEl.textContent = stats.productos_stock_bajo || 0;
+
+        const stockSummaryEl = document.getElementById('stockSummary');
+        const stockBreakdownEl = document.getElementById('stockBreakdown');
+
+        if (stockSummaryEl || stockBreakdownEl) {
+            const productosStockBajo = stats.productos_stock_bajo || 0;
+            const totalPerfumes = stats.total_perfumes || 0;
+            const stockTotal = stats.stock_total || 0;
+            const saludables = Math.max(totalPerfumes - productosStockBajo, 0);
+
+            if (stockSummaryEl) {
+                stockSummaryEl.innerHTML = `
+                    <strong>${productosStockBajo}</strong> referencias están en nivel crítico de inventario.
+                `;
+            }
+
+            if (stockBreakdownEl) {
+                stockBreakdownEl.innerHTML = `
+                    <li>Stock total disponible: <strong>${stockTotal}</strong></li>
+                    <li>Perfumes saludables: <strong>${saludables}</strong></li>
+                    <li>Perfumes con stock bajo: <strong class="text-warning">${productosStockBajo}</strong></li>
+                `;
+            }
+        }
     }
 }
 

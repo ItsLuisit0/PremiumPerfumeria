@@ -40,11 +40,16 @@ exports.getEstadisticasPorCategoria = async (req, res) => {
     try {
         const [stats] = await pool.query(`
             SELECT 
-                publico as categoria, 
-                COUNT(*) as total 
-            FROM perfumes 
-            WHERE activo = TRUE 
+                publico AS categoria,
+                COUNT(*) AS total,
+                SUM(CASE WHEN activo = TRUE THEN 1 ELSE 0 END) AS activos,
+                SUM(CASE WHEN destacado = TRUE THEN 1 ELSE 0 END) AS destacados,
+                SUM(CASE WHEN activo = TRUE THEN stock ELSE 0 END) AS stock_total,
+                ROUND(AVG(precio_minimo), 2) AS precio_promedio,
+                ROUND(AVG(descuento_porcentaje), 2) AS descuento_promedio
+            FROM perfumes
             GROUP BY publico
+            ORDER BY publico
         `);
         
         res.json({

@@ -861,7 +861,9 @@ async function loadChartStockDistribucion() {
     
     if (data && data.success) {
         const stats = data.data;
-        
+        const saludables = Math.max((stats.total_perfumes || 0) - (stats.productos_stock_bajo || 0), 0);
+        const criticos = stats.productos_stock_bajo || 0;
+
         Highcharts.chart('chartStockDistribucion', {
             chart: {
                 type: 'pie',
@@ -876,24 +878,29 @@ async function loadChartStockDistribucion() {
             credits: {
                 enabled: false
             },
+            tooltip: {
+                pointFormat: '<span style="color:{point.color}">\u25CF</span> {point.name}: <b>{point.y}</b>'
+            },
             plotOptions: {
                 pie: {
-                    innerSize: '60%',
+                    innerSize: '65%',
+                    borderWidth: 0,
                     dataLabels: {
                         enabled: true,
-                        format: '{point.name}: {point.y}',
+                        format: '{point.name}<br><b>{point.y}</b>',
                         style: {
                             color: '#f5f5f5',
-                            fontSize: '13px'
+                            fontSize: '12px',
+                            textOutline: 'none'
                         }
                     }
                 }
             },
             series: [{
-                name: 'Cantidad',
+                name: 'Referencias',
                 data: [
-                    { name: 'Stock Normal', y: (stats.total_perfumes - stats.productos_stock_bajo) || 0, color: '#10b981' },
-                    { name: 'Stock Bajo', y: stats.productos_stock_bajo || 0, color: '#ef4444' }
+                    { name: 'Inventario saludable', y: saludables, color: '#22c55e' },
+                    { name: 'Stock bajo', y: criticos, color: '#f87171' }
                 ]
             }]
         });
@@ -901,14 +908,25 @@ async function loadChartStockDistribucion() {
 }
 
 async function loadChartPerfumesPorCategoria() {
-    const data = await apiCall('/admin/estadisticas/categoria');
+    const response = await apiCall('/admin/estadisticas/categoria');
     
-    if (data && data.success) {
-        const categorias = data.data;
+    if (response && response.success) {
+        const categorias = response.data || [];
+
+        if (categorias.length === 0) {
+            document.getElementById('chartPerfumesPorCategoria').innerHTML = '<p class="text-center text-muted mb-0">Sin datos suficientes para graficar</p>';
+            return;
+        }
         
+        const labels = categorias.map(c => c.categoria);
+        const totalSeries = categorias.map(c => Number(c.total) || 0);
+        const activosSeries = categorias.map(c => Number(c.activos) || 0);
+        const destacadosSeries = categorias.map(c => Number(c.destacados) || 0);
+        const stockSeries = categorias.map(c => Number(c.stock_total) || 0);
+        const descuentoProm = categorias.map(c => Number(c.descuento_promedio) || 0);
+
         Highcharts.chart('chartPerfumesPorCategoria', {
             chart: {
-                type: 'column',
                 backgroundColor: 'transparent',
                 style: {
                     fontFamily: 'Montserrat, sans-serif'
@@ -921,38 +939,107 @@ async function loadChartPerfumesPorCategoria() {
                 enabled: false
             },
             xAxis: {
-                categories: categorias.map(c => c.categoria),
+                categories: labels,
+                crosshair: true,
                 labels: {
                     style: {
                         color: '#f5f5f5'
+                    }
+                },
+                lineColor: 'rgba(255,255,255,0.1)'
+            },
+            yAxis: [{
+                title: {
+                    text: 'Cantidad de perfumes',
+                    style: { color: '#f5f5f5' }
+                },
+                labels: {
+                    style: { color: '#f5f5f5' }
+                },
+                gridLineColor: 'rgba(212, 175, 55, 0.1)'
+            }, {
+                title: {
+                    text: 'Stock disponible (unidades)',
+                    style: { color: '#93c5fd' }
+                },
+                labels: {
+                    style: { color: '#93c5fd' }
+                },
+                opposite: true,
+                gridLineWidth: 0
+            }],
+            legend: {
+                align: 'left',
+                verticalAlign: 'top',
+                y: 0,
+                itemStyle: {
+                    color: '#f5f5f5'
+                }
+            },
+            tooltip: {
+                shared: true,
+                formatter: function () {
+                    const point = this.points[0]?.point;
+                    const index = point?.index ?? 0;
+                    const descuento = Number(descuentoProm[index] || 0);
+                    const precio = Number(categorias[index]?.precio_promedio || 0);
+                    return `
+                        <span style="font-size:13px"><b>${labels[index]}</b></span><br/>
+                        ${this.points.map(p => `
+                            <span style="color:${p.color};font-weight:bold">\u25CF</span> ${p.series.name}: <b>${p.y}</b><br/>
+                        `).join('')}
+                        <span style="color:#a5b4fc">\u25CF</span> Precio promedio: <b>$${precio.toFixed(2)}</b><br/>
+                        <span style="color:#fda4af">\u25CF</span> Descuento promedio: <b>${descuento.toFixed(2)}%</b>
+                    `;
+                }
+            },
+            plotOptions: {
+                column: {
+                    borderRadius: 4,
+                    pointPadding: 0.15,
+                    groupPadding: 0.2,
+                    dataLabels: {
+                        enabled: true,
+                        style: {
+                            color: '#fefefe',
+                            textOutline: 'none',
+                            fontSize: '11px'
+                        }
                     }
                 }
             },
-            yAxis: {
-                title: {
-                    text: 'Cantidad',
-                    style: {
-                        color: '#f5f5f5'
-                    }
+            series: [
+                {
+                    name: 'Total por categoría',
+                    type: 'column',
+                    data: totalSeries,
+                    color: '#fbbf24'
                 },
-                labels: {
-                    style: {
-                        color: '#f5f5f5'
-                    }
+                {
+                    name: 'Activos',
+                    type: 'column',
+                    data: activosSeries,
+                    color: '#34d399'
                 },
-                gridLineColor: 'rgba(212, 175, 55, 0.1)'
-            },
-            legend: {
-                enabled: false
-            },
-            series: [{
-                name: 'Perfumes',
-                data: categorias.map(c => ({
-                    y: c.total,
-                    color: c.categoria === 'Hombre' ? '#3b82f6' : 
-                           c.categoria === 'Mujer' ? '#ec4899' : '#D4AF37'
-                }))
-            }]
+                {
+                    name: 'Destacados',
+                    type: 'column',
+                    data: destacadosSeries,
+                    color: '#c084fc'
+                },
+                {
+                    name: 'Stock total (u.)',
+                    type: 'spline',
+                    yAxis: 1,
+                    data: stockSeries,
+                    color: '#60a5fa',
+                    marker: {
+                        lineWidth: 2,
+                        lineColor: '#1d4ed8',
+                        fillColor: '#bfdbfe'
+                    }
+                }
+            ]
         });
     }
 }

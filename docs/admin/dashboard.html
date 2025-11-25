@@ -79,45 +79,89 @@
                 <h2 class="page-title"><i class="bi bi-graph-up me-2"></i>Dashboard</h2>
 
                 <!-- Charts -->
-                <div class="row g-4 mb-4">
-                    <div class="col-12">
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <i class="bi bi-bar-chart-line-fill text-info"></i> Distribución por categoría
+                <div class="row g-4 mb-4 align-items-stretch">
+                    <div class="col-12 col-lg-8">
+                        <div class="chart-card h-100">
+                            <div class="chart-header d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-bar-chart-line-fill text-info"></i> Distribución por categoría</span>
+                                <small class="text-muted">Comparativo de total, activos y destacados</small>
                             </div>
                             <div class="chart-body">
                                 <div id="chartPerfumesPorCategoria" style="height: 420px;"></div>
                             </div>
                         </div>
                     </div>
+                    <div class="col-12 col-lg-4">
+                        <div class="chart-card h-100">
+                            <div class="chart-header">
+                                <i class="bi bi-speedometer2 text-warning"></i> Resumen ejecutivo
+                            </div>
+                            <div class="chart-body">
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary">
+                                    <div>
+                                        <small class="text-muted">Perfumes activos</small>
+                                        <h4 class="mb-0 text-light" id="stat-perfumes">0</h4>
+                                    </div>
+                                    <i class="bi bi-grid-3x3-gap text-warning fs-4"></i>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary">
+                                    <div>
+                                        <small class="text-muted">Reseñas registradas</small>
+                                        <h4 class="mb-0 text-light" id="stat-reviews">0</h4>
+                                    </div>
+                                    <i class="bi bi-chat-left-text text-success fs-4"></i>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary">
+                                    <div>
+                                        <small class="text-muted">Inventario disponible</small>
+                                        <h4 class="mb-0 text-light" id="stat-stock">0</h4>
+                                    </div>
+                                    <i class="bi bi-box-seam text-info fs-4"></i>
+                                </div>
+                                <div class="py-3">
+                                    <small class="text-muted d-block mb-2">Alertas activas</small>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="text-warning mb-0" id="stat-stock-bajo">0</h5>
+                                        <span class="badge bg-warning text-dark">Stock bajo</span>
+                                    </div>
+                                    <p class="text-muted small mt-2 mb-0">
+                                        Mantén esta cifra por debajo del 10% para asegurar disponibilidad constante.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="row g-4">
-                    <div class="col-12">
-                        <div class="chart-card">
+                    <div class="col-12 col-lg-7">
+                        <div class="chart-card h-100">
                             <div class="chart-header">
-                                <i class="bi bi-exclamation-triangle-fill text-warning"></i> Salud del inventario
+                                <i class="bi bi-pie-chart-fill text-warning"></i> Salud del inventario
                             </div>
                             <div class="chart-body">
-                                <div class="row g-4 align-items-center">
-                                    <div class="col-lg-6">
-                                        <div id="chartStockDistribucion" style="height: 320px;"></div>
-                                    </div>
-                                    <div class="col-lg-6">
-                                        <p class="lead text-light mb-3" id="stockSummary">Cargando resumen de stock...</p>
-                                        <ul class="list-unstyled text-muted" id="stockBreakdown">
-                                            <li>Stock total: --</li>
-                                            <li>Productos con stock bajo: --</li>
-                                            <li>Referencias saludables: --</li>
-                                        </ul>
-                                        <p class="text-muted small mb-3">
-                                            Atiende los perfumes con inventario crítico antes de que se agoten para mantener el catálogo completo.
-                                        </p>
-                                        <button class="btn btn-outline-warning" id="goToStockSection">
-                                            <i class="bi bi-box-seam me-2"></i>Ver productos con stock bajo
-                                        </button>
-                                    </div>
+                                <div id="chartStockDistribucion" style="height: 360px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-5">
+                        <div class="chart-card h-100">
+                            <div class="chart-header">
+                                <i class="bi bi-clipboard-data text-info"></i> Acciones sugeridas
+                            </div>
+                            <div class="chart-body">
+                                <p class="lead text-light mb-3" id="stockSummary">Cargando resumen de stock...</p>
+                                <ul class="list-unstyled text-muted mb-4" id="stockBreakdown">
+                                    <li>Stock total: --</li>
+                                    <li>Productos con stock bajo: --</li>
+                                    <li>Referencias saludables: --</li>
+                                </ul>
+                                <div class="alert alert-warning bg-transparent border border-warning-subtle text-warning mb-4">
+                                    Revisa semanalmente los perfumes con menos de 10 unidades y prioriza reposiciones.
                                 </div>
+                                <button class="btn btn-outline-warning w-100" id="goToStockSection">
+                                    <i class="bi bi-box-seam me-2"></i>Ir a Stock Bajo
+                                </button>
                             </div>
                         </div>
                     </div>

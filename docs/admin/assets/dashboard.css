@@ -1,3 +1,8 @@
+.light-on-dark {
+    --text-light: #ffffff;
+    --text-muted: #d1d5db;
+}
+
 :root {
     --primary-gold: #D4AF37;
     --dark-bg: #0a0a0a;
@@ -328,6 +333,21 @@ body {
 
 .chart-body {
     padding: 24px;
+    color: var(--text-light);
+}
+
+.chart-body p,
+.chart-body span,
+.chart-body small,
+.chart-body ul li,
+.chart-body h4,
+.chart-body h5 {
+    color: var(--text-light);
+}
+
+.chart-card .text-muted,
+.filter-card .text-muted {
+    color: rgba(255, 255, 255, 0.7) !important;
 }
 
 .text-gold {
@@ -337,7 +357,8 @@ body {
 /* =============================================
    FILTER CARD
 ============================================= */
-.filter-card {
+.filter-card,
+.chart-card {
     background: linear-gradient(145deg, rgba(26, 26, 26, 0.9), rgba(20, 20, 20, 0.95));
     border: 1px solid var(--border-gold);
     border-radius: 16px;
@@ -846,7 +867,8 @@ body {
         font-size: 24px;
     }
 
-    .filter-card {
+.filter-card,
+.chart-card {
         padding: 16px;
     }
 

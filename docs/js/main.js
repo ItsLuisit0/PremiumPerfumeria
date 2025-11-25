@@ -244,15 +244,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Manejar respuesta con paginación o array directo (retrocompatibilidad)
                     const perfumesData = responseData.data || responseData;
                     
+                    const imageOverrides = {
+                        33: 'ImagenesPerfumes/Cheap_and_Chic_Chic_Petals.jpg'
+                    };
+                    
                     this.perfumes = perfumesData.map(p => {
                         let imagenUrl = p.imagen_url;
+                        
+                        if (imageOverrides[p.id_perfume]) {
+                            imagenUrl = imageOverrides[p.id_perfume];
+                        }
                         
                         if (imagenUrl && imagenUrl.startsWith('http')) {
                             return { ...p, imagen_url: imagenUrl };
                         }
                         
                         if (imagenUrl) {
-                            return { ...p, imagen_url: `./${imagenUrl}` };
+                            const normalized = imagenUrl.startsWith('./') ? imagenUrl : `./${imagenUrl}`;
+                            return { ...p, imagen_url: normalized };
                         }
                         
                         return { ...p, imagen_url: './ImagenesPerfumes/placeholder.svg' };

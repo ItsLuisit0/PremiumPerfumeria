@@ -85,6 +85,15 @@ body {
     line-height: 1.6;
     overflow-x: hidden;
     transition: background-color var(--transition-normal), color var(--transition-normal);
+    position: relative;
+    min-height: 100vh;
+    background-image:
+        radial-gradient(circle at 20% 20%, rgba(212, 175, 55, 0.08), transparent 35%),
+        radial-gradient(circle at 80% 10%, rgba(236, 72, 153, 0.05), transparent 40%),
+        radial-gradient(circle at 50% 80%, rgba(59, 130, 246, 0.06), transparent 45%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.4), transparent 70%);
+    background-size: cover;
+    background-attachment: fixed;
 }
 
 [v-cloak] {
@@ -1065,14 +1074,17 @@ textarea::placeholder {
     display: grid;
     grid-template-columns: 1fr 1fr;
     min-height: 400px;
-    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+    background: linear-gradient(135deg, rgba(245,245,245,0.9) 0%, rgba(232,232,232,0.9) 100%);
     border-radius: 12px;
     overflow: hidden;
     box-shadow: var(--shadow-md);
+    position: relative;
+    animation: dividerParallax 0.6s ease both;
 }
 
 [data-theme="dark"] .divider-content {
-    background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%);
+    background: linear-gradient(135deg, rgba(42,42,42,0.85) 0%, rgba(30,30,30,0.9) 100%);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.45);
 }
 
 .divider-image-side {
@@ -1098,6 +1110,7 @@ textarea::placeholder {
     padding: 60px 40px;
     text-align: center;
     background-color: var(--bg-primary);
+    backdrop-filter: blur(6px);
 }
 
 .divider-title {
@@ -1109,6 +1122,7 @@ textarea::placeholder {
     color: var(--text-primary);
     letter-spacing: 8px;
     text-transform: uppercase;
+    text-shadow: 0 10px 30px rgba(0,0,0,0.18);
 }
 
 .divider-title-bold {
@@ -1120,6 +1134,7 @@ textarea::placeholder {
     color: var(--text-primary);
     letter-spacing: 8px;
     text-transform: uppercase;
+    text-shadow: 0 15px 35px rgba(0,0,0,0.28);
 }
 
 .divider-subtitle {
@@ -1127,6 +1142,20 @@ textarea::placeholder {
     color: var(--text-secondary);
     max-width: 400px;
     line-height: 1.6;
+    text-transform: uppercase;
+    letter-spacing: 0.25rem;
+    opacity: 0.85;
+}
+
+@keyframes dividerParallax {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .section-title-modern {
@@ -3482,6 +3511,7 @@ textarea::placeholder {
         max-height: 34px !important;
         overflow: hidden !important;
         display: -webkit-box !important;
+    line-clamp: 2 !important;
         -webkit-line-clamp: 2 !important;
         -webkit-box-orient: vertical !important;
     }

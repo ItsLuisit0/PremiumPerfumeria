@@ -71,7 +71,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 if (this.selectedPublico) {
-                    filtered = filtered.filter(perfume => perfume.publico === this.selectedPublico);
+                    const allowedPublicos = (() => {
+                        if (this.selectedCategory === 'ArabesHombre') {
+                            return ['Hombre', 'Unisex'];
+                        }
+                        if (this.selectedCategory === 'ArabesMujer') {
+                            return ['Mujer', 'Unisex'];
+                        }
+                        return [this.selectedPublico];
+                    })();
+                    
+                    filtered = filtered.filter(perfume => allowedPublicos.includes(perfume.publico));
                 }
                 
                 if (this.selectedTipo) {
@@ -158,6 +168,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isDesignerWomenView) {
                     this.applyDesignerWomenOrdering(filtered);
                 }
+
+                this.ensureAdjacentPerfumes(
+                    filtered,
+                    'Fruit Collection Orange',
+                    'Fruit Collection - Lemon'
+                );
                 
                 return filtered;
             },
@@ -458,6 +474,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.searchTerm = '';
                 this.selectedPerfume = null;
             },
+            ensureAdjacentPerfumes(list, anchorName, neighborName, placeAfter = true) {
+                const normalize = (name) => (name || '').trim().toLowerCase();
+                const anchorKey = normalize(anchorName);
+                const neighborKey = normalize(neighborName);
+                
+                const anchorIndex = list.findIndex(p => normalize(p.nombre) === anchorKey);
+                const neighborIndex = list.findIndex(p => normalize(p.nombre) === neighborKey);
+                
+                if (anchorIndex === -1 || neighborIndex === -1) {
+                    return;
+                }
+                
+                if (Math.abs(anchorIndex - neighborIndex) === 1) {
+                    return;
+                }
+                
+                const [neighborItem] = list.splice(neighborIndex, 1);
+                const updatedAnchorIndex = list.findIndex(p => normalize(p.nombre) === anchorKey);
+                
+                const insertBase = placeAfter ? updatedAnchorIndex + 1 : updatedAnchorIndex;
+                const insertIndex = Math.min(Math.max(insertBase, 0), list.length);
+                
+                list.splice(insertIndex, 0, neighborItem);
+            },
             filterByCategory(category) {
                 this.selectedCategory = category;
                 this.selectedPublico = category;
@@ -645,6 +685,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const metaCurrent = this.parseColeccionValue(currentPerfume.coleccion);
                 if (!metaCurrent.key) {
+                    return false;
+                }
+                
+                const currentKey = this.normalizeColeccionKey(metaCurrent.key);
+
+                const keySeenBefore = this.filteredPerfumes
+                    .slice(0, index)
+                    .some(perfume => {
+                        const meta = this.parseColeccionValue(perfume.coleccion);
+                        return this.normalizeColeccionKey(meta.key) === currentKey;
+                    });
+
+                if (keySeenBefore) {
                     return false;
                 }
                 

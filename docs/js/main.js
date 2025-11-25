@@ -653,14 +653,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     return false;
                 }
                 
-                if (index === 0) {
+                const currentPerfume = this.filteredPerfumes[index];
+                
+                if (!currentPerfume || currentPerfume.publico !== 'Mujer') {
                     return false;
                 }
                 
-                const currentPerfume = this.filteredPerfumes[index];
-                const previousPerfume = this.filteredPerfumes[index - 1];
+                const hayMujerAnterior = this.filteredPerfumes
+                    .slice(0, index)
+                    .some(perfume => perfume.publico === 'Mujer');
                 
-                return currentPerfume.publico === 'Mujer' && previousPerfume.publico !== 'Mujer';
+                return !hayMujerAnterior;
             },
             onSearchInput() {
                 clearTimeout(this.searchTimeout);

@@ -290,7 +290,7 @@
     <div class="modal fade" id="addPerfumeModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
+                        <div class="modal-header text-white">
                     <h5 class="modal-title">
                         <i class="bi bi-plus-circle me-2"></i><span id="modalTitle">Agregar Nuevo Perfume</span>
                     </h5>
@@ -302,19 +302,19 @@
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Marca *</label>
-                                <input type="text" class="form-control" id="addMarca" required placeholder="Ej: Dior">
+                                <label class="form-label text-white">Marca *</label>
+                                <input type="text" class="form-control text-white" id="addMarca" required placeholder="Ej: Dior">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Nombre *</label>
-                                <input type="text" class="form-control" id="addNombre" required placeholder="Ej: Sauvage">
+                                <label class="form-label text-white">Nombre *</label>
+                                <input type="text" class="form-control text-white" id="addNombre" required placeholder="Ej: Sauvage">
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Tipo *</label>
-                                <select class="form-select" id="addTipo" required>
+                                <label class="form-label text-white">Tipo *</label>
+                                <select class="form-select text-white" id="addTipo" required>
                                     <option value="">Seleccionar...</option>
                                     <option value="Eau de Parfum">Eau de Parfum</option>
                                     <option value="Eau de Toilette">Eau de Toilette</option>
@@ -324,8 +324,8 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Categoría *</label>
-                                <select class="form-select" id="addPublico" required>
+                                <label class="form-label text-white">Categoría *</label>
+                                <select class="form-select text-white" id="addPublico" required>
                                     <option value="">Seleccionar...</option>
                                     <option value="Hombre">Hombre</option>
                                     <option value="Mujer">Mujer</option>
@@ -335,46 +335,46 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Descripción</label>
-                            <textarea class="form-control" id="addDescripcion" rows="2" placeholder="Descripción breve del perfume"></textarea>
+                            <label class="form-label text-white">Descripción</label>
+                            <textarea class="form-control text-white" id="addDescripcion" rows="2" placeholder="Descripción breve del perfume"></textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Notas de olor</label>
+                            <label class="form-label text-white">Notas de olor</label>
                             <div class="row g-3">
                                 <div class="col-md-4">
                                     <label class="form-label text-muted small mb-1">Salida</label>
-                                    <textarea class="form-control" id="addNotasSalida" rows="2" placeholder="Ej: Bergamota, limón"></textarea>
+                                    <textarea class="form-control text-white" id="addNotasSalida" rows="2" placeholder="Ej: Bergamota, limón"></textarea>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label text-muted small mb-1">Corazón</label>
-                                    <textarea class="form-control" id="addNotasCorazon" rows="2" placeholder="Ej: Rosa, jazmín"></textarea>
+                                    <textarea class="form-control text-white" id="addNotasCorazon" rows="2" placeholder="Ej: Rosa, jazmín"></textarea>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label text-muted small mb-1">Fondo</label>
-                                    <textarea class="form-control" id="addNotasFondo" rows="2" placeholder="Ej: Ámbar, almizcle"></textarea>
+                                    <textarea class="form-control text-white" id="addNotasFondo" rows="2" placeholder="Ej: Ámbar, almizcle"></textarea>
                                 </div>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Precio ($) *</label>
-                                <input type="number" class="form-control" id="addPrecio" min="0" step="0.01" required placeholder="0.00">
+                                <label class="form-label text-white">Precio ($) *</label>
+                                <input type="number" class="form-control text-white" id="addPrecio" min="0" step="0.01" required placeholder="0.00">
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">ML *</label>
-                                <input type="number" class="form-control" id="addMililitros" min="1" required placeholder="100">
+                                <label class="form-label text-white">ML *</label>
+                                <input type="number" class="form-control text-white" id="addMililitros" min="1" required placeholder="100">
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Stock Inicial *</label>
-                                <input type="number" class="form-control" id="addStock" min="0" required placeholder="0">
+                                <label class="form-label text-white">Stock Inicial *</label>
+                                <input type="number" class="form-control text-white" id="addStock" min="0" required placeholder="0">
                             </div>
                         </div>
 
                         <!-- Imagen Upload con Drag & Drop -->
                         <div class="mb-3">
-                            <label class="form-label">Imagen del Perfume</label>
+                            <label class="form-label text-white">Imagen del Perfume</label>
                             <div class="image-upload-area" id="imageUploadArea">
                                 <input type="file" id="imageInput" accept="image/*" style="display: none;">
                                 <input type="hidden" id="addImagenUrl">

@@ -1037,22 +1037,39 @@ document.addEventListener('DOMContentLoaded', () => {
             formatPrice(price) {
                 return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(price);
             },
+            parseNotasStruct(notas) {
+                const empty = { salida: 'No especificadas', corazon: 'No especificadas', fondo: 'No especificadas' };
+                if (!notas) return empty;
+                
+                try {
+                    const parsed = JSON.parse(notas);
+                    if (parsed && (parsed.salida || parsed.corazon || parsed.fondo)) {
+                        return {
+                            salida: parsed.salida || empty.salida,
+                            corazon: parsed.corazon || empty.corazon,
+                            fondo: parsed.fondo || empty.fondo
+                        };
+                    }
+                } catch (error) {}
+                
+                const parts = notas.split(/[,;|]/).map(p => p.trim()).filter(Boolean);
+                if (parts.length === 0) return empty;
+                
+                const third = Math.max(1, Math.ceil(parts.length / 3));
+                return {
+                    salida: parts.slice(0, third).join(', ') || empty.salida,
+                    corazon: parts.slice(third, third * 2).join(', ') || empty.corazon,
+                    fondo: parts.slice(third * 2).join(', ') || empty.fondo
+                };
+            },
             getNotasSalida(notas) {
-                if (!notas) return 'No disponible';
-                const parts = notas.split(/[,;]/);
-                return parts.slice(0, Math.ceil(parts.length / 3)).join(', ').trim() || 'No especificadas';
+                return this.parseNotasStruct(notas).salida;
             },
             getNotasCorazon(notas) {
-                if (!notas) return 'No disponible';
-                const parts = notas.split(/[,;]/);
-                const third = Math.ceil(parts.length / 3);
-                return parts.slice(third, third * 2).join(', ').trim() || 'No especificadas';
+                return this.parseNotasStruct(notas).corazon;
             },
             getNotasFondo(notas) {
-                if (!notas) return 'No disponible';
-                const parts = notas.split(/[,;]/);
-                const third = Math.ceil(parts.length / 3);
-                return parts.slice(third * 2).join(', ').trim() || 'No especificadas';
+                return this.parseNotasStruct(notas).fondo;
             },
             selectMenudeo() {
                 this.isMayoreo = false;

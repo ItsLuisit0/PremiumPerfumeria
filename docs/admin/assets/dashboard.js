@@ -419,6 +419,35 @@ function clearFilters() {
     loadPerfumes();
 }
 
+function parseNotasData(rawNotas) {
+    const empty = { salida: '', corazon: '', fondo: '' };
+    
+    if (!rawNotas) {
+        return empty;
+    }
+    
+    try {
+        const parsed = JSON.parse(rawNotas);
+        if (parsed && (parsed.salida !== undefined || parsed.corazon !== undefined || parsed.fondo !== undefined)) {
+            return {
+                salida: parsed.salida || '',
+                corazon: parsed.corazon || '',
+                fondo: parsed.fondo || ''
+            };
+        }
+    } catch (error) {}
+    
+    const parts = rawNotas.split(/[,;|]/).map(item => item.trim()).filter(Boolean);
+    if (parts.length === 0) return empty;
+    
+    const third = Math.max(1, Math.ceil(parts.length / 3));
+    return {
+        salida: parts.slice(0, third).join(', '),
+        corazon: parts.slice(third, third * 2).join(', '),
+        fondo: parts.slice(third * 2).join(', ')
+    };
+}
+
 // =====================================================
 // CRUD PERFUMES
 // =====================================================
@@ -429,6 +458,9 @@ function openAddPerfumeModal() {
     document.getElementById('editPerfumeId').value = '';
     document.getElementById('modalTitle').textContent = 'Agregar Nuevo Perfume';
     document.getElementById('addActivo').checked = true;
+    document.getElementById('addNotasSalida').value = '';
+    document.getElementById('addNotasCorazon').value = '';
+    document.getElementById('addNotasFondo').value = '';
     resetImageUpload();
     
     const modal = new bootstrap.Modal(document.getElementById('addPerfumeModal'));
@@ -447,7 +479,10 @@ async function editPerfume(id) {
         document.getElementById('addTipo').value = perfume.tipo;
         document.getElementById('addPublico').value = perfume.publico;
         document.getElementById('addDescripcion').value = perfume.descripcion || '';
-        document.getElementById('addNotas').value = perfume.notas || '';
+        const parsedNotas = parseNotasData(perfume.notas);
+        document.getElementById('addNotasSalida').value = parsedNotas.salida || '';
+        document.getElementById('addNotasCorazon').value = parsedNotas.corazon || '';
+        document.getElementById('addNotasFondo').value = parsedNotas.fondo || '';
         document.getElementById('addPrecio').value = perfume.precio_minimo;
         document.getElementById('addMililitros').value = perfume.mililitros;
         document.getElementById('addStock').value = perfume.stock;
@@ -519,13 +554,19 @@ async function savePerfume() {
         // Ahora guardar el perfume con la URL de la imagen
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando perfume...';
         
+        const notasPayload = JSON.stringify({
+            salida: document.getElementById('addNotasSalida').value.trim(),
+            corazon: document.getElementById('addNotasCorazon').value.trim(),
+            fondo: document.getElementById('addNotasFondo').value.trim()
+        });
+        
         const perfumeData = {
             marca: marca,
             nombre: nombre,
             tipo: document.getElementById('addTipo').value,
             publico: document.getElementById('addPublico').value,
             descripcion: document.getElementById('addDescripcion').value.trim(),
-            notas: document.getElementById('addNotas').value.trim(),
+            notas: notasPayload,
             precio_minimo: parseFloat(document.getElementById('addPrecio').value),
             mililitros: parseInt(document.getElementById('addMililitros').value),
             stock: parseInt(document.getElementById('addStock').value),

@@ -694,6 +694,10 @@
                                 
                                 <!-- Badges -->
                                 <div class="absolute top-2 left-2 z-10 flex flex-col gap-2">
+                                    <span v-if="perfume.stock === 0 || perfume.stock === '0'" 
+                                          class="px-3 py-1 bg-gray-700 text-white text-xs font-bold rounded-full flex items-center justify-center border border-gray-500">
+                                        Agotado
+                                    </span>
                                     <span v-if="perfume.descuento_porcentaje > 0" 
                                           class="px-2 py-1 bg-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center w-12 h-12 animate-pulse">
                                         -{{ Math.round(perfume.descuento_porcentaje) }}%
@@ -755,9 +759,12 @@
                                     
                                         <!-- Botón Carrito -->
                                         <button @click.stop="addToCart(perfume, 1, $event)"
-                                                class="p-2.5 bg-primary hover:bg-accent text-black rounded-full transition-all duration-300 hover:scale-110 hover:rotate-12">
+                                                :disabled="perfume.stock === 0 || perfume.stock === '0'"
+                                                class="p-2.5 bg-primary hover:bg-accent text-black rounded-full transition-all duration-300 hover:scale-110 hover:rotate-12 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-600 disabled:hover:bg-gray-600 disabled:hover:scale-100 disabled:hover:rotate-0"
+                                                :class="(perfume.stock === 0 || perfume.stock === '0') ? 'opacity-50 cursor-not-allowed bg-gray-600 hover:bg-gray-600' : ''"
+                                                :title="(perfume.stock === 0 || perfume.stock === '0') ? 'Producto agotado' : 'Agregar al carrito'">
                                             <i class="bi bi-cart-plus-fill text-base"></i>
-                                    </button>
+                                        </button>
                                     </div>
                                 </div>
                             </article>
@@ -852,9 +859,15 @@
                             <div class="space-y-6">
                                 <!-- Header -->
                                 <div class="space-y-3 animate-slide-up">
-                                    <span class="inline-block px-4 py-1 bg-primary/20 border border-primary/30 text-primary text-sm font-semibold rounded-full">
-                                        {{ selectedPerfume.marca }}
-                                    </span>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="inline-block px-4 py-1 bg-primary/20 border border-primary/30 text-primary text-sm font-semibold rounded-full">
+                                            {{ selectedPerfume.marca }}
+                                        </span>
+                                        <span v-if="selectedPerfume.stock === 0 || selectedPerfume.stock === '0'" 
+                                              class="inline-block px-4 py-1 bg-gray-700 text-white text-sm font-semibold rounded-full border border-gray-500">
+                                            Agotado
+                                        </span>
+                                    </div>
                                     <h1 class="text-4xl md:text-5xl font-display font-bold text-white leading-tight">
                                         {{ selectedPerfume.nombre }}
                                     </h1>
@@ -965,9 +978,11 @@
                                     <!-- Botones de Acción -->
                                     <div class="flex gap-3">
                                         <button @click="addToCart(selectedPerfume, 1, $event)"
-                                                class="flex-1 px-6 py-4 bg-primary hover:bg-accent text-black font-bold text-sm uppercase tracking-wider transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 flex items-center justify-center gap-2 group">
+                                                :disabled="selectedPerfume.stock === 0 || selectedPerfume.stock === '0'"
+                                                class="flex-1 px-6 py-4 bg-primary hover:bg-accent text-black font-bold text-sm uppercase tracking-wider transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-600 disabled:hover:bg-gray-600"
+                                                :class="(selectedPerfume.stock === 0 || selectedPerfume.stock === '0') ? 'opacity-50 cursor-not-allowed bg-gray-600 hover:bg-gray-600' : ''">
                                             <i class="bi bi-cart-plus-fill text-lg group-hover:scale-110 transition-transform"></i>
-                                            <span>Agregar</span>
+                                            <span>{{ (selectedPerfume.stock === 0 || selectedPerfume.stock === '0') ? 'Agotado' : 'Agregar' }}</span>
                                     </button>
                                         
                                         <button @click.stop="toggleFavorite(selectedPerfume)"

@@ -63,7 +63,7 @@ exports.getAllPerfumes = async (req, res) => {
         }
         
         const [rows] = await pool.query(
-            'SELECT id_perfume, marca, nombre, tipo, publico, descripcion, notas, precio_minimo, mililitros, imagen_url, descuento_porcentaje, precio_con_descuento, activo, coleccion FROM perfumes WHERE activo = 1 LIMIT ? OFFSET ?',
+            'SELECT id_perfume, marca, nombre, tipo, publico, descripcion, notas, precio_minimo, mililitros, imagen_url, descuento_porcentaje, precio_con_descuento, activo, coleccion, stock FROM perfumes WHERE activo = 1 LIMIT ? OFFSET ?',
             [limit, offset]
         );
         
@@ -100,7 +100,7 @@ exports.getPerfumeById = async (req, res) => {
     try {
         const { id } = req.params;
         const [rows] = await pool.query(
-            'SELECT id_perfume, marca, nombre, tipo, publico, descripcion, notas, precio_minimo, mililitros, imagen_url, descuento_porcentaje, precio_con_descuento, activo, coleccion FROM perfumes WHERE id_perfume = ?', 
+            'SELECT id_perfume, marca, nombre, tipo, publico, descripcion, notas, precio_minimo, mililitros, imagen_url, descuento_porcentaje, precio_con_descuento, activo, coleccion, stock FROM perfumes WHERE id_perfume = ?', 
             [id]
         );
         if (rows.length === 0) {

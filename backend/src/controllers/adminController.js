@@ -208,7 +208,7 @@ exports.createPerfume = async (req, res) => {
         const {
             marca, nombre, tipo, publico, descripcion, notas,
             precio_minimo, mililitros, imagen_url, stock,
-            descuento_porcentaje, activo, destacado
+            descuento_porcentaje, activo, destacado, coleccion
         } = req.body;
         
         const id_admin = req.admin.id_admin;
@@ -220,12 +220,12 @@ exports.createPerfume = async (req, res) => {
             `INSERT INTO perfumes (
                 marca, nombre, tipo, publico, descripcion, notas,
                 precio_minimo, mililitros, imagen_url, stock,
-                descuento_porcentaje, activo, destacado, creado_por
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                descuento_porcentaje, activo, destacado, creado_por, coleccion
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 marca, nombre, tipo, publico, descripcion, notas,
                 precio_minimo, mililitros, imagen_url || null, stock || 0,
-                descuento_porcentaje || 0, activoValue, destacadoValue, id_admin
+                descuento_porcentaje || 0, activoValue, destacadoValue, id_admin, coleccion
             ]
         );
         
@@ -262,7 +262,7 @@ exports.updatePerfume = async (req, res) => {
         const {
             marca, nombre, tipo, publico, descripcion, notas,
             precio_minimo, mililitros, imagen_url, stock,
-            descuento_porcentaje, activo, destacado
+            descuento_porcentaje, activo, destacado, coleccion
         } = req.body;
         
         const id_admin = req.admin.id_admin;
@@ -283,13 +283,13 @@ exports.updatePerfume = async (req, res) => {
             `UPDATE perfumes SET
                 marca = ?, nombre = ?, tipo = ?, publico = ?, descripcion = ?, notas = ?,
                 precio_minimo = ?, mililitros = ?, imagen_url = ?, stock = ?,
-                descuento_porcentaje = ?, activo = ?, destacado = ?, actualizado_por = ?
+                descuento_porcentaje = ?, activo = ?, destacado = ?, actualizado_por = ?, coleccion = ?
             WHERE id_perfume = ?`,
             [
                 marca, nombre, tipo, publico, descripcion, notas,
                 precio_minimo, mililitros, imagen_url || null, stock,
                 descuento_porcentaje || 0, activoValue, destacadoValue,
-                id_admin, id
+                id_admin, coleccion, id
             ]
         );
         

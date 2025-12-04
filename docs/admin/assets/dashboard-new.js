@@ -376,8 +376,10 @@ async function editPerfume(id) {
         document.getElementById('addNombre').value = data.nombre;
         document.getElementById('addTipo').value = data.tipo;
         document.getElementById('addPublico').value = data.publico;
+        document.getElementById('addColeccion').value = data.coleccion || '';
         document.getElementById('addDescripcion').value = data.descripcion || '';
-        document.getElementById('addNotas').value = data.notas || '';
+        const parsedNotas = parseNotasData(data.notas);
+        document.getElementById('addNotasSalida').value = parsedNotas.salida || '';
         document.getElementById('addPrecio').value = data.precio_minimo;
         document.getElementById('addMililitros').value = data.mililitros;
         document.getElementById('addStock').value = data.stock;
@@ -409,8 +411,9 @@ async function savePerfume() {
         nombre: document.getElementById('addNombre').value.trim(),
         tipo: document.getElementById('addTipo').value,
         publico: document.getElementById('addPublico').value,
+        coleccion: document.getElementById('addColeccion').value,
         descripcion: document.getElementById('addDescripcion').value.trim(),
-        notas: document.getElementById('addNotas').value.trim(),
+        notas: parseNotasData(document.getElementById('addNotasSalida').value),
         precio_minimo: parseFloat(document.getElementById('addPrecio').value),
         mililitros: parseInt(document.getElementById('addMililitros').value),
         stock: parseInt(document.getElementById('addStock').value),

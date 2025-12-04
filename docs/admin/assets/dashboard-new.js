@@ -371,14 +371,23 @@ async function editPerfume(id) {
     const data = await apiCall(`/perfumes/${id}`);
     
     if (data) {
+        const perfume = data.data;
+        
         document.getElementById('editPerfumeId').value = id;
-        document.getElementById('addMarca').value = data.marca;
-        document.getElementById('addNombre').value = data.nombre;
-        document.getElementById('addTipo').value = data.tipo;
-        document.getElementById('addPublico').value = data.publico;
-        document.getElementById('addColeccion').value = data.coleccion || '';
-        document.getElementById('addDescripcion').value = data.descripcion || '';
-        const parsedNotas = parseNotasData(data.notas);
+        document.getElementById('addMarca').value = perfume.marca;
+        document.getElementById('addNombre').value = perfume.nombre;
+        document.getElementById('addTipo').value = perfume.tipo;
+        
+        const categoriaValue = `${perfume.publico}|${perfume.coleccion}`;
+        const publicoSelect = document.getElementById('addPublico');
+        if ([...publicoSelect.options].some(o => o.value === categoriaValue)) {
+            publicoSelect.value = categoriaValue;
+        } else {
+            publicoSelect.value = ""; 
+        }
+
+        document.getElementById('addDescripcion').value = perfume.descripcion || '';
+        const parsedNotas = parseNotasData(perfume.notas);
         document.getElementById('addNotasSalida').value = parsedNotas.salida || '';
         document.getElementById('addPrecio').value = data.precio_minimo;
         document.getElementById('addMililitros').value = data.mililitros;
@@ -406,23 +415,16 @@ async function editPerfume(id) {
 
 async function savePerfume() {
     const id = document.getElementById('editPerfumeId').value;
-    const perfumeData = {
-        marca: document.getElementById('addMarca').value.trim(),
-        nombre: document.getElementById('addNombre').value.trim(),
-        tipo: document.getElementById('addTipo').value,
-        publico: document.getElementById('addPublico').value,
-        coleccion: document.getElementById('addColeccion').value,
-        descripcion: document.getElementById('addDescripcion').value.trim(),
-        notas: parseNotasData(document.getElementById('addNotasSalida').value),
-        precio_minimo: parseFloat(document.getElementById('addPrecio').value),
-        mililitros: parseInt(document.getElementById('addMililitros').value),
-        stock: parseInt(document.getElementById('addStock').value),
-        activo: document.getElementById('addActivo').checked,
-        imagen_url: document.getElementById('addImagenUrl').value.trim()
+    const marca = document.getElementById('addMarca').value.trim();
+    const nombre = document.getElementById('addNombre').value.trim();
+    const parsedNotas = parseNotasData(document.getElementById('addNotasSalida').value);
+    const notasPayload = {
+        entrada: parsedNotas.entrada,
+        salida: parsedNotas.salida
     };
 
     // Validación
-    if (!perfumeData.marca || !perfumeData.nombre || !perfumeData.tipo || !perfumeData.publico) {
+    if (!marca || !nombre || !document.getElementById('addTipo').value || !document.getElementById('addPublico').value) {
         showToast('Por favor completa todos los campos requeridos', 'danger');
         return;
     }
@@ -430,6 +432,23 @@ async function savePerfume() {
     const btn = document.getElementById('savePerfumeBtn');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+
+    const [publico, coleccion] = document.getElementById('addPublico').value.split('|');
+
+    const perfumeData = {
+        marca: marca,
+        nombre: nombre,
+        tipo: document.getElementById('addTipo').value,
+        publico: publico,
+        coleccion: coleccion,
+        descripcion: document.getElementById('addDescripcion').value.trim(),
+        notas: notasPayload,
+        precio_minimo: parseFloat(document.getElementById('addPrecio').value),
+        mililitros: parseInt(document.getElementById('addMililitros').value),
+        stock: parseInt(document.getElementById('addStock').value),
+        activo: document.getElementById('addActivo').checked,
+        imagen_url: document.getElementById('addImagenUrl').value.trim()
+    };
 
     const endpoint = id ? `/admin/perfumes/${id}` : '/admin/perfumes';
     const method = id ? 'PUT' : 'POST';

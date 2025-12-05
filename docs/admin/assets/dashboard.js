@@ -488,7 +488,12 @@ async function editPerfume(id) {
         }
 
         document.getElementById('addDescripcion').value = data.descripcion || '';
-        document.getElementById('addNotas').value = data.notas || '';
+        
+        const parsedNotas = parseNotasData(data.notas);
+        document.getElementById('addNotasSalida').value = parsedNotas.salida || '';
+        document.getElementById('addNotasCorazon').value = parsedNotas.corazon || '';
+        document.getElementById('addNotasFondo').value = parsedNotas.fondo || '';
+        
         document.getElementById('addPrecio').value = data.precio_minimo;
         document.getElementById('addMililitros').value = data.mililitros;
         document.getElementById('addStock').value = data.stock;
@@ -519,6 +524,12 @@ async function savePerfume() {
     // Separar publico y coleccion desde el valor del select
     const [publico, coleccion] = document.getElementById('addPublico').value.split('|');
 
+    const notasPayload = JSON.stringify({
+        salida: document.getElementById('addNotasSalida').value.trim(),
+        corazon: document.getElementById('addNotasCorazon').value.trim(),
+        fondo: document.getElementById('addNotasFondo').value.trim()
+    });
+
     const perfumeData = {
         marca: document.getElementById('addMarca').value.trim(),
         nombre: document.getElementById('addNombre').value.trim(),
@@ -526,7 +537,7 @@ async function savePerfume() {
         publico: publico,
         coleccion: coleccion,
         descripcion: document.getElementById('addDescripcion').value.trim(),
-        notas: document.getElementById('addNotas').value.trim(),
+        notas: notasPayload,
         precio_minimo: parseFloat(document.getElementById('addPrecio').value),
         mililitros: parseInt(document.getElementById('addMililitros').value),
         stock: parseInt(document.getElementById('addStock').value),
@@ -577,12 +588,6 @@ async function savePerfume() {
         // Ahora guardar el perfume con la URL de la imagen
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando perfume...';
         
-        const notasPayload = JSON.stringify({
-            salida: document.getElementById('addNotasSalida').value.trim(),
-            corazon: document.getElementById('addNotasCorazon').value.trim(),
-            fondo: document.getElementById('addNotasFondo').value.trim()
-        });
-        
         const perfumeDataToSend = {
             marca: perfumeData.marca,
             nombre: perfumeData.nombre,
@@ -590,7 +595,7 @@ async function savePerfume() {
             publico: perfumeData.publico,
             coleccion: perfumeData.coleccion,
             descripcion: perfumeData.descripcion,
-            notas: notasPayload,
+            notas: perfumeData.notas,
             precio_minimo: perfumeData.precio_minimo,
             mililitros: perfumeData.mililitros,
             stock: perfumeData.stock,

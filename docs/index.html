@@ -607,6 +607,13 @@
                                              class="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105">
                                     </div>
                                 </div>
+                                <div v-if="shouldShowGenderDivider(index)" :key="'gender-divider-' + index" class="col-span-full my-8">
+                                    <div class="relative w-full rounded-2xl overflow-hidden shadow-2xl cursor-pointer group transition-all duration-300 hover:shadow-primary/30 hover:scale-[1.02]">
+                                        <img src="./ImagenesPerfumes/SEPARADOR_MUJER.jpg" 
+                                             alt="Perfumes de Diseñador para Mujer" 
+                                             class="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105">
+                                    </div>
+                                </div>
                                 <article @click="showPerfumeDetail(perfume)"
                                          class="group relative bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-hidden cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1"
                                          :style="{ 'animation-delay': (index * 50) + 'ms' }">

@@ -77,7 +77,7 @@ exports.getAllPerfumes = async (req, res) => {
             }
         }
 
-        query += ' ORDER BY nombre LIMIT ? OFFSET ?';
+        query += ' ORDER BY CASE WHEN coleccion IS NULL OR coleccion = \'\' THEN 1 ELSE 0 END, coleccion, FIELD(publico, "Hombre", "Unisex", "Mujer"), nombre LIMIT ? OFFSET ?';
         params.push(parseInt(limit), parseInt(offset));
 
         const [rows] = await pool.query(query, params);

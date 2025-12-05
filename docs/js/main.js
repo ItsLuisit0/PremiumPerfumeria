@@ -576,8 +576,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 return divider;
             },
             shouldShowCollectionDivider(index) {
-                // Se desactiva la lógica de separadores para mostrar un catálogo continuo.
-                return false;
+                if (this.selectedPublico || this.selectedTipo || this.searchTerm || this.selectedCategory) {
+                    return false;
+                }
+                
+                const currentPerfume = this.filteredPerfumes[index];
+                
+                if (!currentPerfume.coleccion) {
+                    return false;
+                }
+                
+                const metaCurrent = this.parseColeccionValue(currentPerfume.coleccion);
+                if (!metaCurrent.key) {
+                    return false;
+                }
+                
+                const currentKey = this.normalizeColeccionKey(metaCurrent.key);
+
+                const keySeenBefore = this.filteredPerfumes
+                    .slice(0, index)
+                    .some(perfume => {
+                        const meta = this.parseColeccionValue(perfume.coleccion);
+                        return this.normalizeColeccionKey(meta.key) === currentKey;
+                    });
+
+                if (keySeenBefore) {
+                    return false;
+                }
+                
+                if (index === 0) {
+                    return true;
+                }
+                
+                const previousPerfume = this.filteredPerfumes[index - 1];
+                const metaPrevious = this.parseColeccionValue(previousPerfume?.coleccion);
+                
+                return this.normalizeColeccionKey(metaCurrent.key) !== this.normalizeColeccionKey(metaPrevious.key);
             },
             shouldShowGenderDivider(index) {
                 if (this.selectedCategory !== 'Disenador') {

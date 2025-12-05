@@ -68,22 +68,12 @@ exports.getAllPerfumes = async (req, res) => {
 
         if (tipo) {
             const tipoLower = tipo.toLowerCase();
-            const marcasArabes = ['lattafa', 'armaf', 'rasasi', 'afnan'];
-            const marcasDisenador = ['versace', 'dior', 'carolina herrera', 'chanel', 'montblanc', 'jean paul gaultier', 'valentino', 'giorgio armani', 'armani', 'yves saint laurent', 'dkny', 'moschino', 'cacharel'];
-            const marcasNicho = ['creed', 'maison francis kurkdjian', 'baccarat'];
-
-            let marcas;
-            if (tipoLower.includes('arab')) {
-                marcas = marcasArabes;
-            } else if (tipoLower.includes('diseñ')) {
-                marcas = marcasDisenador;
+            if (tipoLower.includes('diseñ')) {
+                query += ` AND (coleccion = 'disenador_destacados' OR coleccion = 'disenador_mujer_destacados')`;
+            } else if (tipoLower.includes('arab')) {
+                query += ` AND (coleccion = 'arabes_destacados' OR coleccion = 'arabes_mujer_destacados')`;
             } else if (tipoLower.includes('nicho')) {
-                marcas = marcasNicho;
-            }
-
-            if (marcas) {
-                query += ` AND marca IN (${marcas.map(() => '?').join(',')})`;
-                params.push(...marcas);
+                query += ` AND coleccion = 'nicho_destacados'`;
             }
         }
 

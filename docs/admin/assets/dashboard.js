@@ -468,34 +468,40 @@ function openAddPerfumeModal() {
 }
 
 async function editPerfume(id) {
-    const data = await apiCall(`/admin/perfumes/${id}`);
+    const data = await apiCall(`/perfumes/${id}`);
     
-    if (data && data.success) {
-        const perfume = data.data;
-        
+    if (data) {
         document.getElementById('editPerfumeId').value = id;
-        document.getElementById('addMarca').value = perfume.marca;
-        document.getElementById('addNombre').value = perfume.nombre;
-        document.getElementById('addTipo').value = perfume.tipo;
-        document.getElementById('addPublico').value = perfume.publico;
-        document.getElementById('addDescripcion').value = perfume.descripcion || '';
-        const parsedNotas = parseNotasData(perfume.notas);
-        document.getElementById('addNotasSalida').value = parsedNotas.salida || '';
-        document.getElementById('addNotasCorazon').value = parsedNotas.corazon || '';
-        document.getElementById('addNotasFondo').value = parsedNotas.fondo || '';
-        document.getElementById('addPrecio').value = perfume.precio_minimo;
-        document.getElementById('addMililitros').value = perfume.mililitros;
-        document.getElementById('addStock').value = perfume.stock;
-        document.getElementById('addActivo').checked = perfume.activo;
-        document.getElementById('addImagenUrl').value = perfume.imagen_url || '';
+        document.getElementById('addMarca').value = data.marca;
+        document.getElementById('addNombre').value = data.nombre;
+        document.getElementById('addTipo').value = data.tipo;
+        
+        // Combinar publico y coleccion para el select
+        const categoriaValue = `${data.publico}|${data.coleccion}`;
+        const publicoSelect = document.getElementById('addPublico');
+        
+        // Verificar si la opción existe antes de asignarla
+        if ([...publicoSelect.options].some(o => o.value === categoriaValue)) {
+            publicoSelect.value = categoriaValue;
+        } else {
+            publicoSelect.value = ""; // O un valor por defecto si no se encuentra
+        }
+
+        document.getElementById('addDescripcion').value = data.descripcion || '';
+        document.getElementById('addNotas').value = data.notas || '';
+        document.getElementById('addPrecio').value = data.precio_minimo;
+        document.getElementById('addMililitros').value = data.mililitros;
+        document.getElementById('addStock').value = data.stock;
+        document.getElementById('addActivo').checked = data.activo;
+        document.getElementById('addImagenUrl').value = data.imagen_url || '';
         
         // Set imagen preview
-        if (perfume.imagen_url) {
+        if (data.imagen_url) {
             const preview = document.getElementById('uploadPreview');
             const placeholder = document.getElementById('uploadPlaceholder');
             const previewImage = document.getElementById('previewImage');
             
-            previewImage.src = `../${perfume.imagen_url}`;
+            previewImage.src = `../${data.imagen_url}`;
             placeholder.style.display = 'none';
             preview.style.display = 'block';
         }
@@ -509,11 +515,28 @@ async function editPerfume(id) {
 
 async function savePerfume() {
     const id = document.getElementById('editPerfumeId').value;
-    const marca = document.getElementById('addMarca').value.trim();
-    const nombre = document.getElementById('addNombre').value.trim();
     
+    // Separar publico y coleccion desde el valor del select
+    const [publico, coleccion] = document.getElementById('addPublico').value.split('|');
+
+    const perfumeData = {
+        marca: document.getElementById('addMarca').value.trim(),
+        nombre: document.getElementById('addNombre').value.trim(),
+        tipo: document.getElementById('addTipo').value,
+        publico: publico,
+        coleccion: coleccion,
+        descripcion: document.getElementById('addDescripcion').value.trim(),
+        notas: document.getElementById('addNotas').value.trim(),
+        precio_minimo: parseFloat(document.getElementById('addPrecio').value),
+        mililitros: parseInt(document.getElementById('addMililitros').value),
+        stock: parseInt(document.getElementById('addStock').value),
+        activo: document.getElementById('addActivo').checked === true, // Asegurar boolean true
+        destacado: false, // Por defecto no destacado
+        imagen_url: document.getElementById('addImagenUrl').value.trim()
+    };
+
     // Validación
-    if (!marca || !nombre || !document.getElementById('addTipo').value || !document.getElementById('addPublico').value) {
+    if (!perfumeData.marca || !perfumeData.nombre || !perfumeData.tipo || !perfumeData.publico) {
         showToast('Por favor completa todos los campos requeridos', 'danger');
         return;
     }
@@ -531,8 +554,8 @@ async function savePerfume() {
             
             const formData = new FormData();
             formData.append('imagen', selectedImageFile);
-            formData.append('marca', marca);
-            formData.append('nombre', nombre);
+            formData.append('marca', perfumeData.marca);
+            formData.append('nombre', perfumeData.nombre);
             
             const uploadResponse = await fetch(`${API_URL}/admin/upload/imagen`, {
                 method: 'POST',
@@ -560,29 +583,30 @@ async function savePerfume() {
             fondo: document.getElementById('addNotasFondo').value.trim()
         });
         
-        const perfumeData = {
-            marca: marca,
-            nombre: nombre,
-            tipo: document.getElementById('addTipo').value,
-            publico: document.getElementById('addPublico').value,
-            descripcion: document.getElementById('addDescripcion').value.trim(),
+        const perfumeDataToSend = {
+            marca: perfumeData.marca,
+            nombre: perfumeData.nombre,
+            tipo: perfumeData.tipo,
+            publico: perfumeData.publico,
+            coleccion: perfumeData.coleccion,
+            descripcion: perfumeData.descripcion,
             notas: notasPayload,
-            precio_minimo: parseFloat(document.getElementById('addPrecio').value),
-            mililitros: parseInt(document.getElementById('addMililitros').value),
-            stock: parseInt(document.getElementById('addStock').value),
-            activo: document.getElementById('addActivo').checked === true, // Asegurar boolean true
+            precio_minimo: perfumeData.precio_minimo,
+            mililitros: perfumeData.mililitros,
+            stock: perfumeData.stock,
+            activo: perfumeData.activo,
             destacado: false, // Por defecto no destacado
             imagen_url: imagenUrl
         };
         
-        console.log('📦 Datos del perfume a guardar:', perfumeData);
+        console.log('📦 Datos del perfume a guardar:', perfumeDataToSend);
 
         const endpoint = id ? `/admin/perfumes/${id}` : '/admin/perfumes';
         const method = id ? 'PUT' : 'POST';
 
         const data = await apiCall(endpoint, {
             method: method,
-            body: JSON.stringify(perfumeData)
+            body: JSON.stringify(perfumeDataToSend)
         });
 
         if (data && data.success) {

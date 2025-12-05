@@ -45,45 +45,64 @@ function encontrarImagenPerfume(nombrePerfume) {
 
 exports.getAllPerfumes = async (req, res) => {
     try {
-        const limit = parseInt(req.query.limit) || 100;
-        const offset = parseInt(req.query.offset) || 0;
-        
-        if (limit < 1 || limit > 100) {
-            return res.status(400).json({ 
-                success: false,
-                message: 'El limite debe estar entre 1 y 100' 
-            });
+        const { limit = 100, offset = 0, publico, tipo, coleccion, search } = req.query;
+
+        let query = 'SELECT SQL_CALC_FOUND_ROWS id_perfume, marca, nombre, tipo, publico, descripcion, notas, precio_minimo, mililitros, imagen_url, descuento_porcentaje, precio_con_descuento, activo, coleccion, stock FROM perfumes WHERE activo = 1';
+        const params = [];
+
+        if (publico) {
+            query += ' AND publico = ?';
+            params.push(publico);
         }
-        
-        if (offset < 0) {
-            return res.status(400).json({ 
-                success: false,
-                message: 'El offset debe ser mayor o igual a 0' 
-            });
+
+        if (coleccion) {
+            query += ' AND coleccion = ?';
+            params.push(coleccion);
         }
-        
-        const [rows] = await pool.query(
-            'SELECT id_perfume, marca, nombre, tipo, publico, descripcion, notas, precio_minimo, mililitros, imagen_url, descuento_porcentaje, precio_con_descuento, activo, coleccion, stock FROM perfumes WHERE activo = 1 ORDER BY coleccion, nombre LIMIT ? OFFSET ?',
-            [limit, offset]
-        );
-        
-        const perfumesConImagenes = rows.map(perfume => {
-            if (!perfume.imagen_url) {
-                perfume.imagen_url = encontrarImagenPerfume(perfume.nombre);
+
+        if (search) {
+            query += ' AND (nombre LIKE ? OR marca LIKE ?)';
+            const searchTerm = `%${search}%`;
+            params.push(searchTerm, searchTerm);
+        }
+
+        if (tipo) {
+            const tipoLower = tipo.toLowerCase();
+            const marcasArabes = ['lattafa', 'armaf', 'rasasi', 'afnan'];
+            const marcasDisenador = ['versace', 'dior', 'carolina herrera', 'chanel', 'montblanc', 'jean paul gaultier', 'valentino', 'giorgio armani', 'armani', 'yves saint laurent', 'dkny', 'moschino', 'cacharel'];
+            const marcasNicho = ['creed', 'maison francis kurkdjian', 'baccarat'];
+
+            let marcas;
+            if (tipoLower.includes('arab')) {
+                marcas = marcasArabes;
+            } else if (tipoLower.includes('diseñ')) {
+                marcas = marcasDisenador;
+            } else if (tipoLower.includes('nicho')) {
+                marcas = marcasNicho;
             }
-            return perfume;
-        });
+
+            if (marcas) {
+                query += ` AND marca IN (${marcas.map(() => '?').join(',')})`;
+                params.push(...marcas);
+            }
+        }
+
+        query += ' ORDER BY coleccion, nombre LIMIT ? OFFSET ?';
+        params.push(parseInt(limit), parseInt(offset));
+
+        const [rows] = await pool.query(query, params);
         
-        const [total] = await pool.query('SELECT COUNT(*) as total FROM perfumes WHERE activo = 1');
+        const [totalResult] = await pool.query('SELECT FOUND_ROWS() as total');
+        const total = totalResult[0].total;
         
         res.json({
             success: true,
-            data: perfumesConImagenes,
+            data: rows, // Devolver las filas directamente
             pagination: {
-                limit,
-                offset,
-                total: total[0].total,
-                hasMore: offset + limit < total[0].total
+                limit: parseInt(limit),
+                offset: parseInt(offset),
+                total: total,
+                hasMore: parseInt(offset) + parseInt(limit) < total
             }
         });
     } catch (error) {
@@ -107,12 +126,7 @@ exports.getPerfumeById = async (req, res) => {
             return res.status(404).json({ message: 'Perfume no encontrado' });
         }
         
-        const perfume = rows[0];
-        if (!perfume.imagen_url) {
-            perfume.imagen_url = encontrarImagenPerfume(perfume.nombre);
-        }
-        
-        res.json(perfume);
+        res.json(rows[0]); // Devolver el perfume directamente
     } catch (error) {
         res.status(500).json({ message: 'Error interno del servidor' });
     }

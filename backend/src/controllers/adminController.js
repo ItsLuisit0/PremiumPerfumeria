@@ -84,7 +84,7 @@ exports.getAllPerfumesAdmin = async (req, res) => {
     try {
         const { activo, destacado, publico, marca, search, page = 1, limit = 20, sortField = 'fecha_creacion', sortOrder = 'desc' } = req.query;
         
-        let query = 'SELECT * FROM perfumes WHERE 1=1';
+        let query = 'SELECT SQL_CALC_FOUND_ROWS * FROM perfumes WHERE 1=1';
         const params = [];
         
         if (activo !== undefined) {
@@ -127,47 +127,18 @@ exports.getAllPerfumesAdmin = async (req, res) => {
         
         const [perfumes] = await pool.query(query, params);
         
-        // Obtener total para paginación
-        let countQuery = 'SELECT COUNT(*) as total FROM perfumes WHERE 1=1';
-        const countParams = [];
-        
-        if (activo !== undefined) {
-            countQuery += ' AND activo = ?';
-            countParams.push(activo === 'true' ? 1 : 0);
-        }
-        
-        if (destacado !== undefined) {
-            countQuery += ' AND destacado = ?';
-            countParams.push(destacado === 'true' ? 1 : 0);
-        }
-        
-        if (publico) {
-            countQuery += ' AND publico = ?';
-            countParams.push(publico);
-        }
-        
-        if (marca) {
-            countQuery += ' AND marca = ?';
-            countParams.push(marca);
-        }
-        
-        if (search) {
-            countQuery += ' AND (nombre LIKE ? OR marca LIKE ? OR descripcion LIKE ?)';
-            const searchParam = `%${search}%`;
-            countParams.push(searchParam, searchParam, searchParam);
-        }
-        
-        const [countResult] = await pool.query(countQuery, countParams);
+        const [totalResult] = await pool.query('SELECT FOUND_ROWS() as total');
+        const total = totalResult[0].total;
         
         res.json({
             success: true,
             data: perfumes,
-            total: countResult[0].total,
+            total: total,
             pagination: {
                 page: parseInt(page),
                 limit: parseInt(limit),
-                total: countResult[0].total,
-                pages: Math.ceil(countResult[0].total / limit)
+                total: total,
+                pages: Math.ceil(total / limit)
             }
         });
     } catch (error) {

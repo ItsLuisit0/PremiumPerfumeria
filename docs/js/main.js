@@ -63,119 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
             },
             filteredPerfumes() {
-                let filtered = this.perfumes;
-                
-                if (this.selectedColeccion) {
-                    filtered = filtered.filter(perfume => perfume.coleccion === this.selectedColeccion);
-                    return filtered;
-                }
-                
-                if (this.selectedPublico) {
-                    const allowedPublicos = (() => {
-                        if (this.selectedCategory === 'ArabesHombre') {
-                            return ['Hombre', 'Unisex'];
-                        }
-                        if (this.selectedCategory === 'ArabesMujer') {
-                            return ['Mujer', 'Unisex'];
-                        }
-                        return [this.selectedPublico];
-                    })();
-                    
-                    filtered = filtered.filter(perfume => allowedPublicos.includes(perfume.publico));
-                }
-                
-                if (this.selectedTipo) {
-                    const tipoLower = this.selectedTipo.toLowerCase();
-                    filtered = filtered.filter(perfume => {
-                        const marcaLower = perfume.marca ? perfume.marca.toLowerCase() : '';
-                        
-                        if (tipoLower.includes('arab') || tipoLower.includes('árabe')) {
-                            const marcasArabes = ['lattafa', 'armaf', 'rasasi', 'afnan'];
-                            return marcasArabes.some(marca => marcaLower.includes(marca));
-                        }
-                        
-                        if (tipoLower.includes('diseñ') || tipoLower.includes('disen')) {
-                            const marcasDisenador = [
-                                'versace', 'dior', 'carolina herrera', 'chanel', 'montblanc',
-                                'jean paul gaultier', 'valentino', 'giorgio armani', 'armani',
-                                'yves saint laurent', 'dkny', 'moschino', 'cacharel'
-                            ];
-                            return marcasDisenador.some(marca => marcaLower.includes(marca));
-                        }
-                        
-                        if (tipoLower.includes('nicho')) {
-                            const marcasNicho = ['creed', 'maison francis kurkdjian', 'baccarat'];
-                            return marcasNicho.some(marca => marcaLower.includes(marca));
-                        }
-                        
-                        return false;
-                    });
-                }
-                
-                if (this.searchTerm) {
-                    const searchLower = this.searchTerm.toLowerCase();
-                    filtered = filtered.filter(perfume =>
-                        perfume.nombre.toLowerCase().includes(searchLower) ||
-                        perfume.marca.toLowerCase().includes(searchLower) ||
-                        (perfume.tipo && perfume.tipo.toLowerCase().includes(searchLower))
-                    );
-                }
-                const isHomeView = !this.selectedPublico && !this.selectedTipo && !this.searchTerm && !this.selectedCategory && !this.selectedColeccion;
-
-                if (isHomeView) {
-                    const ordenColecciones = {
-                        'arabes_destacados': 1,
-                        'disenador_destacados': 2,
-                        'nicho_destacados': 3,
-                        'arabes_mujer_destacados': 4,
-                        'disenador_mujer_destacados': 5,
-                        'null': 999
-                    };
-                    
-                    filtered.sort((a, b) => {
-                        const metaA = this.parseColeccionValue(a.coleccion);
-                        const metaB = this.parseColeccionValue(b.coleccion);
-                        const keyA = this.normalizeColeccionKey(metaA.key || 'null');
-                        const keyB = this.normalizeColeccionKey(metaB.key || 'null');
-                        
-                        const ordenA = (metaA.order !== null && metaA.order !== undefined)
-                            ? metaA.order
-                            : (ordenColecciones[keyA] || 999);
-                        const ordenB = (metaB.order !== null && metaB.order !== undefined)
-                            ? metaB.order
-                            : (ordenColecciones[keyB] || 999);
-                        
-                        if (ordenA !== ordenB) {
-                            return ordenA - ordenB;
-                        }
-                        
-                        return a.nombre.localeCompare(b.nombre);
-                    });
-                }
-                else if (this.selectedCategory === 'Disenador') {
-                    filtered.sort((a, b) => {
-                        const ordenPublico = { 'Hombre': 1, 'Unisex': 2, 'Mujer': 3 };
-                        return (ordenPublico[a.publico] || 99) - (ordenPublico[b.publico] || 99);
-                    });
-                }
-
-                const isDesignerWomenView =
-                    (this.selectedCategory === 'Disenador' && (!this.selectedPublico || this.selectedPublico === 'Mujer')) ||
-                    (this.selectedPublico === 'Mujer' && this.selectedTipo && this.selectedTipo.toLowerCase().includes('diseñ')) ||
-                    (this.normalizeColeccionKey(this.selectedColeccion) === 'disenador_mujer_destacados') ||
-                    (isHomeView && filtered.some(perfume => this.normalizeColeccionKey(perfume.coleccion) === 'disenador_mujer_destacados'));
-
-                if (isDesignerWomenView) {
-                    this.applyDesignerWomenOrdering(filtered);
-                }
-
-                this.ensureAdjacentPerfumes(
-                    filtered,
-                    'Fruit Collection Orange',
-                    'Fruit Collection - Lemon'
-                );
-                
-                return filtered;
+                // La lógica de filtrado ahora está en el backend.
+                // Este computed property simplemente devuelve los perfumes ya filtrados.
+                return this.perfumes;
             },
             cartTotalPrice() {
                 return this.cart.reduce((total, item) => {
@@ -250,8 +140,15 @@ document.addEventListener('DOMContentLoaded', () => {
             async fetchPerfumes() {
                 this.isLoading = true;
                 this.errorApi = null;
+
+                const params = new URLSearchParams();
+                if (this.selectedPublico) params.append('publico', this.selectedPublico);
+                if (this.selectedTipo) params.append('tipo', this.selectedTipo);
+                if (this.selectedColeccion) params.append('coleccion', this.selectedColeccion);
+                if (this.searchTerm) params.append('search', this.searchTerm);
+
                 try {
-                    const response = await fetch(`${API_BASE_URL}/api/perfumes`);
+                    const response = await fetch(`${API_BASE_URL}/api/perfumes?${params.toString()}`);
                     if (!response.ok) {
                         throw new Error(`Error ${response.status}: No se pudieron cargar los perfumes`);
                     }
@@ -508,6 +405,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.showFavoritesView = false;
                 this.showComingSoonView = false;
                 
+                this.fetchPerfumes(); // Volver a cargar desde la API
+
                 this.$nextTick(() => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
@@ -522,6 +421,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.showFavoritesView = false;
                 this.showComingSoonView = false;
                 
+                this.fetchPerfumes(); // Volver a cargar desde la API
+                
                 this.$nextTick(() => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
@@ -534,6 +435,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.selectedPerfume = null;
                 this.showFavoritesView = false;
                 this.showComingSoonView = false;
+                
+                this.fetchPerfumes(); // Volver a cargar desde la API
                 this.scrollToProducts();
             },
             getCategoryTitle(category) {
@@ -730,6 +633,7 @@ document.addEventListener('DOMContentLoaded', () => {
             onSearchInput() {
                 clearTimeout(this.searchTimeout);
                 this.searchTimeout = setTimeout(() => {
+                    this.fetchPerfumes(); // Volver a cargar desde la API
                     if (this.searchTerm && this.searchTerm.length >= 2) {
                         this.scrollToProducts();
                     }
@@ -787,6 +691,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.selectedTipo = null;
                 this.selectedCategory = null;
                 this.selectedColeccion = null;
+                this.fetchPerfumes(); // Volver a cargar desde la API
                 if (this.searchModalOpen) {
                     this.searchModalOpen = false;
                     document.body.style.overflow = '';
